@@ -1,0 +1,98 @@
+
+* {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+}
+
+.introjs-overlay {
+
+    opacity: 0.2 !important;
+
+}
+
+.introjs-helperLayer {
+    background: transparent !important;
+}
+
+.cmn-toggle {
+    position: absolute;
+    margin-left: -9999px;
+    visibility: hidden;
+}
+
+.cmn-toggle + label {
+    display: block;
+    position: relative;
+    cursor: pointer;
+}
+
+input.cmn-toggle-round-flat + label {
+    padding: 2px;
+    width: 50px;
+    height: 25px;
+    background-color: #dddddd;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    -ms-border-radius: 25px;
+    -o-border-radius: 25px;
+    border-radius: 25px;
+    -webkit-transition: background 0.4s;
+    -moz-transition: background 0.4s;
+    -o-transition: background 0.4s;
+    transition: background 0.4s;
+    padding-left: 48px;
+}
+
+input.cmn-toggle-round-flat + label:before, input.cmn-toggle-round-flat + label:after {
+    display: block;
+    position: absolute;
+    content: "";
+}
+
+input.cmn-toggle-round-flat + label:before {
+    top: 2px;
+    left: 2px;
+    bottom: 2px;
+    right: 2px;
+    background-color: #fff;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    -ms-border-radius: 25px;
+    -o-border-radius: 25px;
+    border-radius: 25px;
+    -webkit-transition: background 0.4s;
+    -moz-transition: background 0.4s;
+    -o-transition: background 0.4s;
+    transition: background 0.4s;
+}
+
+input.cmn-toggle-round-flat + label:after {
+    top: 4px;
+    left: 4px;
+    bottom: 4px;
+    width: 20px;
+    background-color: #dddddd;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -ms-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+    -webkit-transition: margin 0.4s, background 0.4s;
+    -moz-transition: margin 0.4s, background 0.4s;
+    -o-transition: margin 0.4s, background 0.4s;
+    transition: margin 0.4s, background 0.4s;
+}
+
+input.cmn-toggle-round-flat:checked + label {
+    background-color: #8ce196;
+}
+
+input.cmn-toggle-round-flat:checked + label:after {
+    margin-left: 20px;
+    background-color: #8ce196;
+}
+
+.night-smaller {
+    font-size: 12px !important;
+}

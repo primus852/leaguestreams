@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>LS::LeagueStreams.net - Filtered LoL Content</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/bootstrap/dist/css/bootstrap.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/tooltipster/dist/css/tooltipster.bundle.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/intro.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/overwrites.min.css')) }}"/>
+	<link rel="apple-touch-icon-precomposed" sizes="57x57" href="{{ preload(asset('assets/ls/img/apple-touch-icon-57x57.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ preload(asset('assets/ls/img/apple-touch-icon-114x114.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ preload(asset('assets/ls/img/apple-touch-icon-72x72.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ preload(asset('assets/ls/img/apple-touch-icon-144x144.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="{{ preload(asset('assets/ls/img/apple-touch-icon-60x60.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="{{ preload(asset('assets/ls/img/apple-touch-icon-120x120.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="{{ preload(asset('assets/ls/img/apple-touch-icon-76x76.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{{ preload(asset('assets/ls/img/apple-touch-icon-152x152.png')) }}"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-196x196.png')) }}" sizes="196x196"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-96x96.png')) }}" sizes="96x96"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-32x32.png')) }}" sizes="32x32"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-16x16.png')) }}" sizes="16x16"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-128.png')) }}" sizes="128x128"/>
+    <meta name="application-name" content="LeagueStreams"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF"/>
+    <meta name="msapplication-TileImage" content="{{ preload(asset('assets/ls/img/mstile-144x144.png')) }}"/>
+    <meta name="msapplication-square70x70logo" content="{{ preload(asset('assets/ls/img/mstile-70x70.png')) }}"/>
+    <meta name="msapplication-square150x150logo" content="{{ preload(asset('assets/ls/img/mstile-150x150.png')) }}"/>
+    <meta name="msapplication-wide310x150logo" content="{{ preload(asset('assets/ls/img/mstile-310x150.png')) }}"/>
+    <meta name="msapplication-square310x310logo" content="{{ preload(asset('assets/ls/img/mstile-310x310.png')) }}"/>
+    <link rel="manifest" href="{{ preload(asset('assets/ls/img/manifest.json')) }}">
+    <style>
+        body,html {
+            height: 100%;
+            font-family:'Open Sans Condensed', sans-serif;
+			overflow: hidden;
+        }
+        .fullscreen-bg{
+            background: #fff;
+            opacity: 0.30;
+        }
+        .header{
+            position: relative;
+            display: table;
+            height: 100%;
+            width:100%;
+        }
+        .text-vertical-center {
+            display: table-cell;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .tooltipster-sidetip.tooltipster-punk.tooltipster-ls .tooltipster-box {
+            border-radius: 5px;
+            border: none;
+            border-bottom: 3px solid #D9411E;
+            background: #1d2127
+        }
+
+        .tooltipster-sidetip.tooltipster-punk.tooltipster-ls.tooltipster-top .tooltipster-arrow-border {
+            border-top-color: #D9411E
+        }
+
+    </style>
+</head>
+<body>
+<div class="fullscreen-bg">
+    <video loop muted autoplay class="fullscreen-bg__video">
+        <source src="{{ asset('assets/ls/img/intro/video.mp4') }}" type="video/mp4">
+        <source src="{{ asset('assets/ls/img/intro/video.webm') }}" type="video/webm">
+    </video>
+</div>
+
+<header class="header">
+    <div class="text-vertical-center">
+        <h1><img src="{{ asset('assets/ls/img/intro/logo_intro.png') }}" style="margin-top: -50px;" />LeagueStreams.net</h1>
+        <h3>Your source for filtered LoL Content</h3>
+        <br>
+        <a href="{{ path('mainPage') }}" class="btn btn-danger btn-lg js-scroll-trigger rounded-0" style="width:75px;">Live</a>
+        <a href="{{ path('vodsByChampion') }}" class="btn btn-dark btn-lg js-scroll-trigger rounded-0" style="width:75px;">VODs</a>
+        <br />
+        <br />
+        <br />
+        <h5>Most recent live</h5>
+        <div class="row justify-content-center">
+            <div class="col-sm-2 col-12">
+                <div class="row justify-content-center">
+                    {{ render(controller('App\\Controller\\FragmentController::latestChampion')) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    var LS_NAV = 'intro';
+</script>
+<script src="{{ preload(asset('assets/node_modules/jquery/dist/jquery.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/node_modules/tooltipster/dist/js/tooltipster.bundle.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/ls/js/hashchange.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/ls/js/app.min.js')) }}"></script>
+</body>
+</html>

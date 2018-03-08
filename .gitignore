@@ -16,3 +16,6 @@
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 .idea
+/composer.lock
+/.env
+/public/assets/node_modules/
