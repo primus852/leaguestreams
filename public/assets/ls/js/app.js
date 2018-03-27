@@ -4,11 +4,11 @@ String.prototype.escapeHTML = function () {
     );
 };
 
-$(document).ready(function(){
+$(document).ready(function () {
     /* Review */
-    $( '.card-image' ).mouseover(function(){
+    $('.card-image').mouseover(function () {
         $('.card-modal').fadeIn(100).toggleClass('active');
-    }).mouseout(function(){
+    }).mouseout(function () {
         $('.card-modal').fadeOut(100).toggleClass('active');
     });
 
@@ -343,7 +343,6 @@ $(document).on("click", "#streamerReport", function (e) {
 $(document).on("click", "#summonerReport", function (e) {
     var $btn = $(this);
     var $url = $("#ajax-route-report-summoner").val();
-    var $streamer = $btn.attr("data-streamer");
     var $summoner = $btn.attr("data-summoner");
     var $reason = $("#reportDetails").val();
     if (!$reason.length) {
@@ -351,7 +350,6 @@ $(document).on("click", "#summonerReport", function (e) {
         return false;
     }
     $.post($url, {
-        streamer: $streamer,
         summoner: $summoner,
         reason: $reason
     }).done(function (data) {

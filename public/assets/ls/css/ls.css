@@ -1755,6 +1755,7 @@ body {
 
 .ls-thumbnail {
     border-radius: 0;
+    max-height: 100px;
 }
 
 .ls-thumbnail-portrait {
@@ -1795,9 +1796,7 @@ body {
     font-size: 1.8rem;
     color:#fff;
     text-shadow: 1px 1px 2px #000;
-    position:absolute;
-    top:5px;
-    left:5px;
+
 }
 
 .ls-league {
@@ -2046,8 +2045,8 @@ select {
     position: absolute;
     top: 50%;
     left: 50%;
-    margin-left: -10px;
-    margin-top: -30px;
+    margin-left: -15px;
+    margin-top: -15px;
     color: #ccc !important;
 }
 .ls-streamer-name{
@@ -2368,19 +2367,18 @@ ul.footNavUL li {
 }
 
 .last-champ-path{
-    -webkit-clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
-    clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+    -webkit-clip-path: polygon(25% 10%, 100% 10%, 75% 90%, 0% 90%);
+    clip-path: polygon(25% 10%, 100% 10%, 75% 90%, 0% 90%);
     position: relative;
-    margin-left: -35px;
-    height:150px;
+    margin-left: -22px;
+    height: 198px;
+    width: 80px;
 }
 .last-champion-loss{
-    border-bottom:2px solid #ff4b5c;
-    border-top:2px solid #ff4b5c;
+    border-top:25px solid #ff4b5c;
 }
 .last-champion-win{
-    border-bottom:2px solid #318035;
-    border-top:2px solid #318035;
+    border-top:25px solid #318035;
 }
 .last-champ-divider {
     border-right: 1px solid white;
@@ -2390,3 +2388,10 @@ ul.footNavUL li {
     top: -15px;
     float: left;
 }
+
+.ls-small-white{
+    font-weight:200;
+    text-shadow: 1px 1px 1px #000;
+    color:#fff;
+}
+

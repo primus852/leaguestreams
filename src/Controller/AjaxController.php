@@ -417,7 +417,7 @@ class AjaxController extends Controller
         $action = 'none';
 
         /* @var $summoner Summoner */
-        $summoner = $em->getRepository('AppBundle:Summoner')->find($sc->decode($crypt_id));
+        $summoner = $em->getRepository('App:Summoner')->find($sc->decode($crypt_id));
         if ($summoner === null) {
             return new JsonResponse(array(
                 'result' => 'error',
@@ -477,7 +477,7 @@ class AjaxController extends Controller
                 'message' => 'Streamer is offline, removed panel...',
                 'extra' => array(
                     'icon' => 'remove',
-                    'iClass' => 'danger',
+                    'iClass' => 'warning',
                     'action' => 'remove',
                 )
             ));

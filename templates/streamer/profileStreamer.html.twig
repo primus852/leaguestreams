@@ -216,10 +216,10 @@
                                                                     </div>
                                                                 </article>
                                                                 <figure class="cFigureRevert"
-                                                                        style="background-image: url({{ preload(asset('images/champions/'~vod.championKey~'_0.png')) }})"></figure>
+                                                                        style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.championKey~'_0.png')) }})"></figure>
                                                                 {% if vod.enemyChampion is not null %}
                                                                     <figure class="cFigure"
-                                                                            style="background-image: url({{ preload(asset('images/champions/'~vod.enemyChampionKey~'_0.png')) }})"></figure>
+                                                                            style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.enemyChampionKey~'_0.png')) }})"></figure>
                                                                 {% endif %}
                                                             </div>
                                                         </a>
@@ -303,7 +303,7 @@
         </div>
     </main>
     {% if is_granted("ROLE_SUPER_ADMIN") %}
-        <input type="hidden" id="ajax-route-delete-summoner" value="{{ path('deleteSummoner') }}"/>
+        <input type="hidden" id="ajax-route-delete-summoner" value="{{ path('ajaxDeleteSummoner') }}"/>
         <div class="md-modal md-effect-5" id="modal-5">
             <div class="md-content">
                 <h3>CONFIRM DELETE</h3>
@@ -320,7 +320,7 @@
             </div>
         </div>
     {% else %}
-        <input type="hidden" id="ajax-route-report-summoner" value="{{ path('reportSummoner') }}"/>
+        <input type="hidden" id="ajax-route-report-summoner" value="{{ path('ajaxReportSummoner') }}"/>
         <div class="md-modal md-effect-5" id="modal-5">
             <div class="md-content">
                 <h3>REPORT SUMMONER</h3>
@@ -342,9 +342,9 @@
 {% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/profile.css')) }}"/>
-    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/dt.bs4.min.css')) }}"/>
-    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/modal.css') ) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/profile.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/dt.bs4.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/modal.css') ) }}"/>
     <link rel="stylesheet"
           href="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.css')) }}"/>
 {% endblock stylesheets %}
@@ -355,8 +355,8 @@
     </script>
     <script src="{{ preload(asset('assets/node_modules/popper.js/dist/umd/popper.min.js')) }}"></script>
     <script src="{{ preload(asset('assets/node_modules/bootstrap/dist/js/bootstrap.min.js')) }}"></script>
-    <script src="{{ preload(asset('assets/vendor/ls/js/dt.1.10.13.min.js')) }}"></script>
-    <script src="{{ preload(asset('assets/vendor/ls/js/dt.bs4.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net/js/jquery.dataTables.js')) }}"></script>
+    <script src="{{ preload(asset('assets/ls/js/dt.bs4.min.js')) }}"></script>
     <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive/js/dataTables.responsive.js')) }}"></script>
     <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/js/responsive.bootstrap.js')) }}"></script>
     <script>

@@ -71,9 +71,11 @@ class TwitchApi implements StreamInterface
                 $this->streamer->setIsFeatured(false);
             }
 
+            $partner = $data['stream']['channel']['partner'] ? $data['stream']['channel']['partner'] : false;
+
             $this->streamer->setIsOnline($result);
             $this->streamer->setDescription($data['stream']['channel']['status']);
-            $this->streamer->setIsPartner($data['stream']['channel']['partner']);
+            $this->streamer->setIsPartner($partner);
             $this->streamer->setViewers($data['stream']['viewers']);
             $this->streamer->setResolution($data['stream']['video_height']);
             $this->streamer->setFps($data['stream']['average_fps']);

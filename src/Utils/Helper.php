@@ -57,6 +57,9 @@ class Helper
             case 'da':
                 return 'dk';
                 break;
+            case 'ko':
+                return 'kr';
+                break;
             default:
                 return $flag;
         }

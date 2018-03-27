@@ -18,7 +18,7 @@
                 </a>VODs <span style="font-size:0.5em;">by Champion</span></h1>
         </header>
         <div id="main-nano-wrapper" class="nano">
-            <div class="nano-content" id="pScrollerMain">
+            <div class="nano-content" id="lScroll">
                 <div class="container-fluid">
                     <div class="row justify-content-center" style="padding-left:15px;">
                         <div class="col-12 col-sm-10 text-center">
@@ -26,13 +26,13 @@
                         </div>
                     </div>
                     <br/>&nbsp;
-                    <div class="row justify-content-center">
-                        <div class="col-12 col-sm-10">
-                            <div class="row justify-content-center">
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-10">
+                            <div class="row">
                                 {% for champ in champs %}
-                                    <div class="col-12 col-sm-4 vodCard"
+                                    <div class="col-xl-6 offset-xl-0 col-10 champRow"
                                          data-champ="{{ champ.name|lower }}">
-                                        <div class="row justify-content-center">
+                                        <div class="row">
                                             <div class="card">
                                                 <div class="city-selected city-medium clickable tt"
                                                      title="Load {{ champ.name }}"
@@ -46,7 +46,7 @@
                                                             </div>
                                                         </div>
                                                     </article>
-                                                    <figure class="cFigure lazy" data-src="{{ asset('images/champions/'~champ.key~'_0.png') }}"></figure>
+                                                    <figure class="cFigure lazy" data-src="{{ asset('assets/ls/img/champions/'~champ.key~'_0.png') }}"></figure>
                                                 </div>
                                             </div>
                                             <br/>&nbsp;
@@ -64,17 +64,17 @@
 {% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/dt.bs4.min.css')) }}"/>
-    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/ls.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/dt.bs4.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/ls.min.css')) }}"/>
     <link rel="stylesheet"
           href="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.css')) }}"/>
-    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/profile.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/profile.css')) }}"/>
 {% endblock stylesheets %}
 
 {% block javascripts %}
     <script src="{{ preload(asset('assets/node_modules/jquery-lazy/jquery.lazy.min.js')) }}"></script>
-    <script src="{{ preload(asset('assets/vendor/ls/js/dt.1.10.13.min.js')) }}"></script>
-    <script src="{{ preload(asset('assets/vendor/ls/js/dt.bs4.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net/js/jquery.dataTables.js')) }}"></script>
+    <script src="{{ preload(asset('assets/ls/js/dt.bs4.min.js')) }}"></script>
     <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive/js/dataTables.responsive.js')) }}"></script>
     <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/js/responsive.bootstrap.js')) }}"></script>
     <script>

@@ -146,8 +146,8 @@ class VodController extends Controller
     public function vodsByWishesAction()
     {
 
-        $streamers = $this->getDoctrine()->getRepository('AppBundle:Streamer')->findAll();
-        $champions = $this->getDoctrine()->getRepository('AppBundle:Champion')->findBy(array(), array(
+        $streamers = $this->getDoctrine()->getRepository('App:Streamer')->findAll();
+        $champions = $this->getDoctrine()->getRepository('App:Champion')->findBy(array(), array(
             'name' => 'ASC',
         ));
 

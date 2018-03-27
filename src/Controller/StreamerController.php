@@ -58,7 +58,7 @@ class StreamerController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         /* Get Streamer */
-        $stream = $em->getRepository('App:Streamer')->find($streamer);
+        $stream = $em->getRepository('App:Streamer')->streamerByVarious($streamer);
 
         if ($stream === null) {
             throw new NotFoundHttpException();
