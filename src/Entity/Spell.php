@@ -195,5 +195,15 @@ class Spell
         return $this->modified;
     }
 
+    /**
+     * @param mixed $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
+    }
+
+
+
 
 }

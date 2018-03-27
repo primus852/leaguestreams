@@ -1,0 +1,49 @@
+{% if hasError == false %}
+
+    {% if inGame == true %}
+        <li class="text-center">
+            {% if perks is not empty %}
+                <img src="{{ asset('assets/ls/img/perkStyle/'~perks.primary.id~'.png') }}"
+                     class="ls-perk-primary-player">
+                <img src="{{ asset('assets/ls/img/perkStyle/'~perks.secondary.id~'.png') }}"
+                     class="ls-perk-secondary-player">
+            {% endif %}
+            <img src="{{ version.cdn }}/{{ version.champion }}/img/champion/{{ champion.image }}" alt=""
+                 class="ls-champ-player tt"
+                 title="<strong>{{ perks.primary.name|raw }}</strong> (Primary)<br />{{ perks.primary.description|raw }}<br /><br /><strong>{{ perks.secondary.name|raw }}</strong> (Secondary)<br />{{ perks.secondary.description|raw }}"
+            >
+        </li>
+        <li class="text-center">
+            <div class="ls-winrate" id="ls-champion">{{ champion.name }}</div>
+            {% if league is not null and division is not null %}
+                <div class="ls-lp">({{ league }} {{ division }})</div>
+            {% endif %}
+        </li>
+        {% if perks is not empty %}
+            {% for key, pId in perks.ids %}
+                <li class="text-center">
+                    <img src="{{ asset('assets/ls/img/perk/'~pId.id~'.png') }}"
+                         class="tt ls-perk-player {% if key == 0 %}{% endif %}"
+                         title="<strong>{{ pId.name|raw }}</strong><br />{{ pId.description|raw }}"
+                    >
+                    <div class="ls-winrate-smaller">{{ pId.name|raw }}</div>
+                </li>
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        <li>
+            <span style="color:#D9411E"><strong>Not in Game</strong>..</span>
+        </li>
+    {% endif %}
+    <li class="text-center closeBar pointer">
+        <i class="fa fa-remove fa-2x tt" title="Close Bar"></i>
+        <div class="ls-winrate-smaller">Close</div>
+    </li>
+
+{% else %}
+    <div class="row">
+        <div class="col-12">
+            <span style="color:#D9411E"><strong>{{ hasError }}</strong></span>
+        </div>
+    </div>
+{% endif %}

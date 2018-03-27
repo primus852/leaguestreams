@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+{% block title %} - League of Legends VODs by Champion {% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <div class="search-box">
+                <input placeholder="Search..." id="searchVod" data-step="1" data-intro="Search for a specific Champion"
+                       data-position="left"><span class="icon fa fa-search"></span>
+            </div>
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>VODs <span style="font-size:0.5em;">by Role</span></h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="pScrollerMain">
+                <div class="container-fluid">
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-12 col-sm-10 text-center">
+                            <div class="row justify-content-center">
+                                <div class="col-7">
+                                    <div class="ls-league">Latest VODs for "{{ lane }}"</div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="ls-league">
+                                        <div class="switch">
+                                            <input id="cmn-toggle-4" class="cmn-toggle cmn-toggle-round-flat"
+                                                   type="checkbox">
+                                            <label for="cmn-toggle-4" id="showLabel">&nbsp;Spoilers</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>&nbsp;
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-sm-10">
+                            <div class="row justify-content-center">
+                                {% if vods is not null %}
+                                    {% for vod in vods.videos %}
+
+                                        <div class="col-xl-4 offset-xl-0 col-10 vodCard"
+                                             data-champ="{{ vod.champion |lower }}"
+                                             data-role="{{ vod.role|lower }}"
+                                             data-streamer="{{ vod.channelUser|lower }}">
+                                            <div class="row">
+                                                <div class="card">
+                                                    <a href="{{ vod.internalLink }}">
+                                                        <div class="city-selected city-smaller">
+                                                            <article class="justify-content-center info"
+                                                                     style="text-align: center;cursor: pointer;">
+                                                                <div class="ls-play-button" style="opacity: 0.15;">
+                                                                    <i class="fa fa-play fa-3x"></i>
+                                                                </div>
+                                                                <div class="city">
+                                                                    {{ vod.champion ? vod.champion : "" }}
+                                                                    vs. {{ vod.enemyChampion ? vod.enemyChampion : "???" }}
+                                                                    <br/>
+                                                                    <span>{{ vod.channelUser }} / {{ vod.role }}
+                                                                        ({{ vod.league }})</span>
+                                                                    <br/>
+                                                                    <span>{{ vod.gameStart|date('Y/m/d H:i') }}</span>
+                                                                </div>
+                                                            </article>
+                                                            <figure class="cFigureRevert"
+                                                                    style="background-image: url({{ preload(asset('images/champions/'~vod.championKey~'_0.png')) }})"></figure>
+                                                            {% if vod.enemyChampion is not null %}
+                                                                <figure class="cFigure"
+                                                                        style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.enemyChampionKey~'_0.png')) }})"></figure>
+                                                            {% endif %}
+                                                        </div>
+                                                    </a>
+                                                    <div class="days">
+                                                        <div class="row row-no-gutter">
+                                                            <div class="col col-4">
+                                                                <div class="day">
+                                                                    <h1 data-win="{{ vod.win }}"
+                                                                        class="pointer showWin">
+                                                                        Spoiler</h1>
+                                                                    Win
+                                                                </div>
+                                                            </div>
+                                                            <div class="col col-4">
+                                                                <div class="day">
+                                                                    <h1>{{ vod.version }}</h1>
+                                                                    Patch
+                                                                </div>
+                                                            </div>
+                                                            <div class="col col-4">
+                                                                <div class="day">
+                                                                    <h1>{{ vod.length }}m</h1>
+                                                                    Length
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br/>&nbsp;
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="col-10">
+                                        No VODs found
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/dt.bs4.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/ls.min.css')) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/profile.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script src="{{ preload(asset('assets/node_modules/jquery-lazy/jquery.lazy.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net/js/jquery.dataTables.js')) }}"></script>
+    <script src="{{ preload(asset('assets/ls/js/dt.bs4.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive/js/dataTables.responsive.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/js/responsive.bootstrap.js')) }}"></script>
+    <script>
+        var LS_NAV = "vRole{{ lane }}";
+    </script>
+{% endblock javascripts %}

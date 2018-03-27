@@ -1,0 +1,31 @@
+<div class="col-sm-6 col-12 champRow" id="sRow_{{ streamer.id }}"
+     data-streamer="{{ streamer.streamUsername|lower }}"
+     data-summoner="{{ streamer.summonerName }}"
+     data-champ="{{ streamer.pChamp|lower }}">
+    <div id="sPanel_{{ streamer.id }}"
+         class="row ls-border-container"
+         style="margin-top:10px;margin-left:10px;padding:10px;height:250px;position:relative;background:#1d2127; url('{{ preload(asset('assets/ls/img/champions/'~streamer.imageChampion~'_0.png')) }}') no-repeat top right;"
+    >
+        {% if streamer.hasSummoner == false %}
+            <div class="badge badge-danger rounded-0 ls-summoner-badge">
+                No Summoners attached!
+            </div>
+        {% else %}
+            <div style="position: absolute;top:20px;right:5px;">
+                <i class="fa fa-refresh pointer refreshStreamer"
+                   style="text-shadow: 1px 1px 1px #000;color:#fff;"
+                   data-streamer="{{ streamer.id }}"
+                   data-summoners="{{ streamer.sCollection }}"
+                   data-streamer-container="{{ path('renderStreamerInfoContainer', {'s':streamer.id}) }}"
+                ></i>
+            </div>
+            <div style="position: absolute;bottom:25px;right:10px;font-weight:200;text-shadow: 1px 1px 1px #000;color:#fff;">
+                {% if streamer.inGame == true %}{{ streamer.gameMinutes }}min in Game{% else %}&nbsp;{% endif %}
+            </div>
+            <div class="ls-channel" style="position:absolute;bottom:5px;right:5px;">
+                {% if streamer.inGame == true %}{{ streamer.region }}{{ streamer.summonerName }}{% else %}&nbsp;{% endif %}
+            </div>
+
+        {% endif %}
+    </div>
+</div>

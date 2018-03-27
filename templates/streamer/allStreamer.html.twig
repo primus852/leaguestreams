@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+{% block title %} - All League of Legends Streamer{% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>All Streamers</h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="pScrollerMain">
+                <div class="row justify-content-center" style="padding-left:15px;">
+                    <div class="col col-10">
+                        <table class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0"
+                               width="100%" id="stats-table">
+                            <thead>
+                            <tr>
+                                <th class="text-center">Platform</th>
+                                <th class="text-center">Streamer</th>
+                                <th class="text-center">LAST ON SORT</th>
+                                <th class="text-center">Last Online</th>
+                                <th class="text-center">Verified Summoners</th>
+                                <th class="text-center">&percnt; Winrate</th>
+                                <th class="text-center">&percnt; inGame</th>
+                                <th class="text-center">Awards</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for streamer in streamers %}
+                                <tr id="sRow_{{ streamer.id }}">
+                                    <td>{{ streamer.platform }}</td>
+                                    <td>
+                                        <a href="{{ path('profileStreamer', {"streamer":streamer.id}) }}">{{ streamer.channel }}</a>
+                                    </td>
+                                    <td>
+                                        {% if streamer.started is defined and streamer.started is not null %}
+                                            {% if streamer.isOnline == true %}
+                                                {{ 'now'|date('Y-m-d-H-i') }}
+                                            {% else %}
+                                                {{ streamer.started|date('Y-m-d-H-i') }}
+                                            {% endif %}
+                                        {% else %}
+                                            1970-12-12-01-01
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if streamer.started is defined and streamer.started is not null %}
+                                            {% if streamer.isOnline == true %}
+                                                 Online
+                                            {% else %}
+                                                {{ streamer.started|timeAgo }}
+                                            {% endif %}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if streamer.summoners is not null %}
+                                            {% for summoner in streamer.summoners %}
+                                                <a href="https://{{ summoner.region.short }}.op.gg/summoner/userName={{ summoner.name }}">{{ summoner.region.short|upper }}
+                                                    -{{ summoner.name }}</a> <span
+                                                    style="font-size:0.7rem;">{{ summoner.league }}</span>
+                                                <br/>
+                                            {% endfor %}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">{{ streamer.winrate|number_format(2) }}&percnt;</td>
+                                    <td class="text-center">{{ streamer.totalInGame|number_format(2) }}&percnt;</td>
+                                    <td class="text-left">
+                                        {% if streamer.awards is defined and streamer.awards.otp is not null %}
+                                            <div class="awardImg tt"
+                                                 title="{{ streamer.awards.otp.name }} OneTrickPony<br /><span class='summonerSub'>{{ streamer.awards.otp.games }} of {{ streamer.awards.otp.totals }} Games</span>">
+                                                <span class="award-badge award-otp">OTP</span>
+                                                <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ streamer.awards.otp.img }}"
+                                                     class="" style="max-height:40px;"/>
+                                            </div>
+                                        {% endif %}
+                                        {% if streamer.awards is defined and streamer.awards.pro is not empty %}
+                                            {% for pro in streamer.awards.pro %}
+                                                <div class="awardImg tt"
+                                                     title="{{ pro.name }} Pro<br /><span class='summonerSub'>{{ pro.games }} of {{ pro.totals }} Games</span>">
+                                                    <span class="award-badge award-pro">Pro</span>
+                                                    <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ pro.img }}"
+                                                         class="" style="max-height:40px;"/>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if streamer.awards is defined and streamer.awards.beast is not empty %}
+                                            {% for beast in streamer.awards.beast %}
+                                                <div class="awardImg tt"
+                                                     title="{{ beast.name }} Beast<br /><span class='summonerSub'>{{ beast.games }} Games with a {{ beast.winpct|number_format(2) }}&percnt; Winrate</span>">
+                                                    <span class="award-badge award-beast">Beast</span>
+                                                    <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ beast.img }}"
+                                                         class="" style="max-height:40px;"/>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </td>
+                                    {% if is_granted("ROLE_SUPER_ADMIN") %}
+                                        <td>
+                                            <a class="btn btn-red rounded-0 removeStreamer pointer md-trigger"
+                                               data-streamer="{{ streamer.id }}" data-channel="{{ streamer.cUser }}"
+                                               data-modal="modal-5">Remove <i class="fa fa-remove"></i> </a>
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            <a class="btn btn-red rounded-0 reportStreamer pointer md-trigger"
+                                               data-streamer="{{ streamer.id }}" data-channel="{{ streamer.cUser }}"
+                                               data-modal="modal-5">Report <i class="fa fa-exclamation"></i> </a>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </div>
+    </main>
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <input type="hidden" id="ajax-route-delete-streamer" value="{{ path('ajaxDeleteStreamer') }}"/>
+        <div class="md-modal md-effect-5" id="modal-5">
+            <div class="md-content">
+                <h3>CONFIRM DELETE</h3>
+                <div>
+                    <p>
+                        Would you like to delete Streamer <strong><span class="channelName"></span></strong>?
+                        <br/>
+                        <br/>
+                        All summoners, games and stats will also be deleted!
+                    </p>
+                    <a class="btn btn-green rounded-0 md-close pointer">Abort</a>
+                    <a class="btn btn-red rounded-0 md-close pointer" id="streamerRemove">Yes, remove!</a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <input type="hidden" id="ajax-route-report-streamer" value="{{ path('ajaxReportStreamer') }}"/>
+        <div class="md-modal md-effect-5" id="modal-5">
+            <div class="md-content">
+                <h3>REPORT STREAMER</h3>
+                <div>
+                    <p>
+                        Would you like to report Streamer <strong><span class="channelName"></span></strong>?
+                        <br/>
+                        <br/>
+                        <label for="reportDetails">Please give some details about the report:</label>
+                        <textarea class="ls-input" id="reportDetails"></textarea>
+                    </p>
+                    <a class="btn btn-green rounded-0 md-close pointer">Abort</a>
+                    <a class="btn btn-red rounded-0 md-close pointer" id="streamerReport">Yes, report!</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="md-overlay"></div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/dt.bs4.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/modal.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script>
+        var LS_NAV = "mAll";
+    </script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net/js/jquery.dataTables.js')) }}"></script>
+    <script src="{{ preload(asset('assets/ls/js/dt.bs4.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive/js/dataTables.responsive.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/js/responsive.bootstrap.js')) }}"></script>
+
+{% endblock javascripts %}

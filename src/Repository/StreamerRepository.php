@@ -19,16 +19,35 @@ class StreamerRepository extends ServiceEntityRepository
         parent::__construct($registry, Streamer::class);
     }
 
-    /*
-    public function findBySomething($value)
-    {
-        return $this->createQueryBuilder('s')
-            ->where('s.something = :value')->setParameter('value', $value)
-            ->orderBy('s.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+    /**
+     * @param string $word
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function streamerByVarious(string $word){
+
+        $query = $this->createQueryBuilder('s')
+            ->where('s.id = :word')
+            ->orWhere('s.channelName = :word')
+            ->orWhere('s.channelUser = :word')
+            ->setParameter('word', $word)
+            ->getQuery();
+
+        return $query->getOneOrNullResult();
     }
-    */
+
+    /**
+     * @param string $term
+     * @return array
+     */
+    public function findByTerm(string $term){
+        $query = $this
+            ->createQueryBuilder('p')
+            ->where('p.channelName LIKE :term')
+            ->orWhere('p.channelUser LIKE :term')
+            ->setParameter('term', '%' . $term . '%')
+            ->getQuery();
+
+        return $query->getArrayResult();
+    }
 }

@@ -18,4 +18,5 @@
 .idea
 /composer.lock
 /.env
-/public/assets/node_modules/
+/public/assets/node_modur
+/public/assets/ls/img/champions/Champions.psd

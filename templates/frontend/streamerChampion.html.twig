@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+{% block title %} - League of Legends Streams by Champion {% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <div class="search-box">
+                <input placeholder="Search..." id="searchChamp" data-step="1"
+                       data-intro="Search for a specific Champion"
+                       data-position="left"><span class="icon fa fa-search"></span>
+            </div>
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>Streamer by Champion</h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="lScroll">
+                <div class="container-fluid">
+                    <div class="row" style="padding-left:15px;">
+                        <div class="col-10 offset-1 text-center">
+                            <div class="ls-league">Check who plays your favourite champion most during their streams.
+                            </div>
+                        </div>
+                    </div>
+                    <br/>&nbsp;
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-10">
+                            <div class="row">
+                                {% for champ in champs %}
+                                    <div class="col-xl-6 offset-xl-0 col-10 champRow"
+                                         data-champ="{{ champ.name|lower }}">
+                                        <div class="row">
+                                            <div class="card">
+                                                <div class="city-selected city-medium clickChampionStreamer pointer"
+                                                     data-champ-id="{{ champ.id }}">
+                                                    <article>
+                                                        <div class="info">
+                                                            <div class="city">
+                                                                {{ champ.name }}
+                                                            </div>
+                                                        </div>
+                                                    </article>
+                                                    <figure class="cFigure lazy" data-src="{{ asset('assets/ls/img/champions/'~champ.key~'_0.png') }}"></figure>
+                                                </div>
+                                                <div id="champ_{{ champ.id }}" class="champToggle" style="display:none;position:relative;">
+                                                </div>
+                                            </div>
+                                            <br/>&nbsp;
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </div>
+    </main>
+    <input type="hidden" id="ajax-route-load-streamer-champion" value="{{ path('ajaxStreamerByChampion') }}"/>
+    <input type="hidden" id="ajax-route-path-profile" value="{{ path('profileStreamer') }}"/>
+    <input type="hidden" id="ajax-route-path-stream" value="{{ path('loadPlayer') }}"/>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/profile.min.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script src="{{ preload(asset('assets/node_modules/jquery-lazy/jquery.lazy.min.js')) }}"></script>
+    <script>
+        var LS_NAV = "mChamp";
+    </script>
+{% endblock javascripts %}

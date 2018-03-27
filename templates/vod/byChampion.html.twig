@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+{% block title %} - League of Legends VODs by Champion {% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <div class="search-box">
+                <input placeholder="Search..." id="searchVod" data-step="1" data-intro="Search for a specific Champion"
+                       data-position="left"><span class="icon fa fa-search"></span>
+            </div>
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>VODs <span style="font-size:0.5em;">by Champion</span></h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="pScrollerMain">
+                <div class="container-fluid">
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-12 col-sm-10 text-center">
+                            <div class="ls-league">Check all VODs for your favourite champion.</div>
+                        </div>
+                    </div>
+                    <br/>&nbsp;
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-sm-10">
+                            <div class="row justify-content-center">
+                                {% for champ in champs %}
+                                    <div class="col-12 col-sm-4 vodCard"
+                                         data-champ="{{ champ.name|lower }}">
+                                        <div class="row justify-content-center">
+                                            <div class="card">
+                                                <div class="city-selected city-medium clickable tt"
+                                                     title="Load {{ champ.name }}"
+                                                     data-url="{{ path('renderVodByChampion', {'c':champ.name}) }}"
+                                                     data-hash="{{ champ.name }}"
+                                                     data-trigger="{{ champ.name }}">
+                                                    <article>
+                                                        <div class="info">
+                                                            <div class="city">
+                                                                {{ champ.name }}
+                                                            </div>
+                                                        </div>
+                                                    </article>
+                                                    <figure class="cFigure lazy" data-src="{{ asset('images/champions/'~champ.key~'_0.png') }}"></figure>
+                                                </div>
+                                            </div>
+                                            <br/>&nbsp;
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/dt.bs4.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/ls.min.css')) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/profile.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script src="{{ preload(asset('assets/node_modules/jquery-lazy/jquery.lazy.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/vendor/ls/js/dt.1.10.13.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/vendor/ls/js/dt.bs4.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive/js/dataTables.responsive.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/js/responsive.bootstrap.js')) }}"></script>
+    <script>
+        var LS_NAV = "vChamp";
+    </script>
+{% endblock javascripts %}

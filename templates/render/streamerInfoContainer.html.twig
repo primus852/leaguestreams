@@ -1,0 +1,73 @@
+<div class="col-sm-6 col-12 champRow" id="sRow_{{ streamer.id }}"
+     data-streamer="{{ streamer.streamUsername|lower }}"
+     data-summoner="{{ streamer.summonerName }}"
+     data-champ="{{ streamer.pChamp|lower }}">
+    <div id="sPanel_{{ streamer.id }}"
+         class="row ls-border-container"
+         style="margin-top:10px;margin-left:10px;padding:10px;height:250px;position:relative;background:#1d2127 url('{{ preload(asset('assets/ls/img/champions/'~streamer.imageChampion~'_0.png')) }}') no-repeat top right;"
+    >
+        <div class="ls-streamer-channel tt" title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">
+            <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> {{ streamer.streamUsername }}
+        </div>
+        {% set url = path('loadPlayer', {"searchString":streamer.streamUsername}) %}
+        {% if streamer.platform == "Beam.pro" %}
+            {% set url = 'https://beam.pro/'~streamer.streamUsername %}
+        {% endif %}
+        <div style="position: absolute;bottom:10px;left:10px;width:150px;" class="side-corner-tag">
+            <a href="{{ url }}">
+                <div class="ls-play-button">
+                    <i class="fa fa-play fa-3x"></i>
+                </div>
+                <img src="{{ streamer.preview }}"
+                     id="preview_{{ streamer.id }}"
+                     alt="{{ streamer.previewAlt }}"
+                     class="img-thumbnail ls-thumbnail"
+                >
+            </a>
+        </div>
+        {% if streamer.hasSummoner == false %}
+            <div class="ls-channel"
+                 style="position:absolute;bottom:5px;right:5px;text-shadow: 1px 1px 1px #000;color:#ff4b5c;">
+                No Summoners attached!
+            </div>
+        {% else %}
+            <div style="position: absolute;top:40px;left:10px;width:150px;font-weight:200;text-shadow: 1px 1px 1px #000;color:#fff;">
+                <div class="row">
+                    <div class="col-12">{{ streamer.mainRolePct }}&percnt; {{ streamer.mainRole }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-12">{{ streamer.winRate|round(0) }}&percnt; Win</div>
+                </div>
+                <div class="row">
+                    <div class="col-12">{{ streamer.totalInGame|round(0) }}&percnt; inGame</div>
+                </div>
+            </div>
+            <div style="position: absolute;top:20px;right:5px;">
+                <i class="fa fa-refresh pointer refreshStreamer"
+                   style="text-shadow: 1px 1px 1px #000;color:#fff;"
+                   data-streamer="{{ streamer.id }}"
+                   data-summoners="{{ streamer.sCollection }}"
+                   data-streamer-container="{{ path('renderStreamerInfoContainer', {'s':streamer.id}) }}"
+                ></i>
+            </div>
+            <div style="position: absolute;bottom:25px;right:10px;font-weight:200;text-shadow: 1px 1px 1px #000;color:#fff;">
+                {% if streamer.inGame == true %}<i class="fa fa-info-circle tt"
+                                                   title="{{ streamer.pChamp }}<br />{{ streamer.league }} {{ streamer.division }}<br />{{ streamer.lp }} {{ streamer.queue }}"></i> {{ streamer.gameMinutes }}min in Game{% else %}&nbsp;{% endif %}
+            </div>
+            <div class="ls-channel" style="position:absolute;bottom:5px;right:5px;">
+                {% if streamer.inGame == true %}{{ streamer.region }}{{ streamer.summonerName }}{% else %}&nbsp;{% endif %}
+            </div>
+            {% if streamer.inGame == false %}
+                <div style="position:absolute;bottom:10px;right:10px;">
+                    {% for lastGame in streamer.lastGames %}
+                        <img src="{{ version.cdn }}/img/champion/loading/{{ lastGame.lastChampionImage|replace({'.png':''}) }}_0.jpg"
+                             class="last-champ-path last-champion-{{ lastGame.lastOutcomeText|lower }} tt"
+                             title="{{ lastGame.lastChampionName }}<br /><span class='{{ lastGame.lastOutcome }}Text'>{{ lastGame.lastOutcomeText }}</span> (Winrate {{ lastGame.winrateLast }})"
+                        >
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        {% endif %}
+    </div>
+</div>

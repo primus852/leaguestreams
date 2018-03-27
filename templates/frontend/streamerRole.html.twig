@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+{% block title %} - League of Legends Streams by Role {% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>Streamer by Role</h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="pScrollerMain">
+                <div class="container-fluid">
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-10 text-center">
+                            <div class="ls-league">Check who plays your favourite role most during their streams.</div>
+                        </div>
+                    </div>
+                    <br/>&nbsp;
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-10">
+                            <div class="row">
+                                {% for key, role in roles %}
+                                    {% if key != "Unknown" %}
+                                        <div class="col-xl-6 offset-xl-0 col-10 offset-1">
+                                            <div class="row">
+                                                <div class="card">
+                                                    <div class="city-selected city-smaller">
+                                                        <article>
+                                                            <div class="info">
+                                                                <div class="city">
+                                                                    {{ key }}
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                        <figure class="cFigure"
+                                                                style="background-image: url('{{ asset('assets/ls/img/roles/'~key|lower~'.png') }}')"></figure>
+                                                    </div>
+                                                    {% for details in role %}
+                                                        <div class="days">
+                                                            <div class="row row-no-gutter">
+                                                                <div class="col col-2">
+                                                                    <div class="day">
+                                                                        <h1>
+                                                                            {% if details.on == "true" %}
+                                                                                <a href="{{ path('loadPlayer', {'searchString': details.name}) }}"><i
+                                                                                            class="fa fa-check fa-2x tt"
+                                                                                            title="Online - Watch Now"
+                                                                                            style="color:#82b84f;"></i></a>
+                                                                            {% else %}
+                                                                                <i class="fa fa-remove fa-2x tt"
+                                                                                   title="Offline"
+                                                                                   style="color:#D9411E;"></i>
+                                                                            {% endif %}
+                                                                        </h1>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col col-6">
+                                                                    <div class="day">
+                                                                        <h1>
+                                                                            <a href="{{ path('profileStreamer', {'streamer': details.id}) }}">{{ details.name }}</a>
+                                                                        </h1>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col col-4 text-left">
+                                                                    <div class="day">
+                                                                        <h1>
+                                                                            {{ details.pct|number_format(2) }}&percnt;</h1>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                                <br/>&nbsp;
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/profile.min.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script>
+        var LS_NAV = "mRole";
+    </script>
+{% endblock javascripts %}

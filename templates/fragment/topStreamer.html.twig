@@ -1,0 +1,16 @@
+{% for streamer in streamers %}
+    {% set inGame = 'not in Game' %}
+    {% set inClass = '' %}
+    {% for summoner in streamer.summoner %}
+        {% if summoner.currentMatch is defined and summoner.currentMatch is not  null %}
+            {% if summoner.currentMatch.isPlaying == true %}
+                {% set inGame = 'playing '~summoner.currentMatch.champion.name %}
+                {% set inClass = 'on' %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    <li>
+        <a href="{{ path('loadPlayer', {"searchString": streamer.id}) }}" class="mLink">
+            <span class="ls-ball-online tt" title="Online"></span>{{ streamer.channelUser }} <div class="ls-in-game {{ inClass }}">{{ inGame }}</div>
+        </a></li>
+{% endfor %}

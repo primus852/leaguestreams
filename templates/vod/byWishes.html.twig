@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+{% block title %} - League of Legends VODs by Role {% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>VODs <span style="font-size:0.5em;">by my Wishes</span></h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="pScrollerMain">
+                <div class="container-fluid">
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-10 text-center">
+                            <div class="ls-league">Search for your VOD.
+                            </div>
+                        </div>
+                    </div>
+                    <br/>&nbsp;
+                    <div class="row justify-content-center" style="padding-left:15px;">
+                        <div class="col-10">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="wChampion">Champion</label>
+                                    <select id="wChampion" multiple="multiple">
+                                        <option value="all">-any-</option>
+                                        {% for champ in champions %}
+                                            <option value="{{ champ.id }}">{{ champ.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="wRole">Lane/Role</label>
+                                    <select id="wRole" multiple="multiple">
+                                        <option value="all">-any-</option>
+                                        <option value="Top">Top</option>
+                                        <option value="Jungle">Jungle</option>
+                                        <option value="Mid">Mid</option>
+                                        <option value="Bot">Bot</option>
+                                        <option value="Support">Support</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="wStreamer">Streamer</label>
+                                    <select id="wStreamer" multiple="multiple">
+                                        <option value="all">-any-</option>
+                                        {% for streamer in streamers %}
+                                            <option value="{{ streamer.id }}">{{ streamer.channelUser }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="wEnemy">vs.</label>
+                                    <select id="wEnemy" multiple="multiple">
+                                        <option value="all">-any-</option>
+                                        {% for champ in champions %}
+                                            <option value="{{ champ.id }}">{{ champ.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-12 text-right">
+                                    <a href="#" class="btn btn-success btn-sm rounded-0" id="wishVod" ><i class="fa fa-search"></i> Search</a>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-12" id="vodRowSearch">
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row" id="vodRow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </div>
+    </main>
+    <input type="hidden" id="ajax-route-load-vods-wish" value="{{ path('renderVodByWish') }}"/>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/profile.min.css')) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/perfect-scrollbar/css/perfect-scrollbar.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/select2/dist/css/select2.min.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script src="{{ preload(asset('assets/node_modules/perfect-scrollbar/dist/perfect-scrollbar.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/select2/dist/js/select2.min.js')) }}"></script>
+    <script>
+        var LS_NAV = "vWishes";
+    </script>
+    <script type="text/javascript">
+
+    </script>
+{% endblock javascripts %}

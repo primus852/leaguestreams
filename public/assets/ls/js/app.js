@@ -4,6 +4,16 @@ String.prototype.escapeHTML = function () {
     );
 };
 
+$(document).ready(function(){
+    /* Review */
+    $( '.card-image' ).mouseover(function(){
+        $('.card-modal').fadeIn(100).toggleClass('active');
+    }).mouseout(function(){
+        $('.card-modal').fadeOut(100).toggleClass('active');
+    });
+
+});
+
 var player;
 var cols = {},
     messageIsOpen = false;
@@ -15,6 +25,7 @@ $(function () {
     initScrollbar('#perfectScroll');
     initScrollbar('#pScrollerMenu');
     initScrollbar('#pScrollerMain');
+    initScrollbar('#lScroll');
 
 
     // Bind the event.
@@ -37,10 +48,10 @@ $(function () {
         modalInit();
     }
 
-    var $lazy = $('#pScrollerMain .lazy');
+    var $lazy = $('#lScroll .lazy');
     if ($lazy.length) {
         $lazy.Lazy({
-            appendScroll: $('#pScrollerMain')
+            appendScroll: $('#lScroll')
         });
     }
 
@@ -96,135 +107,6 @@ $(function () {
 
     initTooltips('.tt');
 });
-
-function loadRunesMasteriesVod() {
-    var $streamUrl = $("#ajax-route-get-stream-vod").val();
-
-    var $streamer = $("#streamer-id").val();
-    var $match = $("#match-id").val();
-    var $streamRunesVod = $('#streamRunesVod');
-    $.get($streamUrl, {
-        streamerId: $streamer,
-        matchId: $match
-    }).done(function (data) {
-        $streamRunesVod.html("");
-        var runeRow = 1;
-        $.each(data.runes, function (ind, obj) {
-            $streamRunesVod.append('<div class="rune rRow left">\n    <div class="rContent tt" title="' + obj.name + "<br /><span style='font-size:12px;'>" + obj.desc + '</span>">\n        <img class="icon" src="' + obj.url + '">\n        <div class="count">' + obj.count + "</div>\n    </div>\n</div>");
-            runeRow++;
-        });
-        $.each(data.masteries, function (ind, obj) {
-            addMasteries(obj.offset, obj.rank, obj.name, obj.type, obj.row, obj.pos, obj.desc);
-        });
-        $("#masteries-ferocity").append('<div class="total">Ferocity: ' + data.totals.ferocity + " </div>");
-        $("#masteries-cunning").append('<div class="total">Cunning: ' + data.totals.cunning + " </div>");
-        $("#masteries-utility").append('<div class="total">Utility: ' + data.totals.utility + " </div>");
-        $(".tt").tooltipster({
-            animation: "fade",
-            delay: 200,
-            theme: ["tooltipster-punk", "tooltipster-ls"],
-            contentAsHTML: true
-        });
-    }).fail(function () {
-        openNoty("error", "Ajax failed. The administrator was informed about the incident");
-        return false;
-    });
-}
-
-function loadRunesMasteries(refresh) {
-    var $streamUrl = $("#ajax-route-get-stream").val();
-    var $streamer = $("#streamer-id").val();
-    var $match = $("#match-id").val();
-    var $streamRunes = $("#streamRunes");
-    if (refresh === false) {
-        $streamRunes = $("#streamRunes");
-        $.get($streamUrl, {
-            streamerId: $streamer,
-            matchId: $match
-        }).done(function (data) {
-            $("#streamerId").val(data.streamerId);
-            var options = {
-                width: $videoWidth,
-                height: $videoHeight,
-                channel: data.streamChannel,
-                playsinline: true
-            };
-            player = new Twitch.Player("playerMain", options);
-            player.setVolume(0.5);
-            $streamRunes.html("");
-            var runeRow = 1;
-            $.each(data.runes, function (ind, obj) {
-                $streamRunes.append('<div class="rune rRow left">\n    <div class="rContent tt" title="' + obj.name + "<br /><span style='font-size:12px;'>" + obj.desc + '</span>">\n        <img class="icon" src="' + obj.url + '">\n        <div class="count">' + obj.count + "</div>\n    </div>\n</div>");
-                runeRow++;
-            });
-            $.each(data.masteries, function (ind, obj) {
-                addMasteries(obj.offset, obj.rank, obj.name, obj.type, obj.row, obj.pos, obj.desc);
-            });
-            $("#masteries-ferocity").append('<div class="total">Ferocity: ' + data.totals.ferocity + " </div>");
-            $("#masteries-cunning").append('<div class="total">Cunning: ' + data.totals.cunning + " </div>");
-            $("#masteries-utility").append('<div class="total">Utility: ' + data.totals.utility + " </div>");
-            $(".tt").tooltipster({
-                animation: "fade",
-                delay: 200,
-                theme: ["tooltipster-punk", "tooltipster-ls"],
-                contentAsHTML: true
-            });
-        }).fail(function () {
-            openNoty("error", "Ajax failed. The administrator was informed about the incident");
-            return false;
-        });
-    } else {
-        var $rm = $("#runesMasteries");
-        $rm.html('<i class="fa fa-spin fa-spinner"></i>');
-        var $rmUrl = $("#ajax-route-runes-masteries").val();
-        $.get($rmUrl).done(function (dataRefresh) {
-            $rm.html(dataRefresh);
-            $streamRunes = $("#streamRunes");
-            $.get($streamUrl, {
-                streamerId: $streamer,
-                matchId: $match
-            }).done(function (data) {
-                $("#streamerId").val(data.streamerId);
-                $streamRunes.html("");
-                var runeRow = 1;
-                $.each(data.runes, function (ind, obj) {
-                    $streamRunes.append('<div class="rune rRow left">\n    <div class="rContent tt" title="' + obj.name + "<br /><span style='font-size:12px;'>" + obj.desc + '</span>">\n        <img class="icon" src="' + obj.url + '">\n        <div class="count">' + obj.count + "</div>\n    </div>\n</div>");
-                    runeRow++;
-                });
-                $.each(data.masteries, function (ind, obj) {
-                    addMasteries(obj.offset, obj.rank, obj.name, obj.type, obj.row, obj.pos, obj.desc);
-                });
-                $("#masteries-ferocity").append('<div class="total">Ferocity: ' + data.totals.ferocity + " </div>");
-                $("#masteries-cunning").append('<div class="total">Cunning: ' + data.totals.cunning + " </div>");
-                $("#masteries-utility").append('<div class="total">Utility: ' + data.totals.utility + " </div>");
-                $(".tt").tooltipster({
-                    animation: "fade",
-                    delay: 200,
-                    theme: ["tooltipster-punk", "tooltipster-ls"],
-                    contentAsHTML: true
-                });
-            }).fail(function () {
-                openNoty("error", "Ajax failed. The administrator was informed about the incident");
-                return false;
-            });
-        }).fail(function () {
-            openNoty("error", "Ajax failed. The administrator was informed about the incident");
-            return false;
-        });
-    }
-}
-
-var $statsBar = $(".stats-bar-vod");
-if ($statsBar.length) {
-    $statsBar.BootSideMenu({
-        side: "right",
-        pushBody: false,
-        width: "360px",
-        autoClose: true
-    });
-
-    loadRunesMasteriesVod();
-}
 
 var $isPlayer = $(".refreshInGamePlayer");
 if ($isPlayer.length) {

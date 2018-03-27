@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>LS::LeagueStreams.net - League of Legends VOD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- LOAD CSS FILES -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,100,300,500"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/bootstrap/dist/css/bootstrap.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/font-awesome/css/font-awesome.min.css')) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/perfect-scrollbar/css/perfect-scrollbar.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/select2/dist/css/select2.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/noty/lib/noty.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/ls.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/reset.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/overwrites.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/ls/css/BootSideMenu.min.css')) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/tooltipster/dist/css/tooltipster.bundle.min.css')) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/tooltipster/dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-punk.min.css')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="{{ preload(asset('assets/ls/img/apple-touch-icon-57x57.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114"
+          href="{{ preload(asset('assets/ls/img/apple-touch-icon-114x114.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ preload(asset('assets/ls/img/apple-touch-icon-72x72.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="144x144"
+          href="{{ preload(asset('assets/ls/img/apple-touch-icon-144x144.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="{{ preload(asset('assets/ls/img/apple-touch-icon-60x60.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="120x120"
+          href="{{ preload(asset('assets/ls/img/apple-touch-icon-120x120.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="{{ preload(asset('assets/ls/img/apple-touch-icon-76x76.png')) }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="152x152"
+          href="{{ preload(asset('assets/ls/img/apple-touch-icon-152x152.png')) }}"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-196x196.png')) }}" sizes="196x196"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-96x96.png')) }}" sizes="96x96"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-32x32.png')) }}" sizes="32x32"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-16x16.png')) }}" sizes="16x16"/>
+    <link rel="icon" type="image/png" href="{{ preload(asset('assets/ls/img/favicon-128.png')) }}" sizes="128x128"/>
+    <meta name="application-name" content="LeagueStreams"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF"/>
+    <meta name="msapplication-TileImage" content="{{ preload(asset('assets/ls/img/mstile-144x144.png')) }}"/>
+    <meta name="msapplication-square70x70logo" content="{{ preload(asset('assets/ls/img/mstile-70x70.png')) }}"/>
+    <meta name="msapplication-square150x150logo" content="{{ preload(asset('assets/ls/img/mstile-150x150.png')) }}"/>
+    <meta name="msapplication-wide310x150logo" content="{{ preload(asset('assets/ls/img/mstile-310x150.png')) }}"/>
+    <meta name="msapplication-square310x310logo" content="{{ preload(asset('assets/ls/img/mstile-310x310.png')) }}"/>
+    <link rel="manifest" href="{{ preload(asset('assets/ls/img/manifest.json')) }}">
+</head>
+<body style="background-color: #000;overflow:hidden;">
+<div id="full" style="height:100%;">
+    <!--TOP BAR-->
+
+    <div style="position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    height: 65px;">
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-2" style="padding-left:25px;padding-top:5px;">
+                        <a href="{{ path('mainPage') }}">
+                            <img src="{{ preload(asset('assets/ls/img/logo_icon.png')) }}" width="30" height="30" alt="">
+                        </a>
+                    </div>
+                    <div class="col-7" style="padding-left:0;padding-top:25px;">
+                        <div class="lsFooterBtn">
+                            <label for="show-foot" class="refreshInGamePlayerVod" data-match="{{ matchId }}"
+                                   data-streamer="{{ streamerId }}" data-video="{{ videoId }}"
+                                   data-offset="{{ offset }}"><i class="fa fa-refresh"></i> Not in Game</label>
+                        </div>
+                    </div>
+                    <div class="col-3" style="padding-left:0;padding-top:10px;">
+                        {{ streamer }} - {{ champ }} vs. {{ eChamp }} - {{ role }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--TOP BAR END-->
+    <!--
+    <iframe
+            src="//player.twitch.tv/?video={{ videoId }}&autoplay=true&time={{ iOffset }}"
+            frameborder="0"
+            scrolling="no"
+            allowfullscreen="true"
+            id="tFrame"
+            class="ls-vod-iframe"
+    >
+    </iframe>
+    -->
+    <div id="playerMain"></div>
+
+    <!-- footer -->
+    <footer>
+        <div class="lsFooterBoxInner">
+            <input type="checkbox" id="show-foot" name="show-the-footer" class="r-foot-check">
+            <nav class="lsFooter">
+                <div class="default-width">
+                    <div class="lsFooterInner">
+                        <ul class="footNavUL"></ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </footer>
+</div>
+<input type="hidden" id="ajax-route-check-summoner" value="{{ path('checkSummoner') }}"/>
+<input type="hidden" id="ajax-route-load-perks-vod" value="{{ path('renderPlayerStatsVod', {"streamer": streamerId}) }}"/>
+<input type="hidden" id="streamer-id" value="{{ streamerId }}"/>
+<input type="hidden" id="streamer-channel" value="{{ channel }}"/>
+<!--SideBar End-->
+<script>
+    var LS_NAV = "mLive";
+</script>
+<script src="//player.twitch.tv/js/embed/v1.js"></script>
+<script src="{{ preload(asset('assets/node_modules/jquery/dist/jquery.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/ls/js/BootSideMenu.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/node_modules/tooltipster/dist/js/tooltipster.bundle.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/node_modules/perfect-scrollbar/dist/perfect-scrollbar.js')) }}"></script>
+<script src="{{ preload(asset('assets/node_modules/select2/dist/js/select2.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/node_modules/noty/lib/noty.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/ls/js/hashchange.min.js')) }}"></script>
+<script src="{{ preload(asset('assets/ls/js/app.min.js')) }}"></script>
+<script>
+    $(document).ready(function () {
+
+        var $playerWindow = $("#playerMain");
+        $playerWindow.height($(window).height() - 65);
+        var $videoHeight = $playerWindow.height();
+        var $videoWidth = $playerWindow.width();
+
+        var options = {
+            width: $videoWidth,
+            height: $videoHeight,
+            video: "{{ videoId }}",
+            time: "{{ iOffset }}"
+        };
+        new Twitch.Player("playerMain", options);
+    });
+</script>
+</body>
+</html>

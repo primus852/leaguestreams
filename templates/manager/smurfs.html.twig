@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>Manage Smurfs</h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-10">
+                            <div class="module form-module">
+
+                                <h2>All Smurfs reported to be attached to a streamer</h2>
+                                <div class="row">
+                                    <div class="col-10 offset-1">
+                                        <table class="table">
+                                            <thead>
+                                            <th>Summoner</th>
+                                            <th>Streamer</th>
+                                            <th>Reports</th>
+                                            <th>View</th>
+                                            <th>Action</th>
+                                            </thead>
+                                            <tbody>
+                                            {% for smurf in smurfs %}
+                                                <tr id="row_{{ smurf.streamerId }}">
+                                                    <td>{{ smurf.summoner }}</td>
+                                                    <td>{{ smurf.streamer }}</td>
+                                                    <td>{{ smurf.count }}</td>
+                                                    <td><a href="{{ smurf.link }}" target="_blank">View</a></td>
+                                                    <td>
+                                                        <a class="btn btn-green rounded-0 pointer manageSmurf" data-type="confirm" data-smurf="{{ smurf.sName }}" data-streamer="{{ smurf.streamerId }}" data-region="{{ smurf.region }}"><i class="fa fa-check"></i> Confirm</a>
+                                                        <a class="btn btn-red rounded-0 pointer manageSmurf" data-type="delete" data-smurf="{{ smurf.sName }}" data-streamer="{{ smurf.streamerId }}" data-region="{{ smurf.region }}"><i class="fa fa-remove"></i> Delete</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <input type="hidden" id="ajax-route-manage-smurf" value="{{ path('ajaxManageSmurf') }}"/>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/jquery-autocomplete/jquery.autocomplete.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script src="{{ preload(asset('assets/node_modules/jquery-autocomplete/jquery.autocomplete.js')) }}"></script>
+    <script>
+        var LS_NAV = "mSmurfs";
+    </script>
+{% endblock javascripts %}
+

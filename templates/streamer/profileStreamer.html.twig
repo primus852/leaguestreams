@@ -1,0 +1,368 @@
+{% extends 'base.html.twig' %}
+{% block title %} - Profile of {{ streamer.channelUser }} {% endblock title %}
+{% block body %}
+    <main id="main">
+        <div class="overlay"></div>
+        <header class="header">
+            <h1 class="page-title">
+                <a class="sidebar-toggle-btn trigger-toggle-sidebar">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line line-angle1"></span>
+                    <span class="line line-angle2"></span>
+                </a>Profile of {{ streamer.channelUser }}</h1>
+        </header>
+        <div id="main-nano-wrapper" class="nano">
+            <div class="nano-content" id="pScrollerMain">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col col-10 col-xl-6">
+                            {% if streamer.banner is not empty %}
+                                <img src="{{ streamer.banner }}" alt="{{ streamer.channelUser }} Banner"
+                                     class="img-responsive img-thumbnail"/>
+                            {% else %}
+                                <img class="img-fluid img-thumbnail" src="{{ preload(asset('assets/ls/img/nobanner.jpg')) }}"
+                                     alt="{{ streamer.channelUser }} Banner"/>
+                            {% endif %}
+                        </div>
+                        <div class="col-xl-4 offset-xl-0 col-10">
+                            <div class="row">
+                                <div class="card">
+                                    <div class="city-selected">
+                                        <article>
+                                            <div class="info">
+                                                <div class="city"><span>Platform:</span> {{ streamer.platform.name }}
+                                                </div>
+                                                <div class="night">Last online - {% if streamer.isOnline == true %}<span
+                                                            class=streamOnline>NOW</span>{% else %}{{ streamer.started|date('Y-m-d') }}{% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="watch">
+                                                {% if streamer.isOnline == true %}
+                                                    <a class="btn btn-green rounded-0"
+                                                       href="{{ path('loadPlayer', {"searchString": streamer.id}) }}">Watch</a>
+                                                {% endif %}
+                                            </div>
+                                        </article>
+                                        <figure style="background-image: url({{ streamer.logo }})"></figure>
+                                    </div>
+
+                                    <div class="days">
+                                        <div class="row row-no-gutter">
+                                            <div class="col col-4">
+                                                <div class="day">
+                                                    <h1 id="winrate">
+                                                        {{ stats.winrate|number_format(2) }}&percnt;</h1>
+                                                    Winrate
+                                                </div>
+                                            </div>
+                                            <div class="col col-4">
+                                                <div class="day">
+                                                    <h1 id="gamesAvg">
+                                                        {{ stats.totalInGame|number_format(2) }}&percnt;</h1>
+                                                    inGame
+                                                </div>
+                                            </div>
+                                            <div class="col col-4">
+                                                <div class="day">
+                                                    <h1 id="summoners">{{ summoners }}</h1>
+                                                    Summoner
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                    <br/>&nbsp;
+                    <div class="row justify-content-center">
+                        <div class="col-10 col-xl-3 pBox">
+                            <strong>Summoners</strong><br/><br/>
+                            {% for summoner in streamer.summoner %}
+                                <div class="row" id="sDiv_{{ summoner.id }}">
+                                    <div class="col-7">
+                                        <a href="https://{{ summoner.region.short }}.op.gg/summoner/userName={{ summoner.name }}">{{ summoner.region.short|upper }}
+                                            -{{ summoner.name }}</a>
+                                    </div>
+                                    <div class="col-3">
+                                        <span style="font-size:0.7rem;">{{ summoner.league }}</span>
+                                    </div>
+                                    <div class="col-2">
+                                        {% if is_granted("ROLE_SUPER_ADMIN") %}
+                                            <a class="btn btn-red rounded-0 removeSummoner pointer md-trigger"
+                                               data-streamer="{{ streamer.id }}" data-summoner="{{ summoner.id }}"
+                                               data-name="{{ summoner.region.short|upper }}-{{ summoner.name }}"
+                                               data-modal="modal-5">&nbsp;<i class="fa fa-remove"></i>&nbsp;</a>
+                                        {% else %}
+                                            <a class="btn btn-red rounded-0 reportSummoner pointer md-trigger"
+                                               data-streamer="{{ streamer.id }}" data-summoner="{{ summoner.id }}"
+                                               data-name="{{ summoner.region.short|upper }}-{{ summoner.name }}"
+                                               data-modal="modal-5">&nbsp;<i class="fa fa-exclamation"></i>&nbsp;</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-10 col-xl-2 pBox">
+                            <strong class="tt" title="Min. 100 Games and &gt; 90&percnt; played">One-Trick-Pony <i
+                                        class="fa fa-info-circle"></i></strong><br/>
+                            {% if stats.awards.otp is defined and  stats.awards.otp is not null %}
+                                <div class="awardImg tt"
+                                     title="{{ stats.awards.otp.name }} OneTrickPony<br /><span class='summonerSub'>{{ stats.awards.otp.games }} of {{ stats.awards.otp.totals }} Games</span>">
+                                    <span class="award-badge award-otp">OTP</span>
+                                    <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ stats.awards.otp.img }}"
+                                         class="" style="max-height:40px;"/>
+                                </div>
+                            {% else %}
+                                <br/>
+                                None
+                            {% endif %}
+                        </div>
+                        <div class="col-10 col-xl-2 offset-xl-0 pBox">
+                            <strong class="tt"
+                                    title="Min. 15 Games and &gt; 40&percnt; played with a &gt; 50&percnt; Winrate">Pro
+                                <i class="fa fa-info-circle"></i></strong><br/>
+                            {% if stats.awards is defined and stats.awards.pro is not empty %}
+                                {% for pro in stats.awards.pro %}
+                                    <div class="awardImg tt"
+                                         title="{{ pro.name }} Pro<br /><span class='summonerSub'>{{ pro.games }} of {{ pro.totals }} Games</span>">
+                                        <span class="award-badge award-pro">Pro</span>
+                                        <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ pro.img }}"
+                                             class="" style="max-height:40px;"/>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <br/>
+                                None
+                            {% endif %}
+                        </div>
+                        <div class="col-10 col-xl-2 offset-xl-0 pBox">
+                            <strong class="tt" title="Min. 30 Games with a Winrate &gt; 55&percnt;">Beast <i
+                                        class="fa fa-info-circle"></i></strong><br/>
+                            {% if stats.awards is defined and stats.awards.beast is not empty %}
+                                {% for beast in stats.awards.beast %}
+                                    <div class="awardImg tt"
+                                         title="{{ beast.name }} Beast<br /><span class='summonerSub'>{{ beast.games }} Games with a {{ beast.winpct|number_format(2) }}&percnt; Winrate</span>">
+                                        <span class="award-badge award-beast">Beast</span>
+                                        <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ beast.img }}"
+                                             class="" style="max-height:40px;"/>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <br/>
+                                None
+                            {% endif %}
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <ul class="nav nav-tabs" id="pTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#vods" role="tab" aria-controls="vods">VODs
+                                <span class="badge badge-danger">beta</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#stats" role="tab"
+                               aria-controls="stats">Pool</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="vods" role="tabpanel">
+                            <br/>
+                            <div class="row justify-content-center">
+                                <div class="col-10">
+                                    <div class="row">
+                                        <div class="col col-6">
+                                            <div class="switch">
+                                                <input id="cmn-toggle-4" class="cmn-toggle cmn-toggle-round-flat"
+                                                       type="checkbox">
+                                                <label for="cmn-toggle-4" id="showLabel">&nbsp;Spoilers</label>
+                                            </div>
+                                        </div>
+                                        <div class="col col-6">
+                                            <div class="search-box">
+                                                <input placeholder="Search..." id="searchVod">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-center">
+                                        {% for vod in vods %}
+
+                                            <div class="col-xl-4 offset-xl-0 col-10 vodCard"
+                                                 data-champ="{{ vod.enemyChampion |lower }}"
+                                                 data-role="{{ vod.role|lower }}"
+                                                 data-streamer="{{ streamer.channelUser|lower }}">
+                                                <div class="row">
+                                                    <div class="card">
+                                                        <a href="{{ vod.internalLink }}">
+                                                            <div class="city-selected city-smaller">
+                                                                <article class="justify-content-center info"
+                                                                         style="text-align: center;cursor: pointer;">
+                                                                    <div class="ls-play-button" style="opacity: 0.15;">
+                                                                        <i class="fa fa-play fa-3x"></i>
+                                                                    </div>
+                                                                    <div class="city">
+                                                                        {{ vod.champion ? vod.champion : "" }}
+                                                                        vs. {{ vod.enemyChampion ? vod.enemyChampion : "???" }}
+                                                                        <br/>
+                                                                        <span>{{ streamer.channelUser }} / {{ vod.role }}
+                                                                            ({{ vod.league }})</span>
+                                                                        <br/>
+                                                                        <span>{{ vod.gameStart|date('Y/m/d H:i') }}</span>
+                                                                    </div>
+                                                                </article>
+                                                                <figure class="cFigureRevert"
+                                                                        style="background-image: url({{ preload(asset('images/champions/'~vod.championKey~'_0.png')) }})"></figure>
+                                                                {% if vod.enemyChampion is not null %}
+                                                                    <figure class="cFigure"
+                                                                            style="background-image: url({{ preload(asset('images/champions/'~vod.enemyChampionKey~'_0.png')) }})"></figure>
+                                                                {% endif %}
+                                                            </div>
+                                                        </a>
+
+                                                        <div class="days">
+                                                            <div class="row row-no-gutter">
+                                                                <div class="col col-4">
+                                                                    <div class="day">
+                                                                        <h1 data-win="{{ vod.win }}"
+                                                                            class="pointer showWin">
+                                                                            Spoiler</h1>
+                                                                        Win
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col col-4">
+                                                                    <div class="day">
+                                                                        <h1>{{ vod.version }}</h1>
+                                                                        Patch
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col col-4">
+                                                                    <div class="day">
+                                                                        <h1>{{ vod.length }}m</h1>
+                                                                        Length
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <br/>&nbsp;
+                                                </div>
+                                            </div>
+
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane" id="stats" role="tabpanel">
+
+                            <br/>&nbsp;
+                            <div class="row justify-content-center">
+                                <div class="col-10 pBox">
+                                    <table class="table table-striped table-bordered dt-responsive nowrap"
+                                           cellspacing="0"
+                                           width="100%" id="champ-table">
+                                        <thead>
+                                        <tr>
+                                            <th class="text-center">Champion</th>
+                                            <th class="text-center">Games</th>
+                                            <th class="text-center">&percnt; Played</th>
+                                            <th class="text-center">Wins</th>
+                                            <th class="text-center">Losses</th>
+                                            <th class="text-center">&percnt; Winrate</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for champ in champs %}
+                                            <tr>
+                                                <td>
+                                                    <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ champ.img }}"
+                                                         class="" style="max-height:18px;"/> {{ champ.name }}</td>
+                                                <td class="text-center">{{ champ.games }}</td>
+                                                <td class="text-center">{{ champ.played|number_format(2) }}</td>
+                                                <td class="text-center">{{ champ.win }}</td>
+                                                <td class="text-center">{{ champ.loss }}</td>
+                                                <td class="text-center">{{ champ.winpct|number_format(2) }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <input type="hidden" id="ajax-route-delete-summoner" value="{{ path('deleteSummoner') }}"/>
+        <div class="md-modal md-effect-5" id="modal-5">
+            <div class="md-content">
+                <h3>CONFIRM DELETE</h3>
+                <div>
+                    <p>
+                        Would you like to delete Summoner <strong><span class="summonerName"></span></strong>?
+                        <br/>
+                        <br/>
+                        All games and stats will also be deleted!
+                    </p>
+                    <a class="btn btn-green rounded-0 md-close pointer">Abort</a>
+                    <a class="btn btn-red rounded-0 md-close pointer" id="summonerRemove">Yes, remove!</a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <input type="hidden" id="ajax-route-report-summoner" value="{{ path('reportSummoner') }}"/>
+        <div class="md-modal md-effect-5" id="modal-5">
+            <div class="md-content">
+                <h3>REPORT SUMMONER</h3>
+                <div>
+                    <p>
+                        Would you like to report Summoner <strong><span class="summonerName"></span></strong>?
+                        <br/>
+                        <br/>
+                        <label for="reportDetails">Please give some details about the report:</label>
+                        <textarea class="ls-input" id="reportDetails"></textarea>
+                    </p>
+                    <a class="btn btn-green rounded-0 md-close pointer">Abort</a>
+                    <a class="btn btn-red rounded-0 md-close pointer" id="summonerReport">Yes, report!</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="md-overlay"></div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/profile.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/dt.bs4.min.css')) }}"/>
+    <link rel="stylesheet" href="{{ preload(asset('assets/vendor/ls/css/modal.css') ) }}"/>
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.css')) }}"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script>
+        var LS_NAV = "streamerMenu";
+    </script>
+    <script src="{{ preload(asset('assets/node_modules/popper.js/dist/umd/popper.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/bootstrap/dist/js/bootstrap.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/vendor/ls/js/dt.1.10.13.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/vendor/ls/js/dt.bs4.min.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive/js/dataTables.responsive.js')) }}"></script>
+    <script src="{{ preload(asset('assets/node_modules/datatables.net-responsive-bs/js/responsive.bootstrap.js')) }}"></script>
+    <script>
+        $(function () {
+            $('#pTab').tab();
+            $('#cmn-toggle-4').attr('checked', false);
+        })
+    </script>
+{% endblock javascripts %}
