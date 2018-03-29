@@ -2394,4 +2394,7 @@ ul.footNavUL li {
     text-shadow: 1px 1px 1px #000;
     color:#fff;
 }
+.ls-text-underline{
+    text-decoration: underline;
+}
 

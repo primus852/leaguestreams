@@ -131,7 +131,7 @@ article {
     align-self: auto;
 }
 
-.city span {
+.city span:not(.ls-text-underline) {
     color: #fff;
     font-size: 13px;
     text-align: left;

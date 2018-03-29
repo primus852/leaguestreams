@@ -20,12 +20,10 @@
         <div class="col-12">
             <div class="row">
                 <div class="col-11">
-                    <div class="ls-streamer-channel tt" title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">
-                        <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> {{ streamer.streamUsername }}
-                        <span class="ls-small-white" style="font-size:0.8rem;">
-                        <a href="{{ path('profileStreamer', {'streamer':streamer.streamUsername}) }}"
-                           style="color:#fff;">(Check VODs)</a>
-                            </span>
+                    <div class="ls-streamer-channel">
+                        <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> <span class="tt" title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">{{ streamer.streamUsername }}</span>
+                        <a class="ls-small-white" href="{{ path('profileStreamer', {'streamer':streamer.streamUsername}) }}"
+                           style="color:#fff;font-size:0.8rem;line-height: 1.8rem;">(Check VODs)</a>
                     </div>
                 </div>
                 <div class="col-1 text-right" style="padding-right: 5px;">

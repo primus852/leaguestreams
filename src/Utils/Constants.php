@@ -1,20 +1,14 @@
+<<<<<<< HEAD
 <?php
 
 namespace App\Utils;
 
-class Constants{
+class Constants
+{
 
-
-    /* Riot API endpoints */
-    const API_URL_PLATFORM = "https://{platform}.api.riotgames.com/lol/platform/v3/";
-    const API_URL_CHAMPION_MASTERY = "https://{platform}.api.riotgames.com/lol/champion-mastery/v3/";
-    const API_URL_SPECTATOR = 'https://{platform}.api.riotgames.com/lol/spectator/v3/';
-    const API_URL_STATIC = 'https://{platform}.api.riotgames.com/lol/static-data/v3/';
-    const API_URL_MATCH = 'https://{platform}.api.riotgames.com/lol/match/v3/';
-    const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
-    const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
 
     /* Riot API Key */
+<<<<<<< HEAD
     const API_KEY = "RGAPI-ENTER-YOUR-API-KEY";
     //const API_KEY = "RGAPI-ENTER-YOUR-API-KEY"; //DEV
 
@@ -45,9 +39,13 @@ class Constants{
         503 => 'The Riot API is currently not available',
         504 => 'The Gateway has timed out',
     );
+=======
+    const API_KEY = "RGAPI-YOUR-API-KEY";
+    //const API_KEY = "RGAPI-YOUR-API-KEY"; //DEV
+>>>>>>> c94ec95... Merge to SF4
 
     /* Twitch API Client ID */
-    const TWITCH_API_CLIENT = 'ENTER-YOUR-API-KEY';
+    const TWITCH_API_CLIENT = 'YOUR-API-KEY';
 
     /* Old Twitch API //TODO deprecated 2018/12/31 */
     const TWITCH_V5 = 'https://api.twitch.tv/kraken/';
@@ -60,7 +58,7 @@ class Constants{
     const SMURFS_REQUIRED = 5;
 
     /* Smurfs need report or go to DB directly (false) */
-    const SMURFS_ENABLED = true;
+    const SMURFS_ENABLED = false;
 
     /* Simple Crypt  UPDATE WITH CARE!!! */
     const SC_KEY = 'YOUR-KEY';
@@ -84,4 +82,9 @@ class Constants{
     /* ---> NEW GLOBAL VERSION */
     const RIOT_CURRENT_VERSION = '3';
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 3c8c29a... Merge to SF4
+>>>>>>> d364e41... Merge to SF4

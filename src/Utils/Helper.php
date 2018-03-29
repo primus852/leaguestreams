@@ -9,6 +9,8 @@
 namespace App\Utils;
 
 
+use App\Entity\Platform;
+
 class Helper
 {
 
@@ -63,6 +65,26 @@ class Helper
             default:
                 return $flag;
         }
+    }
+
+    /**
+     * @param Platform $platform
+     * @return null|string
+     */
+    public function getPlatform(Platform $platform){
+
+        /* Get Platform Class */
+        switch ($platform->getName()) {
+            case 'Twitch.tv':
+                /* @var $pApi TwitchApi */
+                $pClass = '\App\Utils\TwitchApi';
+                break;
+            default:
+                $pClass = null;
+                break;
+        }
+
+        return $pClass;
 
     }
 }

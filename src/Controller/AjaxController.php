@@ -407,6 +407,10 @@ class AjaxController extends Controller
     public function updateStreamerSingleAction(Request $request)
     {
 
+
+        /* @var $helper Helper */
+        $helper = new Helper();
+
         $crypt_id = $request->get('id');
         $sc = new SimpleCrypt();
 
@@ -446,16 +450,7 @@ class AjaxController extends Controller
         /* @var $platform Platform */
         $platform = $streamer->getPlatform();
 
-        /* Get Platform Class */
-        switch ($platform->getName()) {
-            case 'Twitch.tv':
-                /* @var $pApi TwitchApi */
-                $pClass = '\App\Utils\TwitchApi';
-                break;
-            default:
-                $pClass = null;
-                break;
-        }
+        $pClass = $helper->getPlatform($platform);
 
         $isOnline = false;
         if ($pClass !== null) {

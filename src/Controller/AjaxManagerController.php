@@ -92,7 +92,7 @@ class AjaxManagerController extends Controller
     }
 
     /**
-     * @Route("/admin/_ajax/_reportSummoner", name="ajaxReportSummoner")
+     * @Route("/_ajax/_reportSummoner", name="ajaxReportSummoner")
      * @param Request $request
      * @return JsonResponse
      */
@@ -117,6 +117,7 @@ class AjaxManagerController extends Controller
         /* Add Summoner Report */
         $report = new SummonerReport();
         $report->setSummoner($summoner);
+        $report->setStreamer($summoner->getStreamer());
         $report->setReason($request->get('reason'));
         $report->setIsResolved(false);
         $report->setIp($helper->get_client_ip());
@@ -142,7 +143,7 @@ class AjaxManagerController extends Controller
 
 
     /**
-     * @Route("/admin/_ajax/_reportStreamer", name="ajaxReportStreamer")
+     * @Route("/_ajax/_reportStreamer", name="ajaxReportStreamer")
      * @param Request $request
      * @return JsonResponse
      */

@@ -5,16 +5,18 @@ namespace App\Controller;
 use App\Entity\Champion;
 use App\Entity\CurrentMatch;
 use App\Entity\Match;
+use App\Entity\Platform;
+use App\Entity\Region;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
+use App\Entity\Versions;
 use App\Utils\Helper;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
+use App\Utils\RiotApi;
 use App\Utils\SimpleCrypt;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
-use Symfony\Component\Asset\Package;
-use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -37,7 +39,7 @@ class RenderController extends Controller
         /* @var $match Match */
         $match = $em->getRepository('App:Match')->find($request->get('match'));
 
-        if($match === null){
+        if ($match === null) {
             throw new NotFoundHttpException();
         }
 
@@ -115,13 +117,20 @@ class RenderController extends Controller
     public function loadPlayerStatsAction($streamer)
     {
 
+        $hasError = false;
+        $lastArray = null;
+
+        $inGame = false;
+        $perks = null;
+        $league = '';
+        $division = '';
+
         /* @var $em ObjectManager */
         $em = $this->getDoctrine()->getManager();
 
+        /* @var $s Streamer */
         $s = $this->getDoctrine()->getRepository('App:Streamer')->find($streamer);
 
-        $hasError = false;
-        $lastArray = null;
         if ($s === null) {
             $hasError = 'Streamer not found?!';
         }
@@ -129,14 +138,16 @@ class RenderController extends Controller
         /* @var $summoners PersistentCollection */
         $summoners = $s->getSummoner();
 
-        $inGame = false;
+        /* @var $version Versions */
+        $version = $this->getDoctrine()
+            ->getRepository('App:Versions')
+            ->find(1);
 
         /* @var $champion Champion */
         $champion = null;
 
-        $league = '';
-        $division = '';
-        $perks = null;
+        /* @var $helper Helper */
+        $helper = new Helper();
 
         /* @var $summoner Summoner */
         foreach ($summoners as $summoner) {
@@ -144,14 +155,15 @@ class RenderController extends Controller
             /* @var $currentMatch CurrentMatch */
             $currentMatch = $summoner->getCurrentMatch();
 
+            /* Check if a current Match exists */
             if ($currentMatch !== null) {
 
-                $inGame = $currentMatch->getIsPlaying();
+                /* Check if it is Playing */
+                if($currentMatch->getIsPlaying()) {
 
-                if ($inGame) {
+                    $inGame = true;
 
                     $champion = $currentMatch->getChampion();
-
                     $league = $summoner->getLeague();
                     $division = $summoner->getDivision();
 
@@ -196,14 +208,134 @@ class RenderController extends Controller
                             );
                         }
                     }
+
+                    /* Found Game, display it */
+                    return $this->render('render/playerStats.html.twig', array(
+                        'streamer' => $s,
+                        'hasError' => $hasError,
+                        'inGame' => $inGame,
+                        'champion' => $champion,
+                        'league' => $league,
+                        'division' => $division,
+                        'perks' => $perks,
+                        'version' => $version
+                    ));
+
                 }
             }
         }
 
-        $version = $this->getDoctrine()
-            ->getRepository('App:Versions')
-            ->find(1);
+        /* If we are here, no summoner has a current Match where he isPlaying, loop again through summoners */
+        foreach($summoners as $summoner){
 
+            /* @var $region Region */
+            $region = $summoner->getRegion();
+
+            /* @var $streamer Streamer */
+            $streamer = $summoner->getStreamer();
+
+            /* @var $riot RiotApi */
+            $riot = new RiotApi();
+            $riot->setRegion($region->getLong());
+
+            /* @var $ls LSFunction */
+            $ls = new LSFunction($em, $riot, $streamer);
+
+            /* @var $platform Platform */
+            $platform = $streamer->getPlatform();
+
+            $pClass = $helper->getPlatform($platform);
+
+            $isOnline = false;
+            if ($pClass !== null) {
+                $pApi = new $pClass($em, $streamer);
+                try {
+                    $isOnline = $pApi->checkStreamOnline(true);
+                } catch (\Exception $e) {
+                    throw new NotFoundHttpException();
+                }
+
+            }
+
+            if ($isOnline === false) {
+                throw new NotFoundHttpException();
+            }
+
+            /* Check and Update Live Game */
+            try {
+                $liveGame = $ls->updateLiveGame($summoner);
+            } catch (\Exception $e) {
+                throw new NotFoundHttpException();
+            }
+
+            if ($liveGame === true) {
+
+                $inGame = true;
+
+                $currentMatch = $ls->getCurrentGame($summoner);
+
+                $champion = $currentMatch->getChampion();
+                $league = $summoner->getLeague();
+                $division = $summoner->getDivision();
+
+                if ($league === 'CHALLENGER' || $league === 'MASTER' || $league === 'UNRANKED') {
+                    $division = '';
+                }
+
+                $perksDb = json_decode($currentMatch->getPerks(), true);
+
+                if (!empty($perksDb)) {
+
+                    /* Perk Ids */
+                    foreach ($perksDb['perkIds'] as $p) {
+
+                        $perk = $em->getRepository('App:Perk')->find($p);
+
+                        if ($perk !== null) {
+                            $perks['ids'][] = array(
+                                'id' => $perk->getId(),
+                                'name' => $perk->getName(),
+                                'description' => $perk->getDescription(),
+                            );
+                        }
+                    }
+
+                    /* Perk Styles */
+                    $perk = $em->getRepository('App:Perk')->find($perksDb['perkStyle']);
+                    if ($perk !== null) {
+                        $perks['primary'] = array(
+                            'id' => $perk->getId(),
+                            'name' => $perk->getName(),
+                            'description' => $perk->getDescription(),
+                        );
+                    }
+
+                    $perk = $em->getRepository('App:Perk')->find($perksDb['perkSubStyle']);
+                    if ($perk !== null) {
+                        $perks['secondary'] = array(
+                            'id' => $perk->getId(),
+                            'name' => $perk->getName(),
+                            'description' => $perk->getDescription(),
+                        );
+                    }
+                }
+
+                /* Found Game, display it */
+                return $this->render('render/playerStats.html.twig', array(
+                    'streamer' => $s,
+                    'hasError' => $hasError,
+                    'inGame' => $inGame,
+                    'champion' => $champion,
+                    'league' => $league,
+                    'division' => $division,
+                    'perks' => $perks,
+                    'version' => $version
+                ));
+            }
+
+        }
+
+        /* Found Game, display it */
         return $this->render('render/playerStats.html.twig', array(
             'streamer' => $s,
             'hasError' => $hasError,
@@ -214,6 +346,7 @@ class RenderController extends Controller
             'perks' => $perks,
             'version' => $version
         ));
+
 
     }
 
@@ -227,6 +360,7 @@ class RenderController extends Controller
     public function renderStreamerInfoContainer($s)
     {
 
+        /* @var $streamer Streamer */
         $streamer = $this->getDoctrine()->getRepository('App:Streamer')->find($s);
 
         if ($streamer === null) {

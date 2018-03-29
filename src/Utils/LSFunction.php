@@ -137,6 +137,7 @@ class LSFunction
 
         if (count($matches) > 0) {
 
+            /* @var $match Match */
             foreach ($matches as $match) {
 
                 try {
@@ -189,6 +190,17 @@ class LSFunction
             throw new Exception('An Error accourred: ' . $e->getMessage());
         }
 
+    }
+
+    /**
+     * @param Summoner $summoner
+     * @return null|object
+     */
+    public function getCurrentGame(Summoner $summoner){
+
+        return $this->em->getRepository('App:CurrentMatch')->findOneBy(array(
+            'summoner' => $summoner,
+        ));
     }
 
     /**
@@ -653,7 +665,7 @@ class LSFunction
             'perkStyle' => null,
             'perkSubStyle' => null,
         );
-        
+
         /* @var $summoner Summoner */
         foreach ($streamer->getSummoner() as $summoner) {
             $hasSummoners++;
@@ -734,9 +746,9 @@ class LSFunction
                         }
                     }
 
-                    if($summoner->getCurrentMatch()->getQueue() === null){
+                    if ($summoner->getCurrentMatch()->getQueue() === null) {
                         $queue = 'unknown';
-                    }else{
+                    } else {
                         $queue = $summoner->getCurrentMatch()->getQueue()->getName();
                     }
 
@@ -938,15 +950,16 @@ class LSFunction
     /**
      * @param \DateTime $ago
      * @param bool $full
+     * @copyright https://stackoverflow.com/questions/22083556/unknown-property-w/32723846#32723846
      * @return string
      */
     function getTimeAgo(\DateTime $ago, $full = false)
     {
         $now = new \DateTime();
-        $diff = $now->diff($ago);
+        $diff = (array)$now->diff($ago);
 
-        $w = floor($diff->d / 7);
-        $diff->d -= $w * 7;
+        $diff['w'] = floor($diff['d'] / 7);
+        $diff['d'] -= $diff['w'] * 7;
 
         $string = array(
             'y' => 'year',
@@ -957,9 +970,10 @@ class LSFunction
             'i' => 'minute',
             's' => 'second',
         );
-        foreach ($string as $k => &$v) {
-            if ($diff->$k) {
-                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+
+        foreach ($string as $k => & $v) {
+            if ($diff[$k]) {
+                $v = $diff[$k] . ' ' . $v . ($diff[$k] > 1 ? 's' : '');
             } else {
                 unset($string[$k]);
             }
