@@ -677,12 +677,12 @@ class LSFunction
                     if (!empty($perks)) {
                         $perkArray = array(
                             'perkStyle' => array(
-                                'id' => $perks['perkStyle'],
+                                'id' => $perks['perkIds'][0],
                                 'name' => 'NYI',
                                 'desc' => 'Rune Description unavailable',
                             ),
                             'perkSubStyle' => array(
-                                'id' => $perks['perkSubStyle'],
+                                'id' => $perks['perkIds'][4],
                                 'name' => 'NYI',
                                 'desc' => 'Rune Description unavailable',
                             ),
@@ -698,6 +698,7 @@ class LSFunction
 
                     $multiStream = null;
                     $mCount = 0;
+                    /* @var $lGame CurrentMatch */
                     foreach ($lGames as $lGame) {
 
                         /* @var $gSummoner Summoner */
@@ -728,20 +729,24 @@ class LSFunction
                     }
 
                     if (!empty($perks)) {
-                        $perkStyle = $this->em->getRepository('App:Perk')->find($perks['perkStyle']);
-                        $perkSubStyle = $this->em->getRepository('App:Perk')->find($perks['perkSubStyle']);
+                        $perkStyle = $this->em->getRepository('App:Perk')->find($perks['perkIds'][0]);
+                        $perkSubStyle = $this->em->getRepository('App:Perk')->find($perks['perkIds'][4]);
                         if ($perkStyle !== null) {
+                            /* TODO: Update Link to Riots own if avail */
                             $perkArray['perkStyle'] = array(
                                 'id' => $perkStyle->getId(),
                                 'name' => $perkStyle->getName(),
                                 'desc' => $perkStyle->getDescription(),
+                                'link' => str_replace('/lol-game-data/assets/','https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/',$perkStyle->getImage()),
                             );
                         }
                         if ($perkSubStyle !== null) {
+                            /* TODO: Update Link to Riots own if avail */
                             $perkArray['perkSubStyle'] = array(
                                 'id' => $perkSubStyle->getId(),
                                 'name' => $perkSubStyle->getName(),
                                 'desc' => $perkSubStyle->getDescription(),
+                                'link' => str_replace('/lol-game-data/assets/','https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/',$perkSubStyle->getImage()),
                             );
                         }
                     }

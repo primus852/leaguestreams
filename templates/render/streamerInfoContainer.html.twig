@@ -19,12 +19,42 @@
     >
         <div class="col-12">
             <div class="row">
-                <div class="col-11">
+                <div class="col-7">
                     <div class="ls-streamer-channel">
-                        <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> <span class="tt" title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">{{ streamer.streamUsername }}</span>
-                        <a class="ls-small-white" href="{{ path('profileStreamer', {'streamer':streamer.streamUsername}) }}"
+                        <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> <span class="tt"
+                                                                                                              title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">{{ streamer.streamUsername }}</span>
+                        <a class="ls-small-white"
+                           href="{{ path('profileStreamer', {'streamer':streamer.streamUsername}) }}"
                            style="color:#fff;font-size:0.8rem;line-height: 1.8rem;">(Check VODs)</a>
                     </div>
+                </div>
+                <div class="col-4">
+                    {% if streamer.inGame == true %}
+                        <img src="{{ version.cdn }}/{{ version.item }}/img/spell/{{ streamer.spell1 }}"
+                             class="ls-opacity mx-auto d-block ls-thumbnail tt"
+                             title="{{ streamer.spell1Name }}"
+                             style="width:34px;height:34px;float:left;border:1px solid #ccc;">
+                        <img src="{{ version.cdn }}/{{ version.item }}/img/spell/{{ streamer.spell2 }}"
+                             class="ls-opacity mx-auto d-block ls-thumbnail tt"
+                             title="{{ streamer.spell2Name }}"
+                             style="width:34px;height:34px;float:left;border:1px solid #ccc;border-left:0;">
+                    {% endif %}
+                    {% if streamer.perks is not null and streamer.inGame == true %}
+                        {% if streamer.perks.perkStyle is not null %}
+                            <img src="{{ streamer.perks.perkStyle.link|lower }}"
+                                 class="ls-opacity d-block ls-thumbnail tt"
+                                 title="<strong>{{ streamer.perks.perkStyle.name }}</strong><br />{{ streamer.perks.perkStyle.desc }}"
+                                 style="width:34px;height:34px;float:left;border:1px solid #ccc;background:rgba(0,0,0,0.8);margin-left:5px;"
+                            >
+                        {% endif %}
+                        {% if streamer.perks.perkSubStyle is not null %}
+                            <img src="{{ streamer.perks.perkSubStyle.link|lower }}"
+                                 class="ls-opacity mx-auto d-block ls-thumbnail tt"
+                                 title="<strong>{{ streamer.perks.perkSubStyle.name }}</strong><br />{{ streamer.perks.perkSubStyle.desc }}"
+                                 style="width:34px;height:34px;float:left;border:1px solid #ccc;border-left:0;background:rgba(0,0,0,0.8);"
+                            >
+                        {% endif %}
+                    {% endif %}
                 </div>
                 <div class="col-1 text-right" style="padding-right: 5px;">
                     <i class="fa fa-refresh pointer refreshStreamer"
