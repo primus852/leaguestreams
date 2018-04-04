@@ -44,6 +44,20 @@ class RiotApi
 
     /**
      * @param $id
+     * @param string $locale
+     * @return mixed
+     */
+    public function getChampionById($id, $locale = 'en_US')
+    {
+
+        $mod = 'champions/' . $id . '?locale=' . $locale;
+        $url = Constants::API_URL_STATIC . $mod;
+
+        return $this->getData($url);
+    }
+
+    /**
+     * @param $id
      * @param bool $championId
      * @return mixed
      */
@@ -203,9 +217,9 @@ class RiotApi
 
         $positions = $this->getData($url);
 
-        foreach($positions as $key => $position){
+        foreach ($positions as $key => $position) {
 
-            if($position['queueType'] === $type){
+            if ($position['queueType'] === $type) {
                 return $positions[$key];
             }
 
@@ -340,6 +354,15 @@ class RiotApi
         return $this->getData($url);
     }
 
+    public function getStatus()
+    {
+
+        $mod = 'shard-data';
+        $url = Constants::API_URL_STATUS . $mod;
+
+        return $this->getData($url);
+    }
+
     /**
      * @param array $ids
      * @param bool $includeTimeline
@@ -361,7 +384,7 @@ class RiotApi
             }
         }
 
-        if (!$includeTimeline){
+        if (!$includeTimeline) {
             return $this->getMultipleData($calls);
         }
 
@@ -374,7 +397,7 @@ class RiotApi
             $e = explode("-", $k);
 
             if ($e[0] == "match") {
-                if (isset($data["timeline-" . $e[1]]["frames"])){
+                if (isset($data["timeline-" . $e[1]]["frames"])) {
                     $d["timeline"] = $data["timeline-" . $e[1]];
                 }
                 array_push($results, $d);
@@ -528,14 +551,16 @@ class RiotApi
     /**
      * @return mixed
      */
-    public function getLastResponseCode(){
+    public function getLastResponseCode()
+    {
         return $this->responseCode;
     }
 
     /**
      * @param $region
      */
-    public function setRegion($region) {
+    public function setRegion($region)
+    {
         $this->region = strtolower($region);
     }
 

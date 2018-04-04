@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 .env
 /public/bundles/
@@ -20,3 +19,7 @@
 /.env
 /public/assets/node_modur
 /public/assets/ls/img/champions/Champions.psd
+
+###> phpunit/phpunit ###
+/phpunit.xml
+###< phpunit/phpunit ###

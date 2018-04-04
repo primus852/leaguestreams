@@ -108,6 +108,7 @@ class Constants
     const API_URL_MATCH = 'https://{platform}.api.riotgames.com/lol/match/v3/';
     const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
     const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
+    const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
 
     /* Riot API Key */
     const API_KEY = "RGAPI-806da044-01c0-25f0-7cf9-6caf130af143";
