@@ -16,11 +16,8 @@ composer.lock
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 .idea
-/composer.lock
-/.env
 /public/assets/node_modur
 /public/assets/ls/img/champions/Champions.psd
 
-###> phpunit/phpunit ###
-/phpunit.xml
-###< phpunit/phpunit ###
+/public/assets/npm-debug.log
+/symfony.lock
