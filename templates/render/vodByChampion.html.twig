@@ -1,0 +1,199 @@
+<div class="header">
+    <div class="row">
+        <div class="col-10">
+            <h1 class="page-title"><a class="icon circle-icon fa fa-remove trigger-message-close"></a>
+                VODs for {{ champ.name }}
+            </h1>
+        </div>
+        <div class="col-2 text-right">
+            &nbsp;
+        </div>
+    </div>
+</div>
+<div class="messageFly-nano-wrapper nano">
+    <div class="nano-content subScroll">
+        <div class="message-container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="message-box">
+                        <div class="row ls-border-container"
+                             style="min-height:200px;background:white url('{{ preload(asset('assets/ls/img/champions/'~champ.key~'_0.png')) }}') no-repeat top right;">
+                            <div class="col-5">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <br/>
+                                        <table class="table table-striped table-bordered dt-responsive nowrap"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-center">
+                                                    Passive
+                                                </th>
+                                                <th class="text-center">
+                                                    Q
+                                                </th>
+                                                <th class="text-center">
+                                                    W
+                                                </th>
+                                                <th class="text-center">
+                                                    E
+                                                </th>
+                                                <th class="text-center">
+                                                    R
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <img src="{{ versions.cdn }}/{{ versions.version }}/img/passive/{{ champ.spellPassiveImage }}"
+                                                         class="tt"
+                                                         title="<strong>{{ champ.spellPassiveName }}</strong><br />{{ champ.spellPassiveDescription }}"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <img src="{{ versions.cdn }}/{{ versions.version }}/img/spell/{{ champ.spellQImage }}"
+                                                         class="tt"
+                                                         title="<strong>{{ champ.spellQName }}</strong><br />{{ champ.spellQDescription }}"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <img src="{{ versions.cdn }}/{{ versions.version }}/img/spell/{{ champ.spellWImage }}"
+                                                         class="tt"
+                                                         title="<strong>{{ champ.spellWName }}</strong><br />{{ champ.spellWDescription }}"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <img src="{{ versions.cdn }}/{{ versions.version }}/img/spell/{{ champ.spellEImage }}"
+                                                         class="tt"
+                                                         title="<strong>{{ champ.spellEName }}</strong><br />{{ champ.spellEDescription }}"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <img src="{{ versions.cdn }}/{{ versions.version }}/img/spell/{{ champ.spellRImage }}"
+                                                         class="tt"
+                                                         title="<strong>{{ champ.spellRName }}</strong><br />{{ champ.spellRDescription }}"/>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <br/>
+                                <div class="message-box show-main-streamers" data-champion="{{ champ.id }}"
+                                     data-url="{{ path('renderMainStreamerByChampion') }}">
+                                    <h4><i class="fa fa-spin fa-spinner"></i> Loading Streamers</h4>
+                                    <div class="row" style="border-bottom:1px solid #ccc;padding-top:5px;">
+                                        <div class="col-12">
+                                            This may take a while...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-10">
+                                <br/>
+                                <strong>Lore</strong><br/>
+                                {{ champ.blurb }} <i class="fa fa-info-circle tt ttLong" title="{{ champ.lore }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-12">
+                    <div class="message-box">
+                        <div class="message">
+                            <div class="row">
+                                <div class="col col-6">
+                                    <div class="switch">
+                                        <input id="cmn-toggle-4" class="cmn-toggle cmn-toggle-round-flat"
+                                               type="checkbox">
+                                        <label for="cmn-toggle-4" id="showLabel">&nbsp;Spoilers</label>
+                                    </div>
+                                </div>
+                                <div class="col col-6 text-right">
+                                    <div class="search-box">
+                                        <input placeholder="Search..." id="searchVod">
+                                    </div>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="row justify-content-center">
+                                {% if vods is not null %}
+                                    {% for vod in vods.videos %}
+
+                                        <div class="col-xl-4 offset-xl-0 col-10 vodCard"
+                                             data-champ="{{ vod.enemyChampion |lower }}"
+                                             data-role="{{ vod.role|lower }}"
+                                             data-streamer="{{ vod.channelUser|lower }}">
+                                            <div class="row">
+                                                <div class="card">
+                                                    <a href="{{ vod.internalLink }}">
+                                                        <div class="city-selected city-smaller">
+                                                            <article class="justify-content-center info"
+                                                                     style="text-align: center;cursor: pointer;">
+                                                                <div class="ls-play-button" style="opacity: 0.15;">
+                                                                    <i class="fa fa-play fa-3x"></i>
+                                                                </div>
+                                                                <div class="city">
+                                                                    <span class="ls-text-underline">{{ vod.champion ? vod.champion : "" }}</span>
+                                                                    vs. {{ vod.enemyChampion ? vod.enemyChampion : "???" }}
+                                                                    <br/>
+                                                                    <span>{{ vod.channelUser }} / {{ vod.role }}
+                                                                        ({{ vod.league }})</span>
+                                                                    <br/>
+                                                                    <span>{{ vod.gameStart|date('Y/m/d H:i') }}</span>
+                                                                </div>
+                                                            </article>
+                                                            <figure class="cFigureRevert"
+                                                                    style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.championKey~'_0.png')) }})"></figure>
+                                                            {% if vod.enemyChampion is not null %}
+                                                                <figure class="cFigure"
+                                                                        style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.enemyChampionKey~'_0.png')) }})"></figure>
+                                                            {% endif %}
+                                                        </div>
+                                                    </a>
+
+                                                    <div class="days">
+                                                        <div class="row row-no-gutter">
+                                                            <div class="col col-4">
+                                                                <div class="day">
+                                                                    <h1 data-win="{{ vod.win }}"
+                                                                        class="pointer showWin">
+                                                                        Spoiler</h1>
+                                                                    Win
+                                                                </div>
+                                                            </div>
+                                                            <div class="col col-4">
+                                                                <div class="day">
+                                                                    <h1>{{ vod.version }}</h1>
+                                                                    Patch
+                                                                </div>
+                                                            </div>
+                                                            <div class="col col-4">
+                                                                <div class="day">
+                                                                    <h1>{{ vod.length }}m</h1>
+                                                                    Length
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br/>&nbsp;
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="col-10">
+                                        No VODs found
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

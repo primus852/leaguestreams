@@ -159,7 +159,7 @@ class RenderController extends Controller
             if ($currentMatch !== null) {
 
                 /* Check if it is Playing */
-                if($currentMatch->getIsPlaying()) {
+                if ($currentMatch->getIsPlaying()) {
 
                     $inGame = true;
 
@@ -226,7 +226,7 @@ class RenderController extends Controller
         }
 
         /* If we are here, no summoner has a current Match where he isPlaying, loop again through summoners */
-        foreach($summoners as $summoner){
+        foreach ($summoners as $summoner) {
 
             /* @var $region Region */
             $region = $summoner->getRegion();
@@ -561,6 +561,42 @@ class RenderController extends Controller
         ));
     }
 
+
+    /**
+     * Due to the enormous loading time, we render this separately via ajax
+     * @Route("/_render/_mainStreamerByChampion", name="renderMainStreamerByChampion")
+     * @param Request $request
+     * @return Response
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function renderMainStreamerAction(Request $request)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+
+        $cId = $request->get('c');
+
+        if ($cId === null) {
+            throw new NotFoundHttpException('Champion cannot be empty');
+        }
+
+        /* @var $champion Champion */
+        $champion = $em->getRepository('App:Champion')->find($cId);
+
+        if ($champion === null) {
+            throw new NotFoundHttpException('Champion not found. ID: ' . $cId);
+        }
+
+        /* @var $ls LSFunction */
+        $ls = new LSFunction($em);
+        $result = $ls->getMainStreamer($champion);
+
+        return $this->render('render/mainStreamer.html.twig', array(
+            'mainStreamer' => $result,
+        ));
+
+    }
+
     /**
      * @Route("/_render/_vodByChampion/{c}", name="renderVodByChampion", defaults={"c"="0"})
      * @param $c int
@@ -571,13 +607,13 @@ class RenderController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        /* Get Champion */
+        /* @var $champion Champion */
         $champion = $em->getRepository('App:Champion')->findOneBy(array(
             'name' => $c
         ));
 
         if ($champion === null) {
-            throw new NotFoundHttpException('Champion not found. ID: ' . $c);
+            throw new NotFoundHttpException('Champion not found. Name: ' . $c);
         }
 
         $versions = $em->getRepository('App:Versions')->find(1);
@@ -586,67 +622,10 @@ class RenderController extends Controller
         $vods = new LSVods($em, null, null, $this->container->get('router'));
         $result = $vods->getByChampion($champion);
 
-        $matches = $this->getDoctrine()->getRepository('App:Match')->findBy(array(
-            'crawled' => true,
-        ));
-
-        $sArray = array();
-        $tArray = array();
-
-        /* @var $match Match */
-        foreach ($matches as $match) {
-
-
-            if (!isset($sArray[$match->getChampion()->getId()])) {
-                $sArray[$match->getChampion()->getId()] = array();
-            }
-
-            if (!isset($sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()])) {
-                $sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()] = 0;
-            }
-
-            if (!isset($tArray[$match->getStreamer()->getChannelUser()])) {
-                $tArray[$match->getStreamer()->getChannelUser()] = 1;
-            } else {
-                $tArray[$match->getStreamer()->getChannelUser()]++;
-            }
-
-            $sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()]++;
-        }
-
-        $streamers = array();
-        if (isset($sArray[$champion->getId()])) {
-            $streamers = $sArray[$champion->getId()];
-        }
-
-        arsort($streamers);
-        $s = array_slice($streamers, 0, 3);
-
-        $sFinal = array();
-        foreach ($s as $key => $sStreamer) {
-
-            if (isset($tArray[$key]) && $tArray[$key] > 0) {
-
-                $sUser = $this->getDoctrine()->getRepository('App:Streamer')->findOneBy(array(
-                    'channelUser' => $key,
-                ));
-
-                $sFinal[$key] = array(
-                    'pct' => round($sStreamer * 100 / $tArray[$key], 2),
-                    'id' => $sUser->getId(),
-                    'on' => $sUser->getIsOnline(),
-                    'name' => $key
-                );
-            }
-        }
-
-        arsort($sFinal);
-
-        return $this->render('vod/byChampion.html.twig', array(
+        return $this->render('render/vodByChampion.html.twig', array(
             'vods' => $result,
             'champ' => $champion,
             'versions' => $versions,
-            'mainStreamer' => $sFinal
         ));
     }
 

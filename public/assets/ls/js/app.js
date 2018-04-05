@@ -742,9 +742,9 @@ $(document).on("click", ".clickChampion", function () {
 });
 
 $(document).on("click", ".clickChampionStreamer", function () {
+
     var $btn = $(this);
-    var $cId = $btn.attr('data-champ-id');
-    var $url = $('#ajax-route-load-streamer-champion').val();
+    var $cId = $btn.attr('data-champion');
     if ($('#champ_' + $cId).is(':visible')) {
         $('#champ_' + $cId).slideToggle();
         return false;
@@ -753,39 +753,11 @@ $(document).on("click", ".clickChampionStreamer", function () {
         openNoty('warning', 'Loading VODs already');
         return false;
     }
-    $('.champToggle').hide();
-    $('#champ_' + $cId).slideToggle('slow').html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-spin fa-spinner"></i>');
+    //$('.champToggle').hide();
+    $('#champ_' + $cId).slideToggle('slow').html('<h4><i class="fa fa-spin fa-spinner"></i> Loading Streamers</h4>\n<div class="row" style="border-bottom:1px solid #ccc;padding-top:5px;">\n    <div class="col-12">\n        This may take a while...\n    </div>\n</div>');
     $btn.addClass('is-disabled');
 
-
-    $.get($url, {
-        champ: $cId
-    }).done(function (data) {
-        $btn.removeClass("is-disabled");
-        $('#champ_' + $cId).html('<table class="table table-condensed" id="tbl_' + $cId + '">\n    <thead>\n    <th class="text-center"><i class="fa fa-video-camera ttStreamer" title="Watch stream or visit profile"></i></th>\n    <th class="text-center"><i class="fa fa-user ttStreamer" title="Username"></i></th>\n    <th class="text-center"><i class="fa fa-trophy ttStreamer" title="Winpercent" ></i></th>\n    </thead>\n    <tbody>\n    </tbody>\n</table> ');
-        var $urlProfile = $('#ajax-route-path-profile').val();
-        var $urlStream = $('#ajax-route-path-stream').val();
-        $.each(data.streamer[0].streamers, function (i, v) {
-            var $online = '<a href="' + $urlProfile + '/' + v.id + '" class="ttStreamer" title="Go to Profile"><i style="color:#cc1c23;" class="fa fa-remove fa-2x"></i></a>';
-            if (v.on !== false) {
-                $online = '<a href="' + $urlStream + '/' + i + '" class="ttStreamer" title="Watch now"><i style="color:#61b041;" class="fa fa-check fa-2x"></i></a>';
-            }
-            $('#tbl_' + $cId + ' > tbody').append('<tr>\n    <td class="text-center">' + $online + '</td>\n    <td>' + i + '</td>\n    <td class="text-center">' + v.pct + '&percnt;</td>\n</tr>');
-
-        });
-
-        initScrollbar('#champ_' + $cId);
-        $(".ttStreamer").tooltipster({
-            animation: "fade",
-            delay: 200,
-            theme: ["tooltipster-punk", "tooltipster-ls"],
-            contentAsHTML: true
-        });
-
-    }).fail(function () {
-        openNoty("error", "Ajax failed. The administrator was informed about the incident");
-        $btn.removeClass("is-disabled");
-    });
+    initMainStreamer('#champ_' + $cId);
 });
 
 $(document).on("keyup", "#searchChamp", function () {
@@ -958,6 +930,7 @@ function loadDetails(trigger, id) {
         initScrollbar('.subScroll');
         initTableVod('#tableVod');
         initTooltips('.tt');
+        initMainStreamer('.show-main-streamers');
     });
 
 
@@ -1070,10 +1043,24 @@ function initTooltips(selector) {
         $(selector).tooltipster({
             animation: "fade",
             delay: 200,
+            debug: false,
             maxWidth: width,
             theme: ["tooltipster-punk", "tooltipster-ls"],
             contentAsHTML: true
         });
     }
+}
 
+function initMainStreamer(selector) {
+    if ($(selector).length) {
+
+        /* Ajax Call */
+        $.post($(selector).attr('data-url'), {
+            c: $(selector).attr('data-champion'),
+        }).done(function (data) {
+            $(selector).html(data);
+            initTooltips('.tt');
+        });
+
+    }
 }

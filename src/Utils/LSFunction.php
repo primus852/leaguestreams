@@ -16,6 +16,7 @@ use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Asset\Package;
 use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -50,6 +51,88 @@ class LSFunction
         }
     }
 
+    /**
+     * Results will be cached for 12 hours as it wont change much during one day
+     * @param Champion $champion
+     * @return array|mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getMainStreamer(Champion $champion)
+    {
+
+
+        $cache = new FilesystemAdapter();
+        $msCache = $cache->getItem('mainstreamer.champion.' . $champion->getId());
+        $msCache->expiresAfter(\DateInterval::createFromDateString('6 hours'));
+
+        if (!$msCache->isHit()) {
+            $matches = $this->em->getRepository('App:Match')->findBy(array(
+                'crawled' => true,
+            ));
+
+            $sArray = array();
+            $tArray = array();
+
+            /* @var $match Match */
+            foreach ($matches as $match) {
+
+
+                if (!isset($sArray[$match->getChampion()->getId()])) {
+                    $sArray[$match->getChampion()->getId()] = array();
+                }
+
+                if (!isset($sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()])) {
+                    $sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()] = 0;
+                }
+
+                if (!isset($tArray[$match->getStreamer()->getChannelUser()])) {
+                    $tArray[$match->getStreamer()->getChannelUser()] = 1;
+                } else {
+                    $tArray[$match->getStreamer()->getChannelUser()]++;
+                }
+
+                $sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()]++;
+            }
+
+            $streamers = array();
+            if (isset($sArray[$champion->getId()])) {
+                $streamers = $sArray[$champion->getId()];
+            }
+
+            arsort($streamers);
+            $s = array_slice($streamers, 0, 3);
+
+            $sFinal = array();
+            foreach ($s as $key => $sStreamer) {
+
+                if (isset($tArray[$key]) && $tArray[$key] > 0) {
+
+                    $sUser = $this->em->getRepository('App:Streamer')->findOneBy(array(
+                        'channelUser' => $key,
+                    ));
+
+                    $sFinal[$key] = array(
+                        'pct' => round($sStreamer * 100 / $tArray[$key], 2),
+                        'id' => $sUser->getId(),
+                        'on' => $sUser->getIsOnline(),
+                        'name' => $key
+                    );
+                }
+            }
+
+            arsort($sFinal);
+
+            $msCache->set($sFinal);
+            $cache->save($msCache);
+
+        } else {
+            $sFinal = $msCache->get();
+        }
+
+        return $sFinal;
+
+    }
+
 
     /**
      * @param $summoner
@@ -75,7 +158,7 @@ class LSFunction
         $s->setModified();
 
 
-        /* Check if already Lvl 30 //TODO This may change with PreSeason 8 (Nov 2017) */
+        /* Check if already Lvl 30 */
         if ($summoner['summonerLevel'] >= 30) {
 
 
@@ -196,7 +279,8 @@ class LSFunction
      * @param Summoner $summoner
      * @return null|object
      */
-    public function getCurrentGame(Summoner $summoner){
+    public function getCurrentGame(Summoner $summoner)
+    {
 
         return $this->em->getRepository('App:CurrentMatch')->findOneBy(array(
             'summoner' => $summoner,
@@ -737,7 +821,7 @@ class LSFunction
                                 'id' => $perkStyle->getId(),
                                 'name' => $perkStyle->getName(),
                                 'desc' => $perkStyle->getDescription(),
-                                'link' => str_replace('/lol-game-data/assets/','https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/',$perkStyle->getImage()),
+                                'link' => str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perkStyle->getImage()),
                             );
                         }
                         if ($perkSubStyle !== null) {
@@ -746,7 +830,7 @@ class LSFunction
                                 'id' => $perkSubStyle->getId(),
                                 'name' => $perkSubStyle->getName(),
                                 'desc' => $perkSubStyle->getDescription(),
-                                'link' => str_replace('/lol-game-data/assets/','https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/',$perkSubStyle->getImage()),
+                                'link' => str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perkSubStyle->getImage()),
                             );
                         }
                     }

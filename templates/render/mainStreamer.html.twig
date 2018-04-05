@@ -1,0 +1,39 @@
+<h4>Main Streamer</h4>
+{% if mainStreamer is not null %}
+    <div class="row" style="border-bottom:1px solid #ccc;">
+        <div class="col-2 text-center">
+            <i class="fa fa-video-camera tt" title="On-/Offline"></i>
+        </div>
+        <div class="col-6">
+            <i class="fa fa-user tt" title="Streamer"></i>
+        </div>
+        <div class="col-4 text-right">
+            <i class="fa fa-trophy tt" title="Percent playing Champion on Stream"></i>
+        </div>
+    </div>
+    {% for streamer in mainStreamer %}
+        <div class="row" style="border-bottom:1px solid #ccc;padding-top:5px;">
+            <div class="col-2 text-center">
+                {% if streamer.on == true %}
+                    <a href="{{ path('loadPlayer', {'searchString': streamer.name}) }}">
+                        <i style="color:#61b041;" class="fa fa-play fa-2x tt" title="Watch Stream now"></i>
+                    </a>
+                {% else %}
+                    <i style="color:#cc1c23;" class="fa fa-remove fa-2x tt" title="Streamer offline"></i>
+                {% endif %}
+            </div>
+            <div class="col-6">
+                <a href="{{ path('profileStreamer', {'streamer':streamer.id}) }}">{{ streamer.name }}</a>
+            </div>
+            <div class="col-4 text-right">
+                {{ streamer.pct }}%
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="row" style="border-bottom:1px solid #ccc;padding-top:5px;">
+        <div class="col-12">
+            No Streamer found
+        </div>
+    </div>
+{% endif %}

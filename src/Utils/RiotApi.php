@@ -424,7 +424,7 @@ class RiotApi
         } else {
             if (!$static) {
                 $this->updateQueue($this->longQueue, Constants::API_LONG_INTERVAL, Constants::API_MAX_LONG);
-                $this->updateQueue($this->longQueue, Constants::API_SHORT_INTERVAL, Constants::API_MAX_SHORT);
+                $this->updateQueue($this->shortQueue, Constants::API_SHORT_INTERVAL, Constants::API_MAX_SHORT);
             }
 
             $ch = curl_init($url);

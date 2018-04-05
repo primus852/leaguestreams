@@ -36,8 +36,8 @@
                                          data-champ="{{ champ.name|lower }}">
                                         <div class="row">
                                             <div class="card">
-                                                <div class="city-selected city-medium clickChampionStreamer pointer"
-                                                     data-champ-id="{{ champ.id }}">
+                                                <div class="city-selected city-medium pointer clickChampionStreamer"
+                                                     data-champion="{{ champ.id }}">
                                                     <article>
                                                         <div class="info">
                                                             <div class="city">
@@ -45,9 +45,20 @@
                                                             </div>
                                                         </div>
                                                     </article>
-                                                    <figure class="cFigure lazy" data-src="{{ asset('assets/ls/img/champions/'~champ.key~'_0.png') }}"></figure>
+                                                    <figure class="cFigure lazy"
+                                                            data-src="{{ asset('assets/ls/img/champions/'~champ.key~'_0.png') }}"></figure>
                                                 </div>
-                                                <div id="champ_{{ champ.id }}" class="champToggle" style="display:none;position:relative;">
+                                                <div id="champ_{{ champ.id }}" class="champToggle"
+                                                     data-champion="{{ champ.id }}"
+                                                     data-url="{{ path('renderMainStreamerByChampion') }}"
+                                                     style="display:none;position:relative;">
+                                                    <h4><i class="fa fa-spin fa-spinner"></i> Loading Streamers</h4>
+                                                    <div class="row"
+                                                         style="border-bottom:1px solid #ccc;padding-top:5px;">
+                                                        <div class="col-12">
+                                                            This may take a while...
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <br/>&nbsp;
