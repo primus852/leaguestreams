@@ -23,6 +23,10 @@
                     <div class="ls-streamer-channel">
                         <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> <span class="tt"
                                                                                                               title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">{{ streamer.streamUsername }}</span>
+                        {% if streamer.isFeatured == true %}
+                            <span class="badge badge-danger ls-small-white"
+                                  style="font-size:0.8rem;line-height: 0.8rem;position: absolute;bottom:23px;">Featured Streamer</span>
+                        {% endif %}
                         <a class="ls-small-white"
                            href="{{ path('profileStreamer', {'streamer':streamer.streamUsername}) }}"
                            style="color:#fff;font-size:0.8rem;line-height: 1.8rem;">(Check VODs)</a>

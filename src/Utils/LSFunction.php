@@ -764,11 +764,13 @@ class LSFunction
                                 'id' => $perks['perkIds'][0],
                                 'name' => 'NYI',
                                 'desc' => 'Rune Description unavailable',
+                                'link' => null,
                             ),
                             'perkSubStyle' => array(
                                 'id' => $perks['perkIds'][4],
                                 'name' => 'NYI',
                                 'desc' => 'Rune Description unavailable',
+                                'link' => null,
                             ),
                         );
                     }

@@ -21,3 +21,8 @@ composer.lock
 
 /public/assets/npm-debug.log
 /symfony.lock
+
+###> phpunit/phpunit ###
+/phpunit.xml
+###< phpunit/phpunit ###
+/src/Migrations/
