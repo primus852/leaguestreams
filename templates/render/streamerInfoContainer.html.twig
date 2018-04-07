@@ -21,8 +21,12 @@
             <div class="row">
                 <div class="col-7">
                     <div class="ls-streamer-channel">
-                        <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span> <span class="tt"
-                                                                                                              title="{{ streamer.resolution }}p@{{ streamer.fps }}fps">{{ streamer.streamUsername }}</span>
+                        <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span>
+                        <span class="tt" title="{{ streamer.resolution }}p@{{ streamer.fps }}fps"
+                            {% if streamer.streamUsername|length > 15 %}style="font-size:1.3rem;"{% endif %}
+                        >
+                            {{ streamer.streamUsername }}
+                        </span>
                         {% if streamer.isFeatured == true %}
                             <span class="badge badge-danger ls-small-white"
                                   style="font-size:0.8rem;line-height: 0.8rem;position: absolute;bottom:23px;">Featured Streamer</span>
