@@ -127,7 +127,15 @@
                                 min in Game
                             </div>
                             <div class="ls-channel">
-                                {{ streamer.region }}{{ streamer.summonerName }}
+                                <span class="ls-small-white" style="font-size:0.8rem;line-height: 0.8rem;">
+                                    {% if streamer.multiStreamCount > 1 %}
+                                        In Game with:
+                                        {% if streamer.inGameAgainst is not null %}{{ streamer.inGameAgainst|raw }}{% endif %}
+                                        {% if streamer.inGameWith is not null %}{% if streamer.inGameAgainst is not null %} | {% endif %}{{ streamer.inGameWith|raw }}{% endif %}
+                                        &nbsp;(<a href="{{ path('loadMultiPlayer', {'streamers':streamer.inGameWithIds}) }}"
+                                            style="color:#fff;" class="pointer"><i class="fa fa-play"></i> MultiStream</a>)
+                                    {% endif %}
+                                </span> {{ streamer.region }}{{ streamer.summonerName }}
                             </div>
                         {% else %}
                             <div class="ls-small-white">

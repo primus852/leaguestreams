@@ -459,7 +459,8 @@ class RenderController extends Controller
                 );
             }
         }
-        $inGameWith = '';
+        $inGameWith = null;
+        $inGameWithAgainst = null;
         $inGameWithIds = '';
 
         /* Currently playing a champion, fill vars */
@@ -503,15 +504,17 @@ class RenderController extends Controller
             if ($si['champ']['multiStreamCount'] >= 1) {
                 $multiStreamCount = $si['champ']['multiStreamCount'];
                 foreach ($si['champ']['multiStream'] as $iGameWith) {
-                    $team = 'success';
                     if ($pChamp !== $iGameWith['champion']) {
                         if ($pTeam !== $iGameWith['team']) {
-                            $team = 'danger';
+                            $inGameWithAgainst .= ' <span class="text-danger tt" title="' . $iGameWith['champion'] . '">' . $iGameWith['streamerName'] . '</span> | ';
+                        } else {
+                            $inGameWith .= ' <span class="text-success tt" title="' . $iGameWith['champion'] . '">' . $iGameWith['streamerName'] . '</span> | ';
                         }
-                        $inGameWith .= $iGameWith['streamerName'] . ' <span class="text-' . $team . '">' . $iGameWith['champion'] . '</span> | ';
                     }
                     $inGameWithIds .= $iGameWith['streamer'] . ',';
                 }
+
+
             }
 
         }
@@ -538,6 +541,7 @@ class RenderController extends Controller
                 'lp' => $lp,
                 'queue' => $queue,
                 'inGameWith' => substr($inGameWith, 0, -3),
+                'inGameAgainst' => substr($inGameWithAgainst, 0, -3),
                 'inGameWithIds' => substr($inGameWithIds, 0, -1),
                 'id' => $id,
                 'streamUsername' => $streamUsername,

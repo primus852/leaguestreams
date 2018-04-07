@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Streamer;
 use App\Utils\LSFunction;
 use App\Utils\TwitchApi;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -128,6 +129,97 @@ class FrontendController extends Controller
             'streamerName' => $s->getChannelUser(),
             'streamStartedTime' => $startDate->format('d.m.Y H:i'),
             'streamStarted' => $ls->getTimeAgo($s->getStarted()),
+        ));
+
+    }
+
+
+    /**
+     * @Route("/multi-player/{streamers}", name="loadMultiPlayer", defaults={"streamers"="0"})
+     * @param $streamers
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function loadMultiPlayerAction($streamers)
+    {
+
+        /* Split Streamers */
+        $sArray = explode(',', $streamers);
+
+        /* All Streamers with relevant data in array */
+        $allStreamer = null;
+        $title = '';
+        $count = 0;
+
+        /* Entity Manager */
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($sArray as $searchString) {
+
+            $s = $em->getRepository(Streamer::class)->streamerByVarious($searchString);
+
+            $isValid = true;
+            $errors = null;
+
+            if ($s === null) {
+
+
+                $result = null;
+                $platformId = null;
+
+                /* See if we can find a platform the streamer is online and streams LoL */
+                // TODO: Add other platforms here, too
+                $ta = new TwitchApi($em);
+                try {
+                    $result = $ta->getStreamerInfo($searchString, true);
+                } catch (Exception $e) {
+                    $errors[] = array(
+                        'message' => 'Twitch API: ' . $e->getMessage(),
+                    );
+                }
+
+                if (count($errors) > 0) {
+                    $isValid = false;
+                }
+
+                if ($isValid === false) {
+                    throw new NotFoundHttpException();
+                }
+
+                if (array_key_exists('channel_id', $result)) {
+                    $s = $em->getRepository(Streamer::class)->findOneBy(array(
+                        'channelId' => $result['channel_id'],
+                    ));
+
+                    if ($s === null) {
+                        throw new NotFoundHttpException('Streamer not found');
+                    }
+                }
+            }
+
+            /* @var $ls LSFunction */
+            $ls = new LSFunction($em);
+
+            /* @var $startDate \DateTime */
+            $startDate = $s->getStarted();
+
+            $allStreamer[] = array(
+                'streamerId' => $s->getId(),
+                'title' => $s->getDescription(),
+                'channel' => $s->getChannelName(),
+                'streamerName' => $s->getChannelUser(),
+                'streamStartedTime' => $startDate->format('d.m.Y H:i'),
+                'streamStarted' => $ls->getTimeAgo($startDate),
+            );
+
+            $title .= $s->getChannelUser() . ' | ';
+            $count++;
+
+        }
+        return $this->render('frontend/playerMulti.html.twig', array(
+            'streamers' => $allStreamer,
+            'title' => 'MultiStream of ' . substr($title, 0, -3),
+            'count' => $count
         ));
 
     }
