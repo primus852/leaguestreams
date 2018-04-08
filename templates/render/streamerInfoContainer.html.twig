@@ -137,7 +137,7 @@
                                         {% if streamer.inGameAgainst is not null %}{{ streamer.inGameAgainst|raw }}{% endif %}
                                         {% if streamer.inGameWith is not null %}{% if streamer.inGameAgainst is not null %} | {% endif %}{{ streamer.inGameWith|raw }}{% endif %}
                                         &nbsp;(<a href="{{ path('loadMultiPlayer', {'streamers':streamer.inGameWithIds}) }}"
-                                            style="color:#fff;" class="pointer"><i class="fa fa-play"></i> MultiStream</a>)
+                                            style="color:#fff;" class="pointer ls-text-link"><i class="fa fa-play"></i> MultiStream</a>)
                                     {% endif %}
                                 </span> {{ streamer.region }}{{ streamer.summonerName }}
                             </div>

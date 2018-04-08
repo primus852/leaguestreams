@@ -2018,11 +2018,11 @@ select {
     height: 10px;
 }
 .ls-text-link{
-    color:#888;
     font-weight:200;
 }
 .ls-text-link:hover{
-    font-weight: 700;
+    font-weight: 400;
+    color: #a01c1a !important;
 }
 
 .ls-border-container{

@@ -506,9 +506,9 @@ class RenderController extends Controller
                 foreach ($si['champ']['multiStream'] as $iGameWith) {
                     if ($pChamp !== $iGameWith['champion']) {
                         if ($pTeam !== $iGameWith['team']) {
-                            $inGameWithAgainst .= ' <span class="text-danger tt" title="' . $iGameWith['champion'] . '">' . $iGameWith['streamerName'] . '</span> | ';
+                            $inGameWithAgainst .= '<i class="fa fa-info-circle"></i> <span class="text-danger tt" title="' . $iGameWith['champion'] . '">' . $iGameWith['streamerName'] . '</span> | ';
                         } else {
-                            $inGameWith .= ' <span class="text-success tt" title="' . $iGameWith['champion'] . '">' . $iGameWith['streamerName'] . '</span> | ';
+                            $inGameWith .= '<i class="fa fa-info-circle"></i> <span class="text-success tt" title="' . $iGameWith['champion'] . '">' . $iGameWith['streamerName'] . '</span> | ';
                         }
                     }
                     $inGameWithIds .= $iGameWith['streamer'] . ',';
