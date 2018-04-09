@@ -62,6 +62,9 @@ class Helper
             case 'ko':
                 return 'kr';
                 break;
+            case 'ja':
+                return 'jp';
+                break;
             default:
                 return $flag;
         }
