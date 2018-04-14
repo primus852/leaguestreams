@@ -14,6 +14,59 @@ class RiotApi
     private $responseCode;
     private $cache;
 
+    /* Riot API endpoints */
+    private const API_URL_PLATFORM = "https://{platform}.api.riotgames.com/lol/platform/v3/";
+    private const API_URL_CHAMPION_MASTERY = "https://{platform}.api.riotgames.com/lol/champion-mastery/v3/";
+    private const API_URL_SPECTATOR = 'https://{platform}.api.riotgames.com/lol/spectator/v3/';
+    private const API_URL_STATIC = 'https://{platform}.api.riotgames.com/lol/static-data/v3/';
+    private const API_URL_MATCH = 'https://{platform}.api.riotgames.com/lol/match/v3/';
+    private const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
+    private const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
+    private const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
+
+    /**
+     * Limits the hits per interval (short)
+     * e.g. allows API_MAX_SHORT requests per API_SHORT_INTERVAL seconds
+     * @todo Take requests from Python Crawler into account
+     * @see: https://developer.riotgames.com/app/YOUR-APP-ID/info under "Rate Limits"
+     * @const API_MAX_SHORT
+     * @const API_SHORT_INTERVAL
+     */
+    private const API_MAX_SHORT = 3000;
+    private const API_SHORT_INTERVAL = 10;
+
+    /**
+     * Limits the hits per interval (long)
+     * e.g. allows API_MAX_LONG requests per API_LONG_INTERVAL seconds
+     * @see: https://developer.riotgames.com/app/YOUR-APP-ID/info under "Rate Limits"
+     * @const API_MAX_LONG
+     * @const API_LONG_INTERVAL
+     */
+    private const API_MAX_LONG = 180000;
+    private const API_LONG_INTERVAL = 600;
+
+    /**
+     * Cache Timeout for requests to the Riot Api
+     * Fairly low, due to the fact that most hits come from the Python Crawler
+     * @const CACHE_REFRESH
+     */
+    private const CACHE_REFRESH = 10;
+
+    private const RIOT_ERROR_CODES = array(
+        0 => 'The Riot API returned no response',
+        400 => 'Bad Request',
+        401 => 'You are not authorized to make this request',
+        403 => 'You are not allowed to make this request',
+        404 => 'Not found',
+        405 => 'This method is not allowed',
+        415 => 'This media type is not supported',
+        429 => 'The rate limit was exceeded, please try again in a few minutes',
+        500 => 'Server Error',
+        502 => 'Bad Gateway',
+        503 => 'The Riot API is currently not available',
+        504 => 'The Gateway has timed out',
+    );
+
 
     /**
      * RiotApi constructor.
@@ -37,7 +90,7 @@ class RiotApi
     {
 
         $mod = 'champions';
-        $url = Constants::API_URL_PLATFORM . $mod . '?freeToPlay=' . $free;
+        $url = self::API_URL_PLATFORM . $mod . '?freeToPlay=' . $free;
 
         return $this->getData($url);
     }
@@ -51,7 +104,7 @@ class RiotApi
     {
 
         $mod = 'champions/' . $id . '?locale=' . $locale;
-        $url = Constants::API_URL_STATIC . $mod;
+        $url = self::API_URL_STATIC . $mod;
 
         return $this->getData($url);
     }
@@ -69,7 +122,7 @@ class RiotApi
         if ($championId)
             $mod .= "/by-champion/" . $championId;
 
-        $url = Constants::API_URL_CHAMPION_MASTERY . $mod;
+        $url = self::API_URL_CHAMPION_MASTERY . $mod;
 
         return $this->getData($url);
     }
@@ -82,7 +135,7 @@ class RiotApi
     {
 
         $mod = 'active-games/by-summoner/' . $id;
-        $url = Constants::API_URL_SPECTATOR . $mod;
+        $url = self::API_URL_SPECTATOR . $mod;
 
         return $this->getData($url);
     }
@@ -96,7 +149,7 @@ class RiotApi
     public function getStatic($mod, $id = null, $params = null)
     {
 
-        $url = Constants::API_URL_STATIC . $mod;
+        $url = self::API_URL_STATIC . $mod;
 
         if ($id !== null)
             $url .= "/" . $id;
@@ -111,14 +164,14 @@ class RiotApi
     {
 
         $mod = 'matches/' . $matchId;
-        $url = Constants::API_URL_MATCH . $mod;
+        $url = self::API_URL_MATCH . $mod;
 
         if (!$includeTimeline) {
             return $this->getData($url);
         }
 
         $modTimeline = 'timelines/by-match/' . $matchId;
-        $urlTimeline = Constants::API_URL_MATCH . $modTimeline;
+        $urlTimeline = self::API_URL_MATCH . $modTimeline;
 
         $data = $this->getMultipleData(array(
             "data" => $url,
@@ -139,7 +192,7 @@ class RiotApi
     {
 
         $mod = 'timelines/by-match/' . $matchId;
-        $url = Constants::API_URL_MATCH . $mod;
+        $url = self::API_URL_MATCH . $mod;
 
         return $this->getData($url);
     }
@@ -172,7 +225,7 @@ class RiotApi
                 $mod .= $params . '&';
         }
 
-        $url = Constants::API_URL_MATCH . $mod;
+        $url = self::API_URL_MATCH . $mod;
 
         return $this->getData($url);
     }
@@ -185,7 +238,7 @@ class RiotApi
     {
 
         $mod = 'matchlists/by-account/' . $accountId . '/recent';
-        $url = Constants::API_URL_MATCH . $mod;
+        $url = self::API_URL_MATCH . $mod;
 
         return $this->getData($url);
     }
@@ -198,7 +251,7 @@ class RiotApi
     {
 
         $mod = 'leagues/by-summoner/' . $id;
-        $url = Constants::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE . $mod;
 
         return $this->getData($url);
     }
@@ -213,7 +266,7 @@ class RiotApi
     {
 
         $mod = 'positions/by-summoner/' . $id;
-        $url = Constants::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE . $mod;
 
         $positions = $this->getData($url);
 
@@ -225,7 +278,7 @@ class RiotApi
 
         }
 
-        throw new Exception(Constants::RIOT_ERROR_CODES[404]);
+        throw new Exception(self::RIOT_ERROR_CODES[404]);
 
     }
 
@@ -237,7 +290,7 @@ class RiotApi
     {
 
         $mod = 'challengerleagues/by-queue/' . $queue;
-        $url = Constants::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE . $mod;
 
         return $this->getData($url);
     }
@@ -250,7 +303,7 @@ class RiotApi
     {
 
         $mod = 'masterleagues/by-queue/' . $queue;
-        $url = Constants::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE . $mod;
 
         return $this->getData($url);
     }
@@ -296,7 +349,7 @@ class RiotApi
         }
 
         $mod .= $id;
-        $url = Constants::API_URL_SUMMONER . $mod;
+        $url = self::API_URL_SUMMONER . $mod;
 
         return $this->getData($url);
     }
@@ -309,7 +362,7 @@ class RiotApi
     {
 
         $mod = 'summoners/by-name/' . rawurlencode($name);
-        $url = Constants::API_URL_SUMMONER . $mod;
+        $url = self::API_URL_SUMMONER . $mod;
 
         return $this->getData($url);
     }
@@ -322,7 +375,7 @@ class RiotApi
     {
 
         $mod = 'masteries/by-summoner/' . $id;
-        $url = Constants::API_URL_PLATFORM . $mod;
+        $url = self::API_URL_PLATFORM . $mod;
 
         return $this->getData($url);
     }
@@ -335,7 +388,7 @@ class RiotApi
     {
 
         $mod = 'runes/by-summoner/' . $id;
-        $url = Constants::API_URL_PLATFORM . $mod;
+        $url = self::API_URL_PLATFORM . $mod;
 
         return $this->getData($url);
     }
@@ -349,7 +402,7 @@ class RiotApi
 
         // TODO: Update to correct url
         $mod = 'runes-reforged/by-summoner/' . $id;
-        $url = Constants::API_URL_PLATFORM . $mod;
+        $url = self::API_URL_PLATFORM . $mod;
 
         return $this->getData($url);
     }
@@ -358,7 +411,7 @@ class RiotApi
     {
 
         $mod = 'shard-data';
-        $url = Constants::API_URL_STATUS . $mod;
+        $url = self::API_URL_STATUS . $mod;
 
         return $this->getData($url);
     }
@@ -376,11 +429,11 @@ class RiotApi
         foreach ($ids as $matchId) {
 
             $mod = 'matches/' . $matchId;
-            $calls["match-" . $matchId] = Constants::API_URL_MATCH . $mod;
+            $calls["match-" . $matchId] = self::API_URL_MATCH . $mod;
 
             if ($includeTimeline) {
                 $modTimeline = 'timelines/by-match/' . $matchId;
-                $calls["timeline-" . $matchId] = Constants::API_URL_MATCH . $modTimeline;
+                $calls["timeline-" . $matchId] = self::API_URL_MATCH . $modTimeline;
             }
         }
 
@@ -423,8 +476,8 @@ class RiotApi
             $result = $this->cache->get($url);
         } else {
             if (!$static) {
-                $this->updateQueue($this->longQueue, Constants::API_LONG_INTERVAL, Constants::API_MAX_LONG);
-                $this->updateQueue($this->shortQueue, Constants::API_SHORT_INTERVAL, Constants::API_MAX_SHORT);
+                $this->updateQueue($this->longQueue, self::API_LONG_INTERVAL, self::API_MAX_LONG);
+                $this->updateQueue($this->shortQueue, self::API_SHORT_INTERVAL, self::API_MAX_SHORT);
             }
 
             $ch = curl_init($url);
@@ -432,7 +485,7 @@ class RiotApi
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-Riot-Token: ' . Constants::API_KEY
+                'X-Riot-Token: ' . self::API_KEY
             ));
 
             $result = curl_exec($ch);
@@ -444,7 +497,7 @@ class RiotApi
                     $this->cache->put($url, $result, Constants::CACHE_REFRESH);
                 }
             } else {
-                throw new Exception(Constants::RIOT_ERROR_CODES[$this->responseCode]);
+                throw new Exception(self::RIOT_ERROR_CODES[$this->responseCode]);
             }
         }
 
@@ -496,7 +549,7 @@ class RiotApi
             $curl_array[$i] = curl_init($url);
             curl_setopt($curl_array[$i], CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl_array[$i], CURLOPT_HTTPHEADER, array(
-                'X-Riot-Token: ' . Constants::API_KEY
+                'X-Riot-Token: ' . self::API_KEY
             ));
             curl_multi_add_handle($mh, $curl_array[$i]);
         }
