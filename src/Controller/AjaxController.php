@@ -11,6 +11,7 @@ use App\Utils\Constants;
 use App\Utils\Helper;
 use App\Utils\LSFunction;
 use App\Utils\RiotApi;
+use App\Utils\RiotApiSetting;
 use App\Utils\SimpleCrypt;
 use App\Utils\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -85,7 +86,7 @@ class AjaxController extends Controller
         $helper = new Helper();
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi();
+        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
         $riot->setRegion($region->getLong());
 
         /* @var $ls LSFunction */
@@ -441,7 +442,7 @@ class AjaxController extends Controller
         $streamer = $summoner->getStreamer();
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi();
+        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
         $riot->setRegion($region->getLong());
 
         /* @var $ls LSFunction */

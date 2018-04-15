@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\StreamerReport;
 use App\Entity\Summoner;
 use App\Entity\SummonerReport;
+use App\Utils\Constants;
 use App\Utils\Helper;
 use App\Utils\LSFunction;
 use App\Utils\RiotApi;
+use App\Utils\RiotApiSetting;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -364,7 +366,7 @@ class AjaxManagerController extends Controller
 
 
             /* @var $riot RiotApi */
-            $riot = new RiotApi();
+            $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
             $riot->setRegion($region->getLong());
 
             /* @var $ls LSFunction */

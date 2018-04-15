@@ -13,6 +13,7 @@ class RiotApi
     private $longQueue;
     private $responseCode;
     private $cache;
+    private $setting;
 
     /* Riot API endpoints */
     private const API_URL_PLATFORM = "https://{platform}.api.riotgames.com/lol/platform/v3/";
@@ -23,27 +24,6 @@ class RiotApi
     private const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
     private const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
     private const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
-
-    /**
-     * Limits the hits per interval (short)
-     * e.g. allows API_MAX_SHORT requests per API_SHORT_INTERVAL seconds
-     * @todo Take requests from Python Crawler into account
-     * @see: https://developer.riotgames.com/app/YOUR-APP-ID/info under "Rate Limits"
-     * @const API_MAX_SHORT
-     * @const API_SHORT_INTERVAL
-     */
-    private const API_MAX_SHORT = 3000;
-    private const API_SHORT_INTERVAL = 10;
-
-    /**
-     * Limits the hits per interval (long)
-     * e.g. allows API_MAX_LONG requests per API_LONG_INTERVAL seconds
-     * @see: https://developer.riotgames.com/app/YOUR-APP-ID/info under "Rate Limits"
-     * @const API_MAX_LONG
-     * @const API_LONG_INTERVAL
-     */
-    private const API_MAX_LONG = 180000;
-    private const API_LONG_INTERVAL = 600;
 
     /**
      * Cache Timeout for requests to the Riot Api
@@ -67,19 +47,20 @@ class RiotApi
         504 => 'The Gateway has timed out',
     );
 
-
     /**
      * RiotApi constructor.
+     * @param RiotApiSetting $setting
      * @param FileSystemCache|null $cache
      * @param string $region
      */
-    public function __construct(FileSystemCache $cache = null, $region = 'na1')
+    public function __construct(RiotApiSetting $setting, FileSystemCache $cache = null, $region = 'na1')
     {
 
         $this->region = $region;
         $this->shortQueue = new \SplQueue();
         $this->longQueue = new \SplQueue();
         $this->cache = $cache;
+        $this->setting = $setting;
     }
 
     /**
@@ -485,7 +466,7 @@ class RiotApi
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-Riot-Token: ' . self::API_KEY
+                'X-Riot-Token: ' . $this->setting->getKey()
             ));
 
             $result = curl_exec($ch);
@@ -494,7 +475,7 @@ class RiotApi
 
             if ($this->responseCode == 200) {
                 if ($this->cache !== null) {
-                    $this->cache->put($url, $result, Constants::CACHE_REFRESH);
+                    $this->cache->put($url, $result, self::CACHE_REFRESH);
                 }
             } else {
                 throw new Exception(self::RIOT_ERROR_CODES[$this->responseCode]);
@@ -529,7 +510,7 @@ class RiotApi
 
         foreach ($callResult as $k => $result) {
             if ($this->cache !== null) {
-                $this->cache->put($urls[$k], $result, Constants::CACHE_REFRESH);
+                $this->cache->put($urls[$k], $result, self::CACHE_REFRESH);
             }
             $results[$k] = json_decode($result, true);
         }
@@ -549,7 +530,7 @@ class RiotApi
             $curl_array[$i] = curl_init($url);
             curl_setopt($curl_array[$i], CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl_array[$i], CURLOPT_HTTPHEADER, array(
-                'X-Riot-Token: ' . self::API_KEY
+                'X-Riot-Token: ' . $this->setting->getKey()
             ));
             curl_multi_add_handle($mh, $curl_array[$i]);
         }

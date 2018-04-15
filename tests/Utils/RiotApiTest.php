@@ -8,8 +8,10 @@
 
 namespace App\Tests\Utils;
 
+use App\Utils\Constants;
 use App\Utils\FileSystemCache;
 use App\Utils\RiotApi;
+use App\Utils\RiotApiSetting;
 use PHPUnit\Framework\TestCase;
 
 class RiotApiTest extends TestCase
@@ -18,15 +20,16 @@ class RiotApiTest extends TestCase
     public function testGetChampionById()
     {
         $cache = new FileSystemCache();
-        $riot = new RiotApi($cache);
+        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY), $cache);
         $result = $riot->getChampionById(16);
 
-        $this->assertEquals('Soraka',$result['key']);
+        $this->assertEquals('Soraka', $result['key']);
     }
 
-    public function testLolStatus(){
+    public function testLolStatus()
+    {
 
-        $riot = new RiotApi();
+        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
 
         /* NA Status */
         $result = $riot->getStatus();

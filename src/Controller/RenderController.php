@@ -10,10 +10,12 @@ use App\Entity\Region;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Entity\Versions;
+use App\Utils\Constants;
 use App\Utils\Helper;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
 use App\Utils\RiotApi;
+use App\Utils\RiotApiSetting;
 use App\Utils\SimpleCrypt;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
@@ -235,7 +237,7 @@ class RenderController extends Controller
             $streamer = $summoner->getStreamer();
 
             /* @var $riot RiotApi */
-            $riot = new RiotApi();
+            $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
             $riot->setRegion($region->getLong());
 
             /* @var $ls LSFunction */
