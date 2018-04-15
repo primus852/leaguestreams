@@ -14,6 +14,7 @@ class RiotApi
     private $responseCode;
     private $cache;
     private $setting;
+    private $key;
 
     /* Riot API endpoints */
     private const API_URL_PLATFORM = "https://{platform}.api.riotgames.com/lol/platform/v3/";
@@ -49,18 +50,19 @@ class RiotApi
 
     /**
      * RiotApi constructor.
-     * @param RiotApiSetting $setting
+     * @param RiotApiSetting $riotApiSetting
      * @param FileSystemCache|null $cache
      * @param string $region
      */
-    public function __construct(RiotApiSetting $setting, FileSystemCache $cache = null, $region = 'na1')
+    public function __construct(RiotApiSetting $riotApiSetting, FileSystemCache $cache = null, $region = 'na1')
     {
 
         $this->region = $region;
         $this->shortQueue = new \SplQueue();
         $this->longQueue = new \SplQueue();
         $this->cache = $cache;
-        $this->setting = $setting;
+        $this->setting = $riotApiSetting->getSettings();
+        $this->key = $riotApiSetting->getKey();
     }
 
     /**
@@ -457,8 +459,8 @@ class RiotApi
             $result = $this->cache->get($url);
         } else {
             if (!$static) {
-                $this->updateQueue($this->longQueue, self::API_LONG_INTERVAL, self::API_MAX_LONG);
-                $this->updateQueue($this->shortQueue, self::API_SHORT_INTERVAL, self::API_MAX_SHORT);
+                $this->updateQueue($this->longQueue, $this->setting['max_requests_long'], $this->setting['interval_long']);
+                $this->updateQueue($this->shortQueue, $this->setting['max_requests_short'], $this->setting['interval_short']);
             }
 
             $ch = curl_init($url);
@@ -466,7 +468,7 @@ class RiotApi
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-Riot-Token: ' . $this->setting->getKey()
+                'X-Riot-Token: ' . $this->key
             ));
 
             $result = curl_exec($ch);
@@ -530,7 +532,7 @@ class RiotApi
             $curl_array[$i] = curl_init($url);
             curl_setopt($curl_array[$i], CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl_array[$i], CURLOPT_HTTPHEADER, array(
-                'X-Riot-Token: ' . $this->setting->getKey()
+                'X-Riot-Token: ' . $this->key
             ));
             curl_multi_add_handle($mh, $curl_array[$i]);
         }
