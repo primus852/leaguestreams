@@ -17,6 +17,7 @@ use App\Utils\LSVods;
 use App\Utils\RiotApi;
 use App\Utils\RiotApiSetting;
 use App\Utils\SimpleCrypt;
+use App\Utils\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\HttpFoundation\Request;
@@ -250,6 +251,7 @@ class RenderController extends Controller
 
             $isOnline = false;
             if ($pClass !== null) {
+                /* @var $pApi TwitchApi */
                 $pApi = new $pClass($em, $streamer);
                 try {
                     $isOnline = $pApi->checkStreamOnline(true);
