@@ -1,6 +1,6 @@
 {% for live in lives %}
     <div class="col-3">
-        <a href="{{ path('loadPlayer', {'searchString':live.summoner.streamer.channelUser}) }}">
+        <a class="liveChamp" href="{{ path('loadPlayer', {'searchString':live.summoner.streamer.channelUser}) }}">
             <img src="{{ version.cdn }}/{{ version.item }}/img/champion/{{ live.champion.image }}" style="max-height:60px;" class="rounded-circle tt"
                  title="{{ live.summoner.streamer.channelUser }} - {{ live.summoner.league }}"
             />
