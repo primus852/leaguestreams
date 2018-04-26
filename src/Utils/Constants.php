@@ -103,7 +103,7 @@ class Constants
     /* Riot API Key */
     const API_KEY = "RGAPI-YOUR-API-KEY";
     //const API_KEY = "RGAPI-YOUR-API-KEY"; //DEV
-
+    
     /* Twitch API Client ID */
     const TWITCH_API_CLIENT = '22x93rehky6uutagaa1wkztm9xo050';
 
