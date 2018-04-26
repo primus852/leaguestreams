@@ -29,7 +29,7 @@ class FrontendControllerTest extends WebTestCase
         $this->assertGreaterThanOrEqual(
             4,
             $crawler->filter('.liveChamp')->count(),
-            'Found not enough Recent Champions, only found '.$crawler->filter('.liveChamp')->count()
+            'Not enough Recent Champions, only found '.$crawler->filter('.liveChamp')->count()
         );
 
         /* See if it contains a Live button */

@@ -84,6 +84,8 @@ class MatchRepository extends ServiceEntityRepository
                 ->setParameter('enemies', $enemies);
         }
 
+        $qb->setMaxResults(999);
+
         return $qb->getQuery()->getResult();
 
     }

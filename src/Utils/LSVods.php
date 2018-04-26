@@ -40,7 +40,7 @@ class LSVods extends LSFunction
         $nowU = new \DateTime();
         $nowU->modify('-55 days');
 
-        $matches = parent::getEm()->getRepository('App:Match')->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
+        $matches = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
 
         foreach ($matches as $match) {
 
@@ -60,6 +60,8 @@ class LSVods extends LSFunction
                 ));
 
                 if ($vods !== null) {
+
+                    /* @var $vod Vod*/
                     foreach ($vods as $vod) {
 
                         /* Start of Vod */
