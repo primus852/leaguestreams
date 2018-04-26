@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 <?php
 
 namespace App\Utils;
@@ -87,6 +85,7 @@ class Constants
 }
 =======
 }
+<<<<<<< HEAD
 >>>>>>> 3c8c29a... Merge to SF4
 <<<<<<< HEAD
 >>>>>>> d364e41... Merge to SF4
@@ -145,3 +144,6 @@ class Constants
 }
 >>>>>>> c44bca3... Merge to SF4
 >>>>>>> 24ec7d3... Merge to SF4
+=======
+
+>>>>>>> ad808ec... Remove API Key
