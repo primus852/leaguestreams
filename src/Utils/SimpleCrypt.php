@@ -7,11 +7,12 @@ class SimpleCrypt
 
     private $key, $iv, $encrypt_method;
 
-    public function __construct($key = Constants::SC_KEY, $iv = Constants::SC_IV, $method = Constants::SC_METHOD)
+    public function __construct($key = null, $iv = null, $method = Constants::SC_METHOD)
     {
+
         $this->encrypt_method = $method;
-        $this->key = hash('sha256', $key);
-        $this->iv = substr(hash('sha256', $iv), 0, 16);
+        $this->key = hash('sha256', $key === null ? getenv('SIMPLECRYPT_KEY') : $key);
+        $this->iv = substr(hash('sha256', $iv === null ? getenv('SIMPLECRYPT_IV') : $iv), 0, 16);
 
     }
 

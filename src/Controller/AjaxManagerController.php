@@ -366,7 +366,7 @@ class AjaxManagerController extends Controller
 
 
             /* @var $riot RiotApi */
-            $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
+            $riot = new RiotApi(new RiotApiSetting());
             $riot->setRegion($region->getLong());
 
             /* @var $ls LSFunction */

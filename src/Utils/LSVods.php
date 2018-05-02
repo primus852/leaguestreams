@@ -8,7 +8,9 @@ use App\Entity\Champion;
 use App\Entity\Match;
 use App\Entity\Streamer;
 use App\Entity\Vod;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class LSVods extends LSFunction
@@ -39,8 +41,89 @@ class LSVods extends LSFunction
         );
         $nowU = new \DateTime();
         $nowU->modify('-55 days');
+        $before = $nowU->format('U');
+        $long = (float)$before * 1000;
 
-        $matches = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
+        $criteria = Criteria::create();
+
+        /* Add Criteria for last 55 Days */
+        $criteria->where(Criteria::expr()->gte('gameCreation', $long));
+
+        /* Add Champions to Query */
+        $orxChampions = array();
+        if (!empty($champions)) {
+            foreach ($champions as $champion) {
+
+                $c = parent::getEm()->getRepository(Champion::class)->find($champion);
+
+                if ($c === null) {
+                    throw new NotFoundHttpException('Champion ID not recognized');
+                }
+
+                $orxChampions[] = Criteria::expr()->eq('champion',$c);
+            }
+        } else {
+            $orxChampions[] = Criteria::expr()->neq('champion', null);
+        }
+
+        /* Add Role to Query */
+        $orxRoles = array();
+        foreach ($roles as $role) {
+            $orxRoles[] = Criteria::expr()->eq('role', $role);
+        }
+
+        /* Add Streamer to Query */
+        $orxStreamers = array();
+        if (!empty($streamers)) {
+            foreach ($streamers as $streamer) {
+
+                $s = parent::getEm()->getRepository(Streamer::class)->find($streamer);
+
+                if ($s === null) {
+                    throw new NotFoundHttpException('Streamer ID not recognized');
+                }
+
+                $orxStreamers[] = Criteria::expr()->eq('streamer', $s);
+            }
+        } else {
+            $orxStreamers[] = Criteria::expr()->neq('streamer', null);
+        }
+
+        /* Add Enemy Champion to Query */
+        $orxEnemies = array();
+        if (!empty($enemies)) {
+            foreach ($enemies as $enemy) {
+
+                $e = parent::getEm()->getRepository(Champion::class)->find($enemy);
+
+                if ($e === null) {
+                    throw new NotFoundHttpException('Enemy Champion ID not recognized');
+                }
+
+                $orxEnemies[] = Criteria::expr()->eq('enemyChampion', $e);
+            }
+        } else {
+            $orxEnemies[] = Criteria::expr()->neq('enemyChampion', null);
+        }
+
+        /* Add all orX */
+        dump(...$orxStreamers);
+        $criteria->andWhere(Criteria::expr()->orX(...$orxChampions));
+        $criteria->andWhere(Criteria::expr()->orX(...$orxRoles));
+        $criteria->andWhere(Criteria::expr()->orX(...$orxStreamers));
+        $criteria->andWhere(Criteria::expr()->orX(...$orxEnemies));
+
+
+        $matches = parent::getEm()->getRepository(Match::class)->matching($criteria);
+
+        dump($matches->count());
+
+
+
+        $matches2 = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
+
+        //dump(count($matches2));
+        die;
 
         foreach ($matches as $match) {
 
@@ -61,7 +144,7 @@ class LSVods extends LSFunction
 
                 if ($vods !== null) {
 
-                    /* @var $vod Vod*/
+                    /* @var $vod Vod */
                     foreach ($vods as $vod) {
 
                         /* Start of Vod */
@@ -129,7 +212,8 @@ class LSVods extends LSFunction
      * @param Champion $champ
      * @return array
      */
-    public function getByChampion(Champion $champ){
+    public function getByChampion(Champion $champ)
+    {
 
         /* Add Streamer to Array */
         $vodArray = array(
@@ -191,8 +275,8 @@ class LSVods extends LSFunction
                             }
 
                             /* Chunk Game Version */
-                            $gv = explode('.',$match->getGameVersion());
-                            $gameVersion = $gv[0].'.'.$gv[1];
+                            $gv = explode('.', $match->getGameVersion());
+                            $gameVersion = $gv[0] . '.' . $gv[1];
 
 
                             $vodArray['videos'][] = array(
@@ -237,7 +321,8 @@ class LSVods extends LSFunction
      * @param $r
      * @return array
      */
-    public function getByRole($r){
+    public function getByRole($r)
+    {
 
 
         /* Add Streamer to Array */
@@ -294,8 +379,8 @@ class LSVods extends LSFunction
                             }
 
                             /* Chunk Game Version */
-                            $gv = explode('.',$match->getGameVersion());
-                            $gameVersion = $gv[0].'.'.$gv[1];
+                            $gv = explode('.', $match->getGameVersion());
+                            $gameVersion = $gv[0] . '.' . $gv[1];
 
                             $vodArray['videos'][] = array(
                                 'champion' => $match->getChampion()->getName(),
@@ -339,7 +424,8 @@ class LSVods extends LSFunction
      * @param Streamer $streamer
      * @return array
      */
-    public function getByStreamer(Streamer $streamer){
+    public function getByStreamer(Streamer $streamer)
+    {
 
         /* Add Streamer to Array */
         $vodArray = array(

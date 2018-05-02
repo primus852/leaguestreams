@@ -17,19 +17,27 @@ use PHPUnit\Framework\TestCase;
 class RiotApiTest extends TestCase
 {
 
+    /**
+     * @group backend
+     * @group champions
+     */
     public function testGetChampionById()
     {
         $cache = new FileSystemCache();
-        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY), $cache);
+        $riot = new RiotApi(new RiotApiSetting(), $cache);
         $result = $riot->getChampionById(16);
 
         $this->assertEquals('Soraka', $result['key']);
     }
 
+    /**
+     * @group backend
+     * @group riot-status
+     */
     public function testLolStatus()
     {
 
-        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
+        $riot = new RiotApi(new RiotApiSetting());
 
         /* NA Status */
         $result = $riot->getStatus();

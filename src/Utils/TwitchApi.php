@@ -173,7 +173,7 @@ class TwitchApi implements StreamInterface
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Accept: application/vnd.twitchtv.v5+json',
-            'Client-ID: ' . Constants::TWITCH_API_CLIENT
+            'Client-ID: ' . getenv('TWITCH_CLIENT_ID')
         ));
 
         $result = curl_exec($ch);

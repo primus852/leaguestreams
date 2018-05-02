@@ -86,7 +86,7 @@ class AjaxController extends Controller
         $helper = new Helper();
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
+        $riot = new RiotApi(new RiotApiSetting());
         $riot->setRegion($region->getLong());
 
         /* @var $ls LSFunction */
@@ -388,7 +388,7 @@ class AjaxController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $results = $em->getRepository('App:Streamer')->findByTerm($term);
+        $results = $em->getRepository(Streamer::class)->findByTerm($term);
         $response = array();
 
         foreach ($results as $result) {
@@ -401,8 +401,10 @@ class AjaxController extends Controller
         return new JsonResponse($response);
     }
 
+
     /**
      * @Route("/_ajax/_updateStreamerSingle", name="updateStreamerSingle")
+     * @param Request $request
      * @return JsonResponse
      */
     public function updateStreamerSingleAction(Request $request)
@@ -442,7 +444,7 @@ class AjaxController extends Controller
         $streamer = $summoner->getStreamer();
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
+        $riot = new RiotApi(new RiotApiSetting());
         $riot->setRegion($region->getLong());
 
         /* @var $ls LSFunction */

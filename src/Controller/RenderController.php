@@ -238,7 +238,7 @@ class RenderController extends Controller
             $streamer = $summoner->getStreamer();
 
             /* @var $riot RiotApi */
-            $riot = new RiotApi(new RiotApiSetting(Constants::API_KEY));
+            $riot = new RiotApi(new RiotApiSetting());
             $riot->setRegion($region->getLong());
 
             /* @var $ls LSFunction */
@@ -669,6 +669,8 @@ class RenderController extends Controller
         /* @var $vods LSVods */
         $vods = new LSVods($this->getDoctrine()->getManager(), null, null, $this->container->get('router'));
         $result = $vods->getByWishes($champions, $roles, $streamers, $enemies);
+
+        dump($result);die;
 
 
         return $this->render('render/vodByWishes.html.twig', array(

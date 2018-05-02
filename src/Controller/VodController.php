@@ -6,6 +6,7 @@ use App\Entity\Champion;
 use App\Entity\Streamer;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
+use Doctrine\Common\Collections\Criteria;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -139,12 +140,32 @@ class VodController extends Controller
         ));
     }
 
+
     /**
-     * @Route("/vods/by-wishes", name="vodsByWishes")
+     * @Route("/vods/by-wishes/champions={c}/roles={r}", name="vodsByWishes", defaults={"c"="all","r"="all"})
+     * @param $c
+     * @param $r
      * @return Response
      */
-    public function vodsByWishesAction()
+    public function vodsByWishesAction($c, $r)
     {
+
+        $cArray = array();
+        $criteria = Criteria::create();
+        if($c !== "all"){
+
+            $champs = explode(',', $c);
+            foreach($champs as $champ){
+                $criteria->orWhere(Criteria::expr()->eq('name', $champ));
+            }
+        }else{
+            $criteria->where(Criteria::expr()->neq('name',''));
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+        $foundChamps = $em->getRepository(Champion::class)->matching($criteria);
+
 
         $streamers = $this->getDoctrine()->getRepository('App:Streamer')->findAll();
         $champions = $this->getDoctrine()->getRepository('App:Champion')->findBy(array(), array(

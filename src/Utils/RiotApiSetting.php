@@ -11,11 +11,10 @@ class RiotApiSetting
 
     /**
      * RiotApiSetting constructor.
-     * @param string $key
      * @param array|null $settings
      * @param bool $isDev
      */
-    public function __construct(string $key, array $settings = null, bool $isDev = true)
+    public function __construct(array $settings = null, bool $isDev = true)
     {
 
         /* Default Settings */
@@ -44,7 +43,7 @@ class RiotApiSetting
         }
 
         /* Riot Api Key */
-        $this->key = $key;
+        $this->key = getenv('RIOT_API_KEY');
     }
 
     /**
