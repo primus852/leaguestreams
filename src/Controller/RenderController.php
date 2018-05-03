@@ -670,8 +670,6 @@ class RenderController extends Controller
         $vods = new LSVods($this->getDoctrine()->getManager(), null, null, $this->container->get('router'));
         $result = $vods->getByWishes($champions, $roles, $streamers, $enemies);
 
-        dump($result);die;
-
 
         return $this->render('render/vodByWishes.html.twig', array(
             'vods' => $result,
