@@ -25,7 +25,24 @@ class LSVods extends LSFunction
     }
 
 
-    private function tempSave(){
+    /**
+     * @param $champions
+     * @param $roles
+     * @param $streamers
+     * @param $enemies
+     * @return array
+     */
+    public function getByWishes($champions, $roles, $streamers, $enemies)
+    {
+
+        /* Add Streamer to Array */
+        $vodArray = array(
+            'videos' => array(),
+        );
+        $nowU = new \DateTime();
+        $nowU->modify('-55 days');
+        $before = $nowU->format('U');
+        $long = (float)$before * 1000;
 
         $criteria = Criteria::create();
 
@@ -101,31 +118,12 @@ class LSVods extends LSFunction
 
         dump($matches->count());
 
-    }
-
-    /**
-     * @param $champions
-     * @param $roles
-     * @param $streamers
-     * @param $enemies
-     * @return array
-     */
-    public function getByWishes($champions, $roles, $streamers, $enemies)
-    {
-
-        /* Add Streamer to Array */
-        $vodArray = array(
-            'videos' => array(),
-        );
-        $nowU = new \DateTime();
-        $nowU->modify('-55 days');
-        $before = $nowU->format('U');
-        $long = (float)$before * 1000;
 
 
+        $matches2 = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
 
-        $matches = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
-
+        //dump(count($matches2));
+        die;
 
         foreach ($matches as $match) {
 
