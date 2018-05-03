@@ -11,6 +11,7 @@ use App\Entity\Region;
 use App\Entity\Spell;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
+use App\Entity\Versions;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -18,7 +19,6 @@ use Symfony\Component\Asset\Package;
 use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\DependencyInjection\Container;
 
 
 class LSFunction
@@ -621,11 +621,15 @@ class LSFunction
     public function getStreamersStats(Streamer $streamer)
     {
 
+        /* @var $version Versions */
+        $version = $this->em->getRepository(Versions::class)->find(1);
+
+
         $cArray = null;
         $lastArray = null;
 
         /* All Games from Streamer */
-        $games = $this->em->getRepository('App:Match')->findBy(array(
+        $games = $this->em->getRepository(Match::class)->findBy(array(
             'streamer' => $streamer,
             'crawled' => true,
         ));
@@ -818,21 +822,19 @@ class LSFunction
                         $perkStyle = $this->em->getRepository('App:Perk')->find($perks['perkIds'][0]);
                         $perkSubStyle = $this->em->getRepository('App:Perk')->find($perks['perkIds'][4]);
                         if ($perkStyle !== null) {
-                            /* TODO: Update Link to Riots own if avail */
                             $perkArray['perkStyle'] = array(
                                 'id' => $perkStyle->getId(),
                                 'name' => $perkStyle->getName(),
                                 'desc' => $perkStyle->getDescription(),
-                                'link' => str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perkStyle->getImage()),
+                                'link' => $version->getCdn().'/img/'.$perkStyle->getImage(),
                             );
                         }
                         if ($perkSubStyle !== null) {
-                            /* TODO: Update Link to Riots own if avail */
                             $perkArray['perkSubStyle'] = array(
                                 'id' => $perkSubStyle->getId(),
                                 'name' => $perkSubStyle->getName(),
                                 'desc' => $perkSubStyle->getDescription(),
-                                'link' => str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perkSubStyle->getImage()),
+                                'link' => $version->getCdn().'/img/'.$perkSubStyle->getImage(),
                             );
                         }
                     }
@@ -870,7 +872,7 @@ class LSFunction
         }
 
         /* Get last 3 Champs */
-        $last3 = $this->em->getRepository('App:Match')->lastMatches($streamer, 3);
+        $last3 = $this->em->getRepository(Match::class)->lastMatches($streamer, 3);
         $outcome = 'loss';
         foreach ($last3 as $last) {
 

@@ -49,14 +49,14 @@
                     {% endif %}
                     {% if streamer.perks is not null and streamer.inGame == true %}
                         {% if streamer.perks.perkStyle is not null %}
-                            <img src="{{ streamer.perks.perkStyle.link|lower }}"
+                            <img src="{{ streamer.perks.perkStyle.link }}"
                                  class="ls-opacity d-block ls-thumbnail tt"
                                  title="<strong>{{ streamer.perks.perkStyle.name }}</strong><br />{{ streamer.perks.perkStyle.desc }}"
                                  style="width:34px;height:34px;float:left;border:1px solid #ccc;background:rgba(0,0,0,0.8);margin-left:5px;"
                             >
                         {% endif %}
                         {% if streamer.perks.perkSubStyle is not null %}
-                            <img src="{{ streamer.perks.perkSubStyle.link|lower }}"
+                            <img src="{{ streamer.perks.perkSubStyle.link }}"
                                  class="ls-opacity mx-auto d-block ls-thumbnail tt"
                                  title="<strong>{{ streamer.perks.perkSubStyle.name }}</strong><br />{{ streamer.perks.perkSubStyle.desc }}"
                                  style="width:34px;height:34px;float:left;border:1px solid #ccc;border-left:0;background:rgba(0,0,0,0.8);"
@@ -133,11 +133,10 @@
                             <div class="ls-channel">
                                 <span class="ls-small-white" style="font-size:0.8rem;line-height: 0.8rem;">
                                     {% if streamer.multiStreamCount > 1 %}
-                                        In Game with:
+                                        <a href="{{ path('loadMultiPlayer', {'streamers':streamer.inGameWithIds}) }}"
+                                           style="color:#fff;" class="pointer ls-text-link"><i class="fa fa-play"></i> MultiStream</a> with
                                         {% if streamer.inGameAgainst is not null %}{{ streamer.inGameAgainst|raw }}{% endif %}
                                         {% if streamer.inGameWith is not null %}{% if streamer.inGameAgainst is not null %} | {% endif %}{{ streamer.inGameWith|raw }}{% endif %}
-                                        &nbsp;(<a href="{{ path('loadMultiPlayer', {'streamers':streamer.inGameWithIds}) }}"
-                                            style="color:#fff;" class="pointer ls-text-link"><i class="fa fa-play"></i> MultiStream</a>)
                                     {% endif %}
                                 </span> {{ streamer.region }}{{ streamer.summonerName }}
                             </div>
