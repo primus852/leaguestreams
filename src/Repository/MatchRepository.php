@@ -51,10 +51,11 @@ class MatchRepository extends ServiceEntityRepository
      * @param array $champions
      * @param array $streamers
      * @param array $enemies
+     * @param array $roles
      * @param $before
      * @return mixed
      */
-    public function matchesByChampionAndStreamer(Array $champions, Array $streamers, Array $enemies, $before)
+    public function matchesByChampionAndStreamer(Array $champions, Array $streamers, Array $enemies, Array $roles, $before)
     {
 
         $long = (float)$before * 1000;
@@ -83,6 +84,7 @@ class MatchRepository extends ServiceEntityRepository
                 ->AndWhere('m.enemyChampion IN (:enemies)')
                 ->setParameter('enemies', $enemies);
         }
+
 
         $qb->setMaxResults(999);
 

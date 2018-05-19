@@ -60,10 +60,8 @@ class LSVods extends LSFunction
                     throw new NotFoundHttpException('Champion ID not recognized');
                 }
 
-                $orxChampions[] = Criteria::expr()->eq('champion',$c);
+                $orxChampions[] = Criteria::expr()->eq('champion', $c);
             }
-        } else {
-            $orxChampions[] = Criteria::expr()->neq('champion', null);
         }
 
         /* Add Role to Query */
@@ -85,8 +83,6 @@ class LSVods extends LSFunction
 
                 $orxStreamers[] = Criteria::expr()->eq('streamer', $s);
             }
-        } else {
-            $orxStreamers[] = Criteria::expr()->neq('streamer', null);
         }
 
         /* Add Enemy Champion to Query */
@@ -102,28 +98,40 @@ class LSVods extends LSFunction
 
                 $orxEnemies[] = Criteria::expr()->eq('enemyChampion', $e);
             }
-        } else {
-            $orxEnemies[] = Criteria::expr()->neq('enemyChampion', null);
         }
 
         /* Add all orX */
-        dump(...$orxStreamers);
-        $criteria->andWhere(Criteria::expr()->orX(...$orxChampions));
-        $criteria->andWhere(Criteria::expr()->orX(...$orxRoles));
-        $criteria->andWhere(Criteria::expr()->orX(...$orxStreamers));
-        $criteria->andWhere(Criteria::expr()->orX(...$orxEnemies));
+        $orX = array();
+        if (!empty($orxChampions)) {
+            $orX[] = Criteria::expr()->orX(...$orxChampions);
+            //$subCriteria->andWhere(Criteria::expr()->orX(...$orxChampions));
+        }
+        if (!empty($orxRoles)) {
+            $orX[] = Criteria::expr()->orX(...$orxRoles);
+            //$subCriteria->andWhere(Criteria::expr()->orX(...$orxRoles));
+        }
+
+        if (!empty($orxStreamers)) {
+            $orX[] = Criteria::expr()->orX(...$orxStreamers);
+            //$subCriteria->andWhere(Criteria::expr()->orX(...$orxStreamers));
+        }
+
+        if (!empty($orxEnemies)) {
+            $orX[] = Criteria::expr()->orX(...$orxEnemies);
+            //$subCriteria->andWhere(Criteria::expr()->orX(...$orxEnemies));
+        }
+
+        //$criteria->andWhere(Criteria::expr()->andX($subCriteria));
+
+        foreach($orX as $x){
+            $criteria->andWhere($x);
+        }
 
 
-        $matches = parent::getEm()->getRepository(Match::class)->matching($criteria);
+        $matches2 = parent::getEm()->getRepository(Match::class)->matching($criteria);
 
-        dump($matches->count());
+        $matches = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $roles, $nowU->format('U'));
 
-
-
-        $matches2 = parent::getEm()->getRepository(Match::class)->matchesByChampionAndStreamer($champions, $streamers, $enemies, $nowU->format('U'));
-
-        //dump(count($matches2));
-        die;
 
         foreach ($matches as $match) {
 

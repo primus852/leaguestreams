@@ -650,26 +650,34 @@ class RenderController extends Controller
         $streamers = $request->get('streamers');
         $enemies = $request->get('enemies');
 
+        $emptyCount = 0;
+
         if ($enemies === "" || $enemies === null || in_array('all', $enemies)) {
             $enemies = array();
+            $emptyCount++;
         }
 
         if ($champions === "" || $champions === null || in_array('all', $champions)) {
             $champions = array();
+            $emptyCount++;
         }
 
         if ($roles === "" || $roles === null || in_array('all', $roles)) {
             $roles = array('Top', 'Jungle', 'Mid', 'Bot', 'Support');
+            $emptyCount++;
         }
 
         if ($streamers === "" || $streamers === null || in_array('all', $streamers)) {
             $streamers = array();
+            $emptyCount++;
         }
 
-        /* @var $vods LSVods */
-        $vods = new LSVods($this->getDoctrine()->getManager(), null, null, $this->container->get('router'));
-        $result = $vods->getByWishes($champions, $roles, $streamers, $enemies);
-
+        $result = null;
+        if ($emptyCount < 5) {
+            /* @var $vods LSVods */
+            $vods = new LSVods($this->getDoctrine()->getManager(), null, null, $this->container->get('router'));
+            $result = $vods->getByWishes($champions, $roles, $streamers, $enemies);
+        }
 
         return $this->render('render/vodByWishes.html.twig', array(
             'vods' => $result,
