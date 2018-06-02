@@ -124,6 +124,7 @@ class FrontendController extends Controller
 
         return $this->render('frontend/player.html.twig', array(
             'streamerId' => $s->getId(),
+            'summoners' => $s->getSummoner(),
             'title' => $s->getDescription(),
             'channel' => $s->getChannelName(),
             'streamerName' => $s->getChannelUser(),

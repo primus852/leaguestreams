@@ -67,7 +67,10 @@
                     </div>
                     <div class="col-3" style="padding-left:0;padding-top:10px;">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-1">
+                                <i class="fa fa-info-circle fa-2x tt" title="<span style='text-decoration:underline;'>Attached Summoners:</span><br />{% for summoner in summoners %}{{ summoner.region.short|upper }}-{{ summoner.name }}<br />{% endfor %}" style="color:#fff;line-height:0.8em;"></i>
+                            </div>
+                            <div class="col-5">
                                 <input class="form-control rounded-0 mr-sm-2" style="height:28px;" id="summoner" type="text" placeholder="Summoner Name">
                             </div>
                             <div class="col-3">

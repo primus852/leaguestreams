@@ -65,6 +65,9 @@ class Helper
             case 'ja':
                 return 'jp';
                 break;
+            case 'zh':
+                return 'cn';
+                break;
             default:
                 return $flag;
         }
