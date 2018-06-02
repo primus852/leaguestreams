@@ -19,7 +19,7 @@
     >
         <div class="col-12">
             <div class="row">
-                <div class="col-7">
+                <div class="col-11">
                     <div class="ls-streamer-channel">
                         <span class="flag-icon flag-icon-{{ streamer.flag }} flag-icon-squared"></span>
                         <span class="tt" title="{{ streamer.resolution }}p@{{ streamer.fps }}fps"
@@ -36,34 +36,6 @@
                            style="color:#fff;font-size:0.8rem;line-height: 1.8rem;"><i class="fa fa-camera"></i> VODs</a>
                     </div>
                 </div>
-                <div class="col-4">
-                    {% if streamer.inGame == true %}
-                        <img src="{{ version.cdn }}/{{ version.item }}/img/spell/{{ streamer.spell1 }}"
-                             class="ls-opacity mx-auto d-block ls-thumbnail tt"
-                             title="{{ streamer.spell1Name }}"
-                             style="width:34px;height:34px;float:left;border:1px solid #ccc;">
-                        <img src="{{ version.cdn }}/{{ version.item }}/img/spell/{{ streamer.spell2 }}"
-                             class="ls-opacity mx-auto d-block ls-thumbnail tt"
-                             title="{{ streamer.spell2Name }}"
-                             style="width:34px;height:34px;float:left;border:1px solid #ccc;border-left:0;">
-                    {% endif %}
-                    {% if streamer.perks is not null and streamer.inGame == true %}
-                        {% if streamer.perks.perkStyle is not null %}
-                            <img src="{{ streamer.perks.perkStyle.link }}"
-                                 class="ls-opacity d-block ls-thumbnail tt"
-                                 title="<strong>{{ streamer.perks.perkStyle.name }}</strong><br />{{ streamer.perks.perkStyle.desc }}"
-                                 style="width:34px;height:34px;float:left;border:1px solid #ccc;background:rgba(0,0,0,0.8);margin-left:5px;"
-                            >
-                        {% endif %}
-                        {% if streamer.perks.perkSubStyle is not null %}
-                            <img src="{{ streamer.perks.perkSubStyle.link }}"
-                                 class="ls-opacity mx-auto d-block ls-thumbnail tt"
-                                 title="<strong>{{ streamer.perks.perkSubStyle.name }}</strong><br />{{ streamer.perks.perkSubStyle.desc }}"
-                                 style="width:34px;height:34px;float:left;border:1px solid #ccc;border-left:0;background:rgba(0,0,0,0.8);"
-                            >
-                        {% endif %}
-                    {% endif %}
-                </div>
                 <div class="col-1 text-right" style="padding-right: 5px;">
                     <i class="fa fa-refresh pointer refreshStreamer"
                        style="text-shadow: 1px 1px 1px #000;color:#fff;"
@@ -74,7 +46,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-4">
+                <div class="col-5">
                     <div class="row">
                         <div class="col-12">
                             <div class="row ls-small-white">
@@ -103,7 +75,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-8 text-right" style="margin-top:-15px;margin-bottom: -20px;">
+                <div class="col-7 text-right" style="margin-top:-15px;margin-bottom: -20px;">
                     {% if streamer.inGame == false %}
                         {% for lastGame in streamer.lastGames %}
                             <img src="{{ version.cdn }}/img/champion/loading/{{ lastGame.lastChampionImage|replace({'.png':''}) }}_0.jpg"
@@ -114,8 +86,36 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="row">
-                <div class="col-12 text-right">
+            <div class="row justify-content-center">
+                <div class="col-5 text-center">
+                    {% if streamer.inGame == true %}
+                        <img src="{{ version.cdn }}/{{ version.item }}/img/spell/{{ streamer.spell1 }}"
+                             class="ls-opacity mx-auto ls-thumbnail tt"
+                             title="{{ streamer.spell1Name }}"
+                             style="width:34px;height:34px;border:1px solid #ccc;">
+                        <img src="{{ version.cdn }}/{{ version.item }}/img/spell/{{ streamer.spell2 }}"
+                             class="ls-opacity mx-auto ls-thumbnail tt"
+                             title="{{ streamer.spell2Name }}"
+                             style="width:34px;height:34px;border:1px solid #ccc;border-left:0;">
+                    {% endif %}
+                    {% if streamer.perks is not null and streamer.inGame == true %}
+                        {% if streamer.perks.perkStyle is not null %}
+                            <img src="{{ streamer.perks.perkStyle.link }}"
+                                 class="ls-opacity ls-thumbnail tt"
+                                 title="<strong>{{ streamer.perks.perkStyle.name }}</strong><br />{{ streamer.perks.perkStyle.desc }}"
+                                 style="width:34px;height:34px;border:1px solid #ccc;background:rgba(0,0,0,0.8);margin-left:5px;"
+                            >
+                        {% endif %}
+                        {% if streamer.perks.perkSubStyle is not null %}
+                            <img src="{{ streamer.perks.perkSubStyle.link }}"
+                                 class="ls-opacity mx-auto ls-thumbnail tt"
+                                 title="<strong>{{ streamer.perks.perkSubStyle.name }}</strong><br />{{ streamer.perks.perkSubStyle.desc }}"
+                                 style="width:34px;height:34px;border:1px solid #ccc;border-left:0;background:rgba(0,0,0,0.8);"
+                            >
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="col-7 text-right">
                     {% if streamer.hasSummoner == false %}
                         <div class="ls-small-white">
                             &nbsp;

@@ -40,11 +40,16 @@ class RenderController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         /* @var $match Match */
-        $match = $em->getRepository('App:Match')->find($request->get('match'));
+        $match = $em->getRepository(Match::class)->find($request->get('match'));
 
         if ($match === null) {
             throw new NotFoundHttpException();
         }
+
+        /* @var $version Versions */
+        $version = $this->getDoctrine()
+            ->getRepository(Versions::class)
+            ->find(1);
 
         /* @var $summoner Summoner */
         $summoner = $match->getSummoner();
@@ -71,6 +76,7 @@ class RenderController extends Controller
                         'id' => $perk->getId(),
                         'name' => $perk->getName(),
                         'description' => $perk->getDescription(),
+                        'link' => $version->getCdn().'/img/'.$perk->getImage(),
                     );
                 }
             }
@@ -82,6 +88,7 @@ class RenderController extends Controller
                     'id' => $perk->getId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
+                    'link' => $version->getCdn().'/img/'.$perk->getImage(),
                 );
             }
 
@@ -91,6 +98,7 @@ class RenderController extends Controller
                     'id' => $perk->getId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
+                    'link' => $version->getCdn().'/img/'.$perk->getImage(),
                 );
             }
         }
@@ -188,6 +196,7 @@ class RenderController extends Controller
                                     'id' => $perk->getId(),
                                     'name' => $perk->getName(),
                                     'description' => $perk->getDescription(),
+                                    'link' => $version->getCdn().'/img/'.$perk->getImage(),
                                 );
                             }
                         }
@@ -199,6 +208,7 @@ class RenderController extends Controller
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
+                                'link' => $version->getCdn().'/img/'.$perk->getImage(),
                             );
                         }
 
@@ -208,6 +218,7 @@ class RenderController extends Controller
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
+                                'link' => $version->getCdn().'/img/'.$perk->getImage(),
                             );
                         }
                     }
@@ -300,6 +311,7 @@ class RenderController extends Controller
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
+                                'link' => $version->getCdn().'/img/'.$perk->getImage(),
                             );
                         }
                     }
@@ -311,6 +323,7 @@ class RenderController extends Controller
                             'id' => $perk->getId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
+                            'link' => $version->getCdn().'/img/'.$perk->getImage(),
                         );
                     }
 
@@ -320,6 +333,7 @@ class RenderController extends Controller
                             'id' => $perk->getId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
+                            'link' => $version->getCdn().'/img/'.$perk->getImage(),
                         );
                     }
                 }
