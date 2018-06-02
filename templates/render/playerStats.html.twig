@@ -22,7 +22,7 @@
         {% if perks is not empty %}
             {% for key, pId in perks.ids %}
                 <li class="text-center">
-                    <img src="{{ pId.link) }}"
+                    <img src="{{ pId.link }}"
                          class="tt ls-perk-player {% if key == 0 %}{% endif %}"
                          title="<strong>{{ pId.name|raw }}</strong><br />{{ pId.description|raw }}"
                     >
