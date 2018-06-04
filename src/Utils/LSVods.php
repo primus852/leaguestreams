@@ -146,7 +146,7 @@ class LSVods extends LSFunction
                 $end = clone $start;
                 $end->modify("+" . $match->getLength() . " seconds");
 
-                $vods = parent::getEm()->getRepository('App:VOD')->findBy(array(
+                $vods = parent::getEm()->getRepository(Vod::class)->findBy(array(
                     'streamer' => $match->getStreamer()
                 ));
 
@@ -252,7 +252,7 @@ class LSVods extends LSFunction
                 $end->modify("+" . $match->getLength() . " seconds");
 
                 /* Now find a VOD that fits the start / end */
-                $vods = parent::getEm()->getRepository('App:VOD')->findBy(array(
+                $vods = parent::getEm()->getRepository(Vod::class)->findBy(array(
                     'streamer' => $match->getStreamer()
                 ));
                 if ($vods !== null) {
@@ -359,7 +359,7 @@ class LSVods extends LSFunction
                 $end->modify("+" . $match->getLength() . " seconds");
 
                 /* Now find a VOD that fits the start / end */
-                $vods = parent::getEm()->getRepository('App:VOD')->findBy(array(
+                $vods = parent::getEm()->getRepository(Vod::class)->findBy(array(
                     'streamer' => $match->getStreamer()
                 ));
                 if ($vods !== null) {
