@@ -12,6 +12,7 @@ use App\Entity\Spell;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Entity\Versions;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -63,12 +64,18 @@ class LSFunction
 
         $cache = new FilesystemAdapter();
         $msCache = $cache->getItem('mainstreamer.champion.' . $champion->getId());
-        $msCache->expiresAfter(\DateInterval::createFromDateString('6 hours'));
+        $msCache->expiresAfter(\DateInterval::createFromDateString('24 hours'));
 
         if (!$msCache->isHit()) {
-            $matches = $this->em->getRepository('App:Match')->findBy(array(
-                'crawled' => true,
-            ));
+
+            $nowU = new \DateTime();
+            $nowU->modify('-55 days');
+
+            $criteria = new Criteria();
+            $criteria->where(Criteria::expr()->eq('crawled', true));
+            $criteria->andWhere(Criteria::expr()->gte('gameCreation', $nowU->format('U')));
+
+            $matches = $this->em->getRepository(Match::class)->matching($criteria);
 
             $sArray = array();
             $tArray = array();
@@ -826,7 +833,7 @@ class LSFunction
                                 'id' => $perkStyle->getId(),
                                 'name' => $perkStyle->getName(),
                                 'desc' => $perkStyle->getDescription(),
-                                'link' => $version->getCdn().'/img/'.$perkStyle->getImage(),
+                                'link' => $version->getCdn() . '/img/' . $perkStyle->getImage(),
                             );
                         }
                         if ($perkSubStyle !== null) {
@@ -834,7 +841,7 @@ class LSFunction
                                 'id' => $perkSubStyle->getId(),
                                 'name' => $perkSubStyle->getName(),
                                 'desc' => $perkSubStyle->getDescription(),
-                                'link' => $version->getCdn().'/img/'.$perkSubStyle->getImage(),
+                                'link' => $version->getCdn() . '/img/' . $perkSubStyle->getImage(),
                             );
                         }
                     }

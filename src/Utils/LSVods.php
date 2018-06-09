@@ -237,7 +237,7 @@ class LSVods extends LSFunction
         /* All Matches */
         $nowU = new \DateTime();
         $nowU->modify('-55 days');
-        $matches = parent::getEm()->getRepository('App:Match')->lastDaysChampion($champ, $nowU->format('U'));
+        $matches = parent::getEm()->getRepository(Match::class)->lastDaysChampion($champ, $nowU->format('U'));
         $gameVersion = 'Unknown';
 
         foreach ($matches as $match) {
