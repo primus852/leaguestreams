@@ -190,70 +190,7 @@
                                         </div>
                                     </div>
                                     <div class="row justify-content-center">
-                                        {% for vod in vods %}
 
-                                            <div class="col-xl-4 offset-xl-0 col-10 vodCard"
-                                                 data-champ="{{ vod.enemyChampion |lower }}"
-                                                 data-role="{{ vod.role|lower }}"
-                                                 data-streamer="{{ streamer.channelUser|lower }}">
-                                                <div class="row">
-                                                    <div class="card">
-                                                        <a href="{{ vod.internalLink }}">
-                                                            <div class="city-selected city-smaller">
-                                                                <article class="justify-content-center info"
-                                                                         style="text-align: center;cursor: pointer;">
-                                                                    <div class="ls-play-button" style="opacity: 0.15;">
-                                                                        <i class="fa fa-play fa-3x"></i>
-                                                                    </div>
-                                                                    <div class="city">
-                                                                        <span class="ls-text-underline">{{ vod.champion ? vod.champion : "" }}</span>
-                                                                        vs. {{ vod.enemyChampion ? vod.enemyChampion : "???" }}
-                                                                        <br/>
-                                                                        <span>{{ streamer.channelUser }} / {{ vod.role }}
-                                                                            ({{ vod.league }})</span>
-                                                                        <br/>
-                                                                        <span>{{ vod.gameStart|date('Y/m/d H:i') }}</span>
-                                                                    </div>
-                                                                </article>
-                                                                <figure class="cFigureRevert"
-                                                                        style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.championKey~'_0.png')) }})"></figure>
-                                                                {% if vod.enemyChampion is not null %}
-                                                                    <figure class="cFigure"
-                                                                            style="background-image: url({{ preload(asset('assets/ls/img/champions/'~vod.enemyChampionKey~'_0.png')) }})"></figure>
-                                                                {% endif %}
-                                                            </div>
-                                                        </a>
-
-                                                        <div class="days">
-                                                            <div class="row row-no-gutter">
-                                                                <div class="col col-4">
-                                                                    <div class="day">
-                                                                        <h1 data-win="{{ vod.win }}"
-                                                                            class="pointer showWin">
-                                                                            Spoiler</h1>
-                                                                        Win
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col col-4">
-                                                                    <div class="day">
-                                                                        <h1>{{ vod.version }}</h1>
-                                                                        Patch
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col col-4">
-                                                                    <div class="day">
-                                                                        <h1>{{ vod.length }}m</h1>
-                                                                        Length
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <br/>&nbsp;
-                                                </div>
-                                            </div>
-
-                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
