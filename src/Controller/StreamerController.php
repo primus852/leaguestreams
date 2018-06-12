@@ -191,7 +191,9 @@ class StreamerController extends Controller
                             );
                         }
 
-
+                        usort($vodArray, function ($a, $b) {
+                            return $b['gameStart'] <=> $a['gameStart'];
+                        });
 
                     }
                 }
