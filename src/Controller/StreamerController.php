@@ -4,8 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Champion;
 use App\Entity\Match;
+use App\Entity\Streamer;
+use App\Entity\Versions;
 use App\Entity\Vod;
 use App\Utils\LSFunction;
+use Doctrine\Common\Collections\Criteria;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,7 +26,7 @@ class StreamerController extends Controller
     public function allStreamerAction(Request $request)
     {
 
-        $streams = $this->getDoctrine()->getRepository('App:Streamer')->findBy(array(), array(
+        $streams = $this->getDoctrine()->getRepository(Streamer::class)->findBy(array(), array(
             'channelName' => 'ASC'
         ));
 
@@ -58,11 +61,24 @@ class StreamerController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         /* Get Streamer */
-        $stream = $em->getRepository('App:Streamer')->streamerByVarious($streamer);
+        $criteriaStreamer = Criteria::create();
+        $criteriaStreamer->where(Criteria::expr()->orX(
+            Criteria::expr()->eq('id',$streamer),
+            Criteria::expr()->eq('channelName',$streamer),
+            Criteria::expr()->eq('channelUser',$streamer)
+        ));
+        $criteriaStreamer->setMaxResults(1);
+        $stream = $em->getRepository(Streamer::class)->matching($criteriaStreamer);
 
-        if ($stream === null) {
+        if ($stream->count() === 0) {
             throw new NotFoundHttpException();
         }
+
+        /* @var $stream Streamer */
+        foreach($stream as $s){
+            $stream = $s;
+        }
+
 
         /* Get Stats for Streamer */
         $ls = new LSFunction($this->getDoctrine()->getManager(), null, $stream);
@@ -71,7 +87,7 @@ class StreamerController extends Controller
 
         /* Get all available Champs */
         $cArray = array();
-        $champs = $this->getDoctrine()->getRepository('App:Champion')->findBy(array(), array('name' => 'ASC'));
+        $champs = $this->getDoctrine()->getRepository(Champion::class)->findBy(array(), array('name' => 'ASC'));
 
         /* @var $champ Champion */
         foreach ($champs as $champ) {
@@ -102,15 +118,23 @@ class StreamerController extends Controller
         }
 
 
-        $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
-            ->find(1);
+        $versions = $this->getDoctrine()->getRepository(Versions::class)->find(1);
 
 
         $vodArray = array();
 
+        /* Get VODs for the last 55 days for the streamer */
+        $dateVod = new \DateTime();
+        $dateVod->modify('-55 days');
+        $criteriaVod = Criteria::create();
+        $criteriaVod->where(Criteria::expr()->andX(
+            Criteria::expr()->eq('streamer',$stream),
+            Criteria::expr()->gte('created',$dateVod->format('Y-m-d\Th:i:s\Z'))
+        ));
+        $vods = $em->getRepository(Vod::class)->matching($criteriaVod);
+
         /* @var $vod Vod */
-        foreach ($stream->getVod() as $vod) {
+        foreach ($vods as $vod) {
 
 
             $startVod = \DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new \DateTimeZone('UTC'));
@@ -123,7 +147,7 @@ class StreamerController extends Controller
                 $startVodU = $startVod->format('U') * 1000;
                 $endVodU = $endVod->format('U') * 1000;
 
-                $matches = $em->getRepository('App:Match')->matchesByU($stream, $startVodU, $endVodU);
+                $matches = $em->getRepository(Match::class)->matchesByU($stream, $startVodU, $endVodU);
 
                 /* @var $match Match */
                 foreach ($matches as $match) {
