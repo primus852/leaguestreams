@@ -110,95 +110,7 @@ class StreamerController extends Controller
         $vodArray = array();
 
         /* @var $vod Vod */
-        foreach ($stream->getVod() as $vod) {
 
-
-            $startVod = \DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new \DateTimeZone('UTC'));
-            $endVod = clone $startVod;
-            $today = new \DateTime('now', new \DateTimeZone('UTC'));
-            $diff = $startVod->diff($today);
-            if ($diff->days <= 55) {
-                $endVod->modify("+" . $vod->getLength() . " seconds");
-
-                $startVodU = $startVod->format('U') * 1000;
-                $endVodU = $endVod->format('U') * 1000;
-
-                $matches = $em->getRepository('App:Match')->matchesByU($stream, $startVodU, $endVodU);
-
-                /* @var $match Match */
-                foreach ($matches as $match) {
-
-                    if ($match->getGameCreation() !== "") {
-
-                        /* NOT UTC */
-                        $start = \DateTime::createFromFormat('U', round(($match->getGameCreation() / 1000)));
-                        $end = clone $start;
-                        $end->modify("+" . $match->getLength() . " seconds");
-
-                        /* Start of Vod */
-                        $startVod = \DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new \DateTimeZone('UTC'));
-
-                        $endVod = clone $startVod;
-                        $endVod->modify("+" . $vod->getLength() . " seconds");
-
-                        //echo $start->format('Y-m-d H:i') . " >= " . $startVod->format('Y-m-d H:i') . "  && " . $end->format('Y-m-d H:i') . " <= " . $endVod->format('Y-m-d H:i') . "<br />";
-
-                        if ($start >= $startVod && $end <= $endVod) {
-
-                            $startOffset = $startVod->diff($start);
-                            $minutes = $startOffset->days * 24 * 60;
-                            $minutes += $startOffset->h * 60;
-                            $minutes += $startOffset->i;
-                            $offset = $minutes . "m" . $startOffset->s . "s";
-                            $offsetSeconds = (float)($minutes * 60) + $startOffset->s;
-                            $eChamp = null;
-                            $eChampKey = null;
-                            if ($match->getEnemyChampion() !== null) {
-                                $eChamp = $match->getEnemyChampion()->getName();
-                                $eChampKey = $match->getEnemyChampion()->getKey();
-                            }
-
-                            $v = explode('.', $match->getGameVersion());
-                            $version = $v[0] . "." . $v[1];
-
-                            $cRole = $match->getLane() . "_" . $match->getRole();
-                            $role = $ls->getRoleName($cRole);
-
-                            $vodArray[] = array(
-                                'champion' => $match->getChampion()->getName(),
-                                'championKey' => $match->getChampion()->getKey(),
-                                'enemyChampion' => $eChamp,
-                                'enemyChampionKey' => $eChampKey,
-                                'gameStart' => $start->format('Y-m-d H:i'),
-                                'streamStart' => $startVod->format('Y-m-d H:i'),
-                                'offset' => $offset,
-                                'offsetSeconds' => $offsetSeconds,
-                                'id' => $vod->getVideoId(),
-                                'link' => "https://www.twitch.tv/videos/" . str_replace("v", "", $vod->getVideoId()) . "?t=" . $offset,
-                                'videoId' => $vod->getVideoId(),
-                                'win' => $match->getWin(),
-                                'version' => $version,
-                                'role' => $role,
-                                'length' => round($match->getLength() / 60),
-                                'queue' => $match->getQueue()->getName(),
-                                'league' => $match->getSummoner()->getLeague(),
-                                'internalLink' => $this->generateUrl('vodsPlayer', array(
-                                    'vId' => $vod->getVideoId(),
-                                    'offset' => $offsetSeconds,
-                                    'match' => $match->getId(),
-                                ))
-
-                            );
-                        }
-
-                        usort($vodArray, function ($a, $b) {
-                            return $b['gameStart'] <=> $a['gameStart'];
-                        });
-
-                    }
-                }
-            }
-        }
 
         return $this->render('streamer/profileStreamer.html.twig', array(
             'streamer' => $stream,
@@ -206,7 +118,6 @@ class StreamerController extends Controller
             'champs' => $cArray,
             'versions' => $versions,
             'summoners' => count($stream->getSummoner()),
-            'vods' => $vodArray,
         ));
     }
 
