@@ -125,7 +125,12 @@ if ($isPlayer.length) {
         channel: $('#streamer-channel').val(),
         playsinline: true
     };
-    player = new Twitch.Player("playerMain", options);
+    if ($isPlayer.hasClass('twitch-embed')) {
+        player = new Twitch.Embed("playerMain", options);
+    } else {
+        player = new Twitch.Player("playerMain", options);
+    }
+
     player.setVolume(0.5);
 
     checkRunesInGame($isPlayer, false, true);
@@ -140,6 +145,18 @@ $(document).on("click", ".refreshRunes", function (e) {
 $(document).on("click", ".refreshInGamePlayer", function (e) {
     e.preventDefault();
     checkRunesInGame($(this), true, true);
+});
+
+$(document).on('click','.toggle-chat',function(){
+
+    var $click = $(this);
+
+    if($click.hasClass('clicked')){
+        return false;
+    }
+
+    $click.addClass('clicked').html('<i class="fa fa-spin fa-spinner"></i>');
+
 });
 
 function checkRunesInGame(btn, toggleOpen, forceReload) {
@@ -447,24 +464,24 @@ $(document).on("click", ".refreshStreamer", function (e) {
 
     $panel.block({
         message: '' +
-        '   <div class="row">' +
-        '       <div class="col col-12">' +
-        '           <div class="row">' +
-        '               <div class="col col-4 text-right">' +
-        '                   <img src="' + $logo + '" style="max-height:85px;">' +
-        '               </div>' +
-        '               <div class="col col-8 text-left">' +
-        '                   <h1 style="margin-top:25px;"><i class="fa fa-spin fa-spinner"></i> Updating Streamer</h1>' +
-        '               </div>' +
-        '           </div>' +
-        '       </div>' +
-        '   </div>' +
-        '   <br />' +
-        '   <div class="row">' +
-        '       <div class="col col-12">' +
-        $checkString +
-        '       </div>' +
-        '   </div> ',
+            '   <div class="row">' +
+            '       <div class="col col-12">' +
+            '           <div class="row">' +
+            '               <div class="col col-4 text-right">' +
+            '                   <img src="' + $logo + '" style="max-height:85px;">' +
+            '               </div>' +
+            '               <div class="col col-8 text-left">' +
+            '                   <h1 style="margin-top:25px;"><i class="fa fa-spin fa-spinner"></i> Updating Streamer</h1>' +
+            '               </div>' +
+            '           </div>' +
+            '       </div>' +
+            '   </div>' +
+            '   <br />' +
+            '   <div class="row">' +
+            '       <div class="col col-12">' +
+            $checkString +
+            '       </div>' +
+            '   </div> ',
         css: {
             backgroundColor: "transparent",
             color: "#fff",

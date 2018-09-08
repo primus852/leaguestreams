@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Champion;
+use App\Entity\Match;
 use App\Entity\Streamer;
+use App\Entity\Versions;
 use App\Utils\LSFunction;
 use App\Utils\TwitchApi;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -40,7 +43,7 @@ class FrontendController extends Controller
 
         /* Get online Streamer */
         $streams = $this->getDoctrine()
-            ->getRepository('App:Streamer')
+            ->getRepository(Streamer::class)
             ->findBy(
                 array(
                     'isOnline' => true,
@@ -53,7 +56,7 @@ class FrontendController extends Controller
 
 
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
         return $this->render('frontend/index.html.twig', array(
@@ -64,18 +67,23 @@ class FrontendController extends Controller
     }
 
     /**
-     * @Route("/player/{searchString}", name="loadPlayer", defaults={"searchString"="0"})
+     * @Route("/player/{searchString}/{embed}", name="loadPlayer", defaults={"searchString"="0", "embed"="player"})
      * @param $searchString
+     * @param $embed
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function loadPlayerAction($searchString)
+    public function loadPlayerAction($searchString, $embed)
     {
+
+        $e = $embed !== 'player' ? 'player' : 'embed';
+        $link = $embed !== 'player' ? 'https://player.twitch.tv/js/embed/v1.js' : 'https://embed.twitch.tv/embed/v1.js';
+
 
         /* Entity Manager */
         $em = $this->getDoctrine()->getManager();
 
-        $s = $em->getRepository('App:Streamer')->streamerByVarious($searchString);
+        $s = $em->getRepository(Streamer::class)->streamerByVarious($searchString);
 
         $isValid = true;
         $errors = null;
@@ -105,7 +113,7 @@ class FrontendController extends Controller
             }
 
             if (array_key_exists('channel_id', $result)) {
-                $s = $em->getRepository('App:Streamer')->findOneBy(array(
+                $s = $em->getRepository(Streamer::class)->findOneBy(array(
                     'channelId' => $result['channel_id'],
                 ));
 
@@ -122,14 +130,17 @@ class FrontendController extends Controller
         /* @var $startDate \DateTime */
         $startDate = $s->getStarted();
 
-        return $this->render('frontend/player.html.twig', array(
+        return $this->render('frontend/playerEmbed.html.twig', array(
             'streamerId' => $s->getId(),
+            'search' => $searchString,
             'summoners' => $s->getSummoner(),
             'title' => $s->getDescription(),
             'channel' => $s->getChannelName(),
             'streamerName' => $s->getChannelUser(),
             'streamStartedTime' => $startDate->format('d.m.Y H:i'),
             'streamStarted' => $ls->getTimeAgo($s->getStarted()),
+            'add' => $e,
+            'twitchJs' => $link,
         ));
 
     }
@@ -237,11 +248,11 @@ class FrontendController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         /* Get Champions */
-        $champs = $em->getRepository('App:Champion')->findBy(array(), array('name' => 'ASC'));
+        $champs = $em->getRepository(Champion::class)->findBy(array(), array('name' => 'ASC'));
 
 
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
         return $this->render('frontend/streamerChampion.html.twig', array(
@@ -260,10 +271,10 @@ class FrontendController extends Controller
 
         /* Get CDN */
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
-        $matches = $this->getDoctrine()->getRepository('App:Match')->findBy(array(
+        $matches = $this->getDoctrine()->getRepository(Match::class)->findBy(array(
             'crawled' => true,
         ));
 
@@ -308,7 +319,7 @@ class FrontendController extends Controller
 
                 if (isset($tArray[$key]) && $tArray[$key] > 0) {
 
-                    $sUser = $this->getDoctrine()->getRepository('App:Streamer')->findOneBy(array(
+                    $sUser = $this->getDoctrine()->getRepository(Streamer::class)->findOneBy(array(
                         'channelUser' => $key,
                     ));
 

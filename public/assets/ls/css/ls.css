@@ -2409,4 +2409,11 @@ ul.footNavUL li {
 .ls-text-underline{
     text-decoration: underline;
 }
+.toggle-chat{
+    position: absolute;
+    right: 1.5%;
+    top: 45px;
+    font-size: 0.8em;
+    font-weight: 100
+}
 
