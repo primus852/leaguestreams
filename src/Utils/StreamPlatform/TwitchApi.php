@@ -11,8 +11,9 @@ namespace App\Utils\StreamPlatform;
 
 use App\Entity\Platform;
 use App\Entity\Streamer;
-use App\Utils\LSCrawl\StopWatch;
 use Doctrine\Common\Persistence\ObjectManager;
+use primus852\SimpleStopwatch\Stopwatch;
+use primus852\SimpleStopwatch\StopwatchException;
 
 class TwitchApi implements StreamPlatformInterface
 {
@@ -126,8 +127,12 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * If the Streamer is online, update the total time Online (now - last modified)
              */
-            $minutes = StopWatch::in_minutes($streamer->getModified());
-            $streamer->setTotalOnline($streamer->getTotalOnline()+$minutes);
+            try{
+            $minutes = Stopwatch::stop($streamer->getModified(), true, 'm');
+            }catch (StopwatchException $e){
+                throw new StreamPlatformException('Error parsing Timer: '.$e->getMessage());
+            }
+            $streamer->setTotalOnline($streamer->getTotalOnline() + $minutes);
 
             /**
              * Now we update the Modified Col
@@ -171,8 +176,8 @@ class TwitchApi implements StreamPlatformInterface
          * Error Handling
          * @todo improve...
          */
-        if(empty($data)){
-            throw new StreamPlatformException('Channel '. $channel.' not found');
+        if (empty($data)) {
+            throw new StreamPlatformException('Channel ' . $channel . ' not found');
         }
 
         if (count($data) > 1) {

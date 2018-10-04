@@ -3,10 +3,11 @@
 namespace App\Command;
 
 use App\Entity\Streamer;
-use App\Utils\LSCrawl\StopWatch;
 use App\Utils\StreamPlatform\StreamPlatformException;
 use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
+use primus852\SimpleStopwatch\Stopwatch;
+use primus852\SimpleStopwatch\StopwatchException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,6 +19,10 @@ class CrawlStreamerCommand extends Command
     protected static $defaultName = 'crawl:streamer';
     private $em;
 
+    /**
+     * CrawlStreamerCommand constructor.
+     * @param ObjectManager $em
+     */
     public function __construct(ObjectManager $em)
     {
         $this->em = $em;
@@ -25,6 +30,9 @@ class CrawlStreamerCommand extends Command
         parent::__construct();
     }
 
+    /**
+     *
+     */
     protected function configure()
     {
         $this
@@ -32,6 +40,12 @@ class CrawlStreamerCommand extends Command
             ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     * @throws StopwatchException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
@@ -41,51 +55,55 @@ class CrawlStreamerCommand extends Command
          * Run forever... Bad?
          */
 
-            /**
-             * Start Stopwatch
-             */
-            $start = StopWatch::start();
+        /**
+         * Start Stopwatch
+         */
+        $start = Stopwatch::start();
 
-            /**
-             * All Streamers
-             */
-            $streamers = $this->em->getRepository(Streamer::class)->findAll();
-            $streamCount = 0;
-            $count_online = 0;
-            $count_offline = 0;
+        /**
+         * All Streamers
+         */
+        $streamers = $this->em->getRepository(Streamer::class)->findAll();
+        $streamCount = 0;
+        $count_online = 0;
+        $count_offline = 0;
 
-            foreach ($streamers as $streamer) {
+        foreach ($streamers as $streamer) {
 
-                if ($streamer->getPlatform()->getName() === 'Twitch.tv') {
-                    $streamCount++;
+            if ($streamer->getPlatform()->getName() === 'Twitch.tv') {
+                $streamCount++;
 
-                    $api = new TwitchApi($this->em);
-                    $isOnline = false;
-                    try {
-                        $isOnline = $api->check_online($streamer->getChannelId(), true);
-                    } catch (StreamPlatformException $e) {
-                        $io->error('Exception: ' . $e->getMessage());
-                    }
-
-                    if ($isOnline) {
-                        $count_online++;
-                        $debug ? $io->success('Streamer ' . $streamer->getChannelUser() . ' is Online') : null;
-                    } else {
-                        $count_offline++;
-                        $debug ? $io->warning('Streamer ' . $streamer->getChannelUser() . ' is Offline') : null;
-                    }
-
-
-                } else {
-                    $io->error('Platform not implemented: ' . $streamer->getPlatform()->getName());
+                $api = new TwitchApi($this->em);
+                $isOnline = false;
+                try {
+                    $isOnline = $api->check_online($streamer->getChannelId(), true);
+                } catch (StreamPlatformException $e) {
+                    $io->error('Exception: ' . $e->getMessage());
                 }
+
+                if ($isOnline) {
+                    $count_online++;
+                    $debug ? $io->success('Streamer ' . $streamer->getChannelUser() . ' is Online') : null;
+                } else {
+                    $count_offline++;
+                    $debug ? $io->warning('Streamer ' . $streamer->getChannelUser() . ' is Offline') : null;
+                }
+
+
+            } else {
+                $io->error('Platform not implemented: ' . $streamer->getPlatform()->getName());
             }
+        }
 
+        try {
             $perSecond = round(StopWatch::stop($start, true) / $streamCount, 2);
-
             $debug ? $io->comment('Finished. Duration: ' . StopWatch::stop($start) .
                 ' (' . $perSecond . ' Streamer/s).' .
                 ' Online: ' . $count_online . '|Offline: ' . $count_offline) : null;
+        } catch (StopwatchException $e) {
+            throw new StopwatchException('Exception with Stopping Timer. ' . $e->getMessage());
         }
+
+    }
     //176749 / 18:07:49
 }

@@ -8,6 +8,7 @@
         "ext-json": "*",
         "friendsofsymfony/user-bundle": "^2.1",
         "primus852/simple-crypt": "^1.2",
+        "primus852/simple-stopwatch": "^1.0",
         "primus852/symfony-short-response": "dev-master",
         "sensio/framework-extra-bundle": "^5.1",
         "symfony/asset": "^4.0",
