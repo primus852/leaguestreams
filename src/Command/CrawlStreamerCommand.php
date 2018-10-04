@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Command;
+
+use App\Entity\Streamer;
+use App\Utils\LSCrawl\StopWatch;
+use App\Utils\StreamPlatform\StreamPlatformException;
+use App\Utils\StreamPlatform\TwitchApi;
+use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+class CrawlStreamerCommand extends Command
+{
+    protected static $defaultName = 'crawl:streamer';
+    private $em;
+
+    public function __construct(ObjectManager $em)
+    {
+        $this->em = $em;
+
+        parent::__construct();
+    }
+
+    protected function configure()
+    {
+        $this
+            ->setDescription('Crawl all Streamers and check if they are online and playing League')
+            ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $io = new SymfonyStyle($input, $output);
+        $debug = $input->getArgument('debug') === 'y' ? true : false;
+
+        /**
+         * Run forever... Bad?
+         */
+
+            /**
+             * Start Stopwatch
+             */
+            $start = StopWatch::start();
+
+            /**
+             * All Streamers
+             */
+            $streamers = $this->em->getRepository(Streamer::class)->findAll();
+            $streamCount = 0;
+            $count_online = 0;
+            $count_offline = 0;
+
+            foreach ($streamers as $streamer) {
+
+                if ($streamer->getPlatform()->getName() === 'Twitch.tv') {
+                    $streamCount++;
+
+                    $api = new TwitchApi($this->em);
+                    $isOnline = false;
+                    try {
+                        $isOnline = $api->check_online($streamer->getChannelId(), true);
+                    } catch (StreamPlatformException $e) {
+                        $io->error('Exception: ' . $e->getMessage());
+                    }
+
+                    if ($isOnline) {
+                        $count_online++;
+                        $debug ? $io->success('Streamer ' . $streamer->getChannelUser() . ' is Online') : null;
+                    } else {
+                        $count_offline++;
+                        $debug ? $io->warning('Streamer ' . $streamer->getChannelUser() . ' is Offline') : null;
+                    }
+
+
+                } else {
+                    $io->error('Platform not implemented: ' . $streamer->getPlatform()->getName());
+                }
+            }
+
+            $perSecond = round(StopWatch::stop($start, true) / $streamCount, 2);
+
+            $debug ? $io->comment('Finished. Duration: ' . StopWatch::stop($start) .
+                ' (' . $perSecond . ' Streamer/s).' .
+                ' Online: ' . $count_online . '|Offline: ' . $count_offline) : null;
+        }
+    //176749 / 18:07:49
+}
