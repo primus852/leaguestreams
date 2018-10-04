@@ -35,7 +35,7 @@ class Version20180308223638 extends AbstractMigration
         $this->addSql('CREATE TABLE ls_versions_all (version VARCHAR(15) NOT NULL, major VARCHAR(15) NOT NULL, last_modified DATETIME NOT NULL, PRIMARY KEY(version, major)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE ls_versions (id INT AUTO_INCREMENT NOT NULL, version VARCHAR(15) NOT NULL, cdn VARCHAR(150) NOT NULL, champion VARCHAR(15) NOT NULL, profileicon VARCHAR(15) NOT NULL, item VARCHAR(15) NOT NULL, map VARCHAR(15) NOT NULL, mastery VARCHAR(15) NOT NULL, spell VARCHAR(15) NOT NULL, rune VARCHAR(15) NOT NULL, last_modified DATETIME NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE ls_vods (video_id VARCHAR(250) NOT NULL, streamer_id INT DEFAULT NULL, thumbnail VARCHAR(250) NOT NULL, created VARCHAR(50) NOT NULL, last_check DATETIME NOT NULL, length INT NOT NULL, INDEX IDX_23CD23E225F432AD (streamer_id), PRIMARY KEY(video_id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB');
-        $this->addSql('ALTER TABLE ls_current_match ADD CONSTRAINT FK_C5572E27FA7FD7EB FOREIGN KEY (champion_id) REFERENCES ls_champions (id)');
+        $this->addSql('ALTER TABLE ls_current_match ADD CONSTRAINT FK_C5572E27FA7FD7EB FOREIGN KEY (champion_id) REFERENCES ls_champions_legacy (id)');
         $this->addSql('ALTER TABLE ls_current_match ADD CONSTRAINT FK_C5572E2753C55F64 FOREIGN KEY (map_id) REFERENCES ls_maps (id)');
         $this->addSql('ALTER TABLE ls_current_match ADD CONSTRAINT FK_C5572E27BC01C675 FOREIGN KEY (summoner_id) REFERENCES ls_summoner (id)');
         $this->addSql('ALTER TABLE ls_current_match ADD CONSTRAINT FK_C5572E27477B5BAE FOREIGN KEY (queue_id) REFERENCES ls_queues (id)');
@@ -43,8 +43,8 @@ class Version20180308223638 extends AbstractMigration
         $this->addSql('ALTER TABLE ls_current_match ADD CONSTRAINT FK_C5572E27A2427A25 FOREIGN KEY (p1_spell2_id) REFERENCES ls_spells (id)');
         $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F63358362DF6AE32 FOREIGN KEY (streamer) REFERENCES ls_streamer (id)');
         $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F6335836F62F176 FOREIGN KEY (region) REFERENCES ls_regions (id)');
-        $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F633583645437EB4 FOREIGN KEY (champion) REFERENCES ls_champions (id)');
-        $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F6335836FF8FE01F FOREIGN KEY (enemy_champion_id) REFERENCES ls_champions (id)');
+        $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F633583645437EB4 FOREIGN KEY (champion) REFERENCES ls_champions_legacy (id)');
+        $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F6335836FF8FE01F FOREIGN KEY (enemy_champion_id) REFERENCES ls_champions_legacy (id)');
         $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F6335836ABE89763 FOREIGN KEY (summoner) REFERENCES ls_summoner (id)');
         $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F633583693ADAABB FOREIGN KEY (map) REFERENCES ls_maps (id)');
         $this->addSql('ALTER TABLE ls_matches ADD CONSTRAINT FK_F6335836477B5BAE FOREIGN KEY (queue_id) REFERENCES ls_queues (id)');
@@ -98,7 +98,7 @@ class Version20180308223638 extends AbstractMigration
         $this->addSql('ALTER TABLE ls_matches DROP FOREIGN KEY FK_F6335836ABE89763');
         $this->addSql('ALTER TABLE spell_summoner DROP FOREIGN KEY FK_BF84AE69BC01C675');
         $this->addSql('ALTER TABLE ls_summoner_report DROP FOREIGN KEY FK_3F88B5C7BC01C675');
-        $this->addSql('DROP TABLE ls_champions');
+        $this->addSql('DROP TABLE ls_champions_legacy');
         $this->addSql('DROP TABLE ls_current_match');
         $this->addSql('DROP TABLE ls_live');
         $this->addSql('DROP TABLE ls_maps');

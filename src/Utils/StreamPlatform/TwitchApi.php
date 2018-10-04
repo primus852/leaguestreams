@@ -127,10 +127,10 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * If the Streamer is online, update the total time Online (now - last modified)
              */
-            try{
-            $minutes = Stopwatch::stop($streamer->getModified(), true, 'm');
-            }catch (StopwatchException $e){
-                throw new StreamPlatformException('Error parsing Timer: '.$e->getMessage());
+            try {
+                $minutes = Stopwatch::stop($streamer->getModified(), true, 'm');
+            } catch (StopwatchException $e) {
+                throw new StreamPlatformException('Error parsing Timer: ' . $e->getMessage());
             }
             $streamer->setTotalOnline($streamer->getTotalOnline() + $minutes);
 

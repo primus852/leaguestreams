@@ -91,7 +91,7 @@ class CrawlStreamerCommand extends Command
 
 
             } else {
-                $io->error('Platform not implemented: ' . $streamer->getPlatform()->getName());
+                $debug ? $io->error('Platform not implemented: ' . $streamer->getPlatform()->getName()) : null;
             }
         }
 
@@ -103,7 +103,5 @@ class CrawlStreamerCommand extends Command
         } catch (StopwatchException $e) {
             throw new StopwatchException('Exception with Stopping Timer. ' . $e->getMessage());
         }
-
     }
-    //176749 / 18:07:49
 }
