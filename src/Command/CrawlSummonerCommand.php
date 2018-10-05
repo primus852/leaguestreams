@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Utils\LS\Crawl;
+use App\Utils\LS\CrawlException;
 use App\Utils\RiotApi\Region;
 use Doctrine\Common\Persistence\ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
@@ -66,13 +67,32 @@ class CrawlSummonerCommand extends Command
 
         foreach($streamers as $streamer){
 
+            $debug ? $io->note('Checking Streamer '.$streamer->getChannelName()) : null;
+
             /* @var $summoner Summoner */
             foreach($lsCrawl->summoners($streamer) as $summoner){
 
-                $isPlaying = $lsCrawl->check_summoner($summoner);
-                $text = $isPlaying ? 'Online, skipping rest...' : 'Offline';
+                try{
+                    $isPlaying = $lsCrawl->check_game_summoner($summoner, true);
+                }catch (CrawlException $e){
+                    $isPlaying = false;
+                }
+                $text = $isPlaying ? '<fg=green>InGame</>, skipping rest...' : '<fg=red>Not InGame</>';
 
-                $debug ? $io->note('Summoner '.Region::name($summoner->getRegion()).'-'.$summoner->getName().': '.$text) : null;
+                if($debug){
+                    if($isPlaying){
+                        $io->text('-->Summoner '.Region::name($summoner->getRegion()).'-'.$summoner->getName().': '.$text);
+                    }else{
+                        $io->text('-->Summoner '.Region::name($summoner->getRegion()).'-'.$summoner->getName().': '.$text);
+                    }
+                }
+
+                /**
+                 * Do not crawl more Summoners if one is playing...
+                 */
+                if($isPlaying){
+                    break;
+                }
 
             }
         }

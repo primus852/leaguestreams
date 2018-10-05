@@ -94,6 +94,7 @@ class TwitchApi implements StreamPlatformInterface
                 'channelId' => $channel_id
             ));
 
+            $was = false;
             if ($streamer === null) {
 
                 /**
@@ -109,6 +110,8 @@ class TwitchApi implements StreamPlatformInterface
                 $streamer->setTotalOnline(0);
                 $streamer->setCreated();
                 $streamer->setIsFeatured(false);
+            } else {
+                $was = $streamer->getisOnline();
             }
 
             $streamer->setIsPartner($isPartner);
@@ -146,6 +149,10 @@ class TwitchApi implements StreamPlatformInterface
             } catch (\Exception $e) {
                 throw new StreamPlatformException('MySQL Error: ' . $e->getMessage());
             }
+
+            /**
+             * if we set the streamer to Offline
+             */
 
         }
 
@@ -195,6 +202,25 @@ class TwitchApi implements StreamPlatformInterface
         }
 
         return $result;
+
+    }
+
+    public function vods(Streamer $streamer)
+    {
+
+        /**
+         * API: new Twitch
+         */
+        $url = '/helix/videos?user_id=' . $streamer->getChannelId() . '&type=archive';
+
+        try {
+            $data = $this->data($url, true);
+        } catch (StreamPlatformException $e) {
+            throw new StreamPlatformException($e->getMessage());
+        }
+
+        dump($data);
+        die;
 
     }
 
