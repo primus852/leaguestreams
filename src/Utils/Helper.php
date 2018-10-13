@@ -25,7 +25,7 @@ class Helper
     /**
      * @return array|false|null|string
      */
-    public function get_client_ip()
+    public static function get_client_ip()
     {
         $ip = null;
         if (getenv('HTTP_CLIENT_IP'))

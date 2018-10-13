@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Champion;
+use App\Entity\Match;
 use App\Entity\Platform;
 use App\Entity\Region;
 use App\Entity\Smurf;
@@ -9,12 +11,18 @@ use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Utils\Constants;
 use App\Utils\Helper;
+use App\Utils\LS\Crawl;
+use App\Utils\LS\CrawlException;
 use App\Utils\LSFunction;
-use App\Utils\RiotApi;
-use App\Utils\RiotApiSetting;
+use App\Utils\RiotApi\RiotApi;
+use App\Utils\RiotApi\RiotApiException;
+use App\Utils\RiotApi\Settings;
 use App\Utils\SimpleCrypt;
-use App\Utils\TwitchApi;
+use App\Utils\StreamPlatform\StreamPlatformException;
+use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\PersistentCollection;
+use primus852\ShortResponse\ShortResponse;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,152 +44,150 @@ class AjaxController extends Controller
         /* @var $em ObjectManager */
         $em = $this->getDoctrine()->getManager();
 
-        /* Find Streamer in DB */
-        $streamer = $em
-            ->getRepository('App:Streamer')
-            ->find($request->get('streamerId'));
-
+        /* @var $streamer Streamer */
+        $streamer = $em->getRepository(Streamer::class)->find($request->get('streamerId'));
         if ($streamer === null) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Streamer not found, please try again and select Streamer from list.',
-            ));
+            return ShortResponse::error('Streamer not found, please try again and select Streamer from list.');
         }
 
-        /* Find Region */
-        $region = $em
-            ->getRepository('App:Region')
-            ->find($request->get('region'));
-
+        /* @var region Region */
+        $region = $em->getRepository(Region::class)->find($request->get('region'));
         if ($region === null) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Region not found, please try again and select region from list.',
-            ));
+            return ShortResponse::error('Region not found, please try again and select region from list.');
         }
 
-        /* Find Region-Summoner in DB */
-        $summoner = $em
-            ->getRepository('App:Summoner')
-            ->findOneBy(array(
-                'name' => $request->get('summoner'),
-                'region' => $region
-            ));
-
-
+        /* @var $summoner Summoner */
+        $summoner = $em->getRepository(Summoner::class)->findOneBy(array(
+            'name' => $request->get('summoner'),
+            'region' => $region
+        ));
         if ($summoner !== null) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName(),
-            ));
+            return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
         }
 
-        $singleSmurf = $em
-            ->getRepository("App:Smurf")
-            ->findBy(array(
-                'name' => $request->get('summoner'),
-            ));
+        /* @var $singleSmurf PersistentCollection */
+        $singleSmurf = $em->getRepository(Smurf::class)->findBy(array(
+            'name' => $request->get('summoner'),
+        ));
 
-        /* @var $helper Helper */
-        $helper = new Helper();
+        /* @var $crawl Crawl */
+        $crawl = new Crawl($em);
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi(new RiotApiSetting());
+        $riot = new RiotApi(new Settings());
         $riot->setRegion($region->getLong());
 
-        /* @var $ls LSFunction */
-        $ls = new LSFunction($em, $riot, $streamer);
-
+        /**
+         * Find the Summoner at Riot
+         */
         try {
             $summoner = $riot->getSummonerByName($request->get('summoner'));
-        } catch (Exception $e) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Search for <strong>' . $request->get('summoner') . '</strong>: ' . $e->getMessage()
-            ));
+        } catch (RiotApiException $e) {
+            return ShortResponse::error('Search for <strong>' . $request->get('summoner') . '</strong>: ' . $e->getMessage());
         }
 
-        /* Check if enough Smurf Reports or admin */
+        /**
+         * Check if we are an admin, enough smurf report or reporting disabled (direct add)
+         */
         if (
             (count($singleSmurf) >= Constants::SMURFS_REQUIRED && $singleSmurf !== null) ||
             Constants::SMURFS_ENABLED === false ||
             $this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')
         ) {
 
+            /**
+             * Add the Summoner to the Database
+             */
             try {
-                $s = $ls->addSummoner($summoner);
-            } catch (Exception $e) {
-                return new JsonResponse(array(
-                    'result' => 'error',
-                    'message' => 'An Error occurred: ' . $e->getMessage(),
-                ));
+                $s = $crawl->add_summoner($summoner, $streamer, $region, $riot);
+            } catch (CrawlException $e) {
+                return ShortResponse::error('Error: ' . $e->getMessage());
             }
 
+            /**
+             * Update the MatchHistory if the flag is set
+             */
+            if ($request->get('update_matchhistory') === 'y') {
+
+                /**
+                 * Gather all uncrawled Games from Streamer
+                 */
+                $matches = $em->getRepository(Match::class)->findBy(array(
+                    'crawled' => false,
+                    'streamer' => $streamer,
+                ));
+
+                /**
+                 * Update the Games
+                 */
+                foreach ($matches as $match) {
+                    try {
+                        $crawl->update_match($match);
+                    } catch (CrawlException $e) {
+                        return ShortResponse::error('Error: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            /**
+             * See if we have a live game
+             */
+            $isPlaying = true;
+            $game = null;
             try {
-                $ls->updateMatchHistory($streamer);
-            } catch (Exception $e) {
-                return new JsonResponse(array(
-                    'result' => 'error',
-                    'message' => $e->getMessage()
-                ));
+                $game = $riot->getCurrentGame($s->getSummonerId());
+            } catch (RiotApiException $e) {
+                $isPlaying = false;
             }
 
-            /* Check and Update Live Game */
+            /**
+             * If Summoner is in a live game, update
+             */
             try {
-                $ls->updateLiveGame($s);
-            } catch (Exception $e) {
-                return new JsonResponse(array(
-                    'result' => 'error',
-                    'message' => 'Could not check/update Streamer Live Game',
-                ));
+                $isPlaying ? $crawl->current_match_update($s, $game) : $crawl->current_match_remove($s);
+            } catch (CrawlException $e) {
+                return ShortResponse::exception('There was a problem updating Live Match, please try again in a few minutes', $e->getMessage());
             }
 
-            return new JsonResponse(array(
-                'result' => 'success',
-                'message' => 'Summoner inserted, updated Summoner Stats',
-            ));
 
-
-        } else {
-
-            /* Check for Smurfs in Database */
-            $singleSmurfCheck = $this->getDoctrine()->getRepository("App:Smurf")->findOneBy(array(
-                'region' => $region,
-                'streamer' => $streamer,
-                'ip' => $helper->get_client_ip(),
-            ));
-
-
-            if ($singleSmurfCheck !== null) {
-                return new JsonResponse(array(
-                    'result' => 'warning',
-                    'message' => 'Summoner already added. More reports needed.',
-                ));
-            }
-
-            $smurf = new Smurf();
-
-            $smurf->setName($request->get('summoner'));
-            $smurf->setIp($helper->get_client_ip());
-            $smurf->setStreamer($streamer);
-            $smurf->setRegion($region);
-            $smurf->setModified();
-            $em->persist($smurf);
-            try {
-                $em->flush();
-            } catch (\Exception $e) {
-                return new JsonResponse(array(
-                    'result' => 'error',
-                    'message' => 'Database Error. The Administrator is informed about the incident.',
-                ));
-            }
-
-            return new JsonResponse(array(
-                'result' => 'success',
-                'message' => 'Summoner added. More reports needed in order to attach it to the Streamer.',
-            ));
+            return ShortResponse::success('Summoner inserted, updated Summoner Stats');
 
         }
+
+        /**
+         * Check for Smurfs in Database
+         */
+        $singleSmurfCheck = $em->getRepository(Smurf::class)->findOneBy(array(
+            'region' => $region,
+            'streamer' => $streamer,
+            'ip' => Helper::get_client_ip(),
+        ));
+
+        /**
+         * Already reported (from this IP)
+         */
+        if ($singleSmurfCheck !== null) {
+            return ShortResponse::error('Summoner already added. More reports needed.');
+        }
+
+        /**
+         * Create new Smurf
+         */
+        $smurf = new Smurf();
+        $smurf->setName($request->get('summoner'));
+        $smurf->setIp(Helper::get_client_ip());
+        $smurf->setStreamer($streamer);
+        $smurf->setRegion($region);
+        $smurf->setModified();
+
+        $em->persist($smurf);
+        try {
+            $em->flush();
+        } catch (\Exception $e) {
+            return ShortResponse::mysql($e->getMessage());
+        }
+
+        return ShortResponse::success('Summoner added. More reports needed in order to attach it to the Streamer.');
     }
 
     /**
@@ -195,7 +201,7 @@ class AjaxController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         /* Get Champion */
-        $champion = $em->getRepository('App:Champion')->find($request->get('champ'));
+        $champion = $em->getRepository(Champion::class)->find($request->get('champ'));
 
         if ($champion === null) {
             return new JsonResponse(array(
@@ -205,7 +211,7 @@ class AjaxController extends Controller
         }
 
 
-        $matches = $this->getDoctrine()->getRepository('App:Match')->findBy(array(
+        $matches = $this->getDoctrine()->getRepository(Match::class)->findBy(array(
             'crawled' => true,
         ));
 
@@ -245,7 +251,7 @@ class AjaxController extends Controller
 
             if (isset($tArray[$key]) && $tArray[$key] > 0) {
 
-                $sUser = $this->getDoctrine()->getRepository('App:Streamer')->findOneBy(array(
+                $sUser = $this->getDoctrine()->getRepository(Streamer::class)->findOneBy(array(
                     'channelUser' => $key,
                 ));
 
@@ -290,38 +296,29 @@ class AjaxController extends Controller
 
         /* Get Platform */
         $platform = $this->getDoctrine()
-            ->getRepository('App:Platform')
+            ->getRepository(Platform::class)
             ->find($request->get('platform'));
 
         if ($platform === null) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Invalid Platform',
-            ));
+            return ShortResponse::error('Invalid Platform');
         }
 
         $exists = $this->getDoctrine()
-            ->getRepository("App:Streamer")
+            ->getRepository(Streamer::class)
             ->findOneBy(array(
                 'platform' => $platform,
                 'channelName' => strtolower(str_replace(" ", "", $request->get('channel'))),
             ));
 
         if ($exists !== null) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Streamer already connected with ' . $platform->getName(),
-            ));
+            return ShortResponse::error('Streamer already connected with ' . $platform->getName());
         }
 
         $ta = new TwitchApi($em);
         try {
-            $result = $ta->getStreamerInfo($request->get('channel'));
-        } catch (Exception $e) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => $e->getMessage()
-            ));
+            $result = $ta->info($request->get('channel'));
+        } catch (StreamPlatformException $e) {
+            return ShortResponse::error('Not saved: ' . $e->getMessage());
         }
 
         /* Send to Database */
@@ -359,22 +356,17 @@ class AjaxController extends Controller
 
         $ta->setStreamer($streamer);
         try {
-            $ta->checkStreamOnline(true);
-        } catch (Exception $e) {
-            return new JsonResponse(array(
-                'result' => 'warning',
-                'message' => 'Streamer added! Could not update Streamer Info, it will be updated automatically in approx. 5 minutes',
-                'channelName' => $result["channel_name"],
-                'channelUser' => $result["display_name"],
+            $ta->check_online(true);
+        } catch (StreamPlatformException $e) {
+            return ShortResponse::json('warning', 'Streamer added! Could not update Streamer Info, it will be updated automatically in approx. 5 minutes', array(
+                'channelName' => $result['channel_name'],
+                'channelUser' => $result['display_name'],
             ));
         }
 
-
-        return new JsonResponse(array(
-            'result' => 'success',
-            'message' => 'Streamer added to database',
-            'channelName' => $result["channel_name"],
-            'channelUser' => $result["display_name"],
+        return ShortResponse::success('Streamer added to database', array(
+            'channelName' => $result['channel_name'],
+            'channelUser' => $result['display_name'],
         ));
     }
 
@@ -507,5 +499,5 @@ class AjaxController extends Controller
             )
         ));
     }
-    
+
 }

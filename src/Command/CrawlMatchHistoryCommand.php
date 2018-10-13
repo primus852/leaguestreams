@@ -51,8 +51,9 @@ class CrawlMatchHistoryCommand extends Command
         foreach($uncrawled as $uc){
 
             try{
-                $lsCrawl->update_match($uc);
-                $debug ? $io->text('-->Game '.$uc->getMatchId().' / '.$uc->getSummoner()->getRegion()->getShort().'-'.$uc->getSummoner()->getName().' <fg=green>updated</>') : null;
+                $result = $lsCrawl->update_match($uc);
+                $colorText = $result ? '<fg=green>updated</>' : '<fg=red>not found</>';
+                $debug ? $io->text('-->Game '.$uc->getMatchId().' / '.$uc->getSummoner()->getRegion()->getShort().'-'.$uc->getSummoner()->getName().' '.$colorText) : null;
 
                 /**
                  * Update current LeagueStats of Summoner

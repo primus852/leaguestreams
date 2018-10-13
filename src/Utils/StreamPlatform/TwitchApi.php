@@ -1,16 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: torsten
- * Date: 28.09.2018
- * Time: 19:11
- */
 
 namespace App\Utils\StreamPlatform;
 
 
 use App\Entity\Platform;
 use App\Entity\Streamer;
+use App\Entity\Vod;
 use Doctrine\Common\Persistence\ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
@@ -21,7 +16,6 @@ class TwitchApi implements StreamPlatformInterface
     private $em;
     private $streamer;
     private $status;
-    private $channelData;
     private $url = 'https://api.twitch.tv';
     private $gameId = '21779';
 
@@ -111,7 +105,7 @@ class TwitchApi implements StreamPlatformInterface
                 $streamer->setCreated();
                 $streamer->setIsFeatured(false);
             } else {
-                $was = $streamer->getisOnline();
+                $was = $streamer->getIsOnline();
             }
 
             $streamer->setIsPartner($isPartner);
@@ -151,9 +145,15 @@ class TwitchApi implements StreamPlatformInterface
             }
 
             /**
-             * if we set the streamer to Offline
+             * if we set the streamer to Offline update the VODs
              */
-
+            if ($was && !$streamer->getisOnline()) {
+                try {
+                    $this->vods($streamer);
+                } catch (StreamPlatformException $e) {
+                    throw new StreamPlatformException('Could not get VODs: ' . $e->getMessage());
+                }
+            }
         }
 
         return $result;
@@ -174,7 +174,7 @@ class TwitchApi implements StreamPlatformInterface
         $url = '/helix/users?login=' . $channel;
 
         try {
-            $data = $this->data($url, true);
+            $data = $this->data($url);
         } catch (StreamPlatformException $e) {
             throw new StreamPlatformException($e->getMessage());
         }
@@ -187,9 +187,14 @@ class TwitchApi implements StreamPlatformInterface
             throw new StreamPlatformException('Channel ' . $channel . ' not found');
         }
 
+        if (empty($data['data'])) {
+            throw new StreamPlatformException('Channel ' . $channel . ' not found');
+        }
+
         if (count($data) > 1) {
             throw new StreamPlatformException('More than one channel \'' . $channel . '\' found, please specify your search');
         }
+
         $data = $data['data'][0];
         $isOnline = $validateGame ? $this->check_online($data['id'], true) : false;
 
@@ -205,23 +210,65 @@ class TwitchApi implements StreamPlatformInterface
 
     }
 
+    /**
+     * @param Streamer $streamer
+     * @throws StreamPlatformException
+     */
     public function vods(Streamer $streamer)
     {
 
         /**
-         * API: new Twitch
+         * API: v5
+         * @todo: Replace when possible
          */
-        $url = '/helix/videos?user_id=' . $streamer->getChannelId() . '&type=archive';
+        $url = '/kraken/channels/' . $streamer->getChannelId() . '/videos?broadcast_type=archive&limit=100';
 
+        /**
+         * Get the VOD List
+         */
         try {
             $data = $this->data($url, true);
         } catch (StreamPlatformException $e) {
             throw new StreamPlatformException($e->getMessage());
         }
 
-        dump($data);
-        die;
+        if (array_key_exists('videos', $data)) {
 
+            foreach ($data['videos'] as $vod) {
+
+                $thumb = $vod['preview']['medium'];
+                $videoId = $vod['_id'];
+                $length = $vod['length'];
+                $created = $vod['created_at'];
+
+                /**
+                 * Check if it is the right game and publicly viewable
+                 */
+                if ($vod['game'] === 'League of Legends' && $vod['viewable'] === 'public') {
+
+                    $v = $this->em->getRepository(Vod::class)->find($videoId);
+
+                    if ($v === null) {
+                        $v = new Vod();
+                        $v->setVideoId($videoId);
+                    }
+
+                    $v->setThumbnail($thumb);
+                    $v->setCreated($created);
+                    $v->setLength($length);
+                    $v->setLastCheck(new \DateTime());
+                    $v->setStreamer($streamer);
+
+                    $this->em->persist($v);
+
+                    try {
+                        $this->em->flush();
+                    } catch (\Exception $e) {
+                        throw new StreamPlatformException('MySQL Error: ' . $e->getMessage());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -287,7 +334,7 @@ class TwitchApi implements StreamPlatformInterface
             throw new StreamPlatformException('cURL Error: ' . $e->getMessage());
         }
 
-        if (!$this->status == 200) {
+        if (!$this->status === 200) {
             throw new StreamPlatformException(
                 'Error with the Twitch API, please try again in a few moments.' .
                 ' Status Code: ' . $this->status .

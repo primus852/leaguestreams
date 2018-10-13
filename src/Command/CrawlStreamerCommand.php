@@ -98,7 +98,7 @@ class CrawlStreamerCommand extends Command
         try {
             $perSecond = round(StopWatch::stop($start, true) / $streamCount, 2);
             $debug ? $io->comment('Finished. Duration: ' . StopWatch::stop($start) .
-                ' (' . $perSecond . ' Streamer/s).' .
+                ' (' . $perSecond . ' s/Streamer).' .
                 ' Online: ' . $count_online . '|Offline: ' . $count_offline) : null;
         } catch (StopwatchException $e) {
             throw new StopwatchException('Exception with Stopping Timer. ' . $e->getMessage());
