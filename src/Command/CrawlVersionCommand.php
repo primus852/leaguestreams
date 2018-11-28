@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Entity\Match;
 use App\Utils\Locker\Locker;
 use App\Utils\LS\Crawl;
 use App\Utils\LS\CrawlException;
@@ -15,9 +14,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CrawlMatchHistoryCommand extends Command
+
+class CrawlVersionCommand extends Command
 {
-    protected static $defaultName = 'crawl:match_history';
+    protected static $defaultName = 'crawl:version';
     private $em;
 
     /**
@@ -37,16 +37,16 @@ class CrawlMatchHistoryCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Check for uncrawled games and update the Match')
+            ->setDescription('Crawl all Streamers and check if they are online and playing League')
             ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug')
             ->addArgument('force', InputArgument::OPTIONAL, 'Force Execution even if .lock exists');
-        ;
     }
 
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null|void
+     * @throws CrawlException
      * @throws StopwatchException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -73,29 +73,15 @@ class CrawlMatchHistoryCommand extends Command
          */
         Locker::touch(__FILE__);
 
+        /**
+         * New Crawler
+         */
         $lsCrawl = new Crawl($this->em);
 
-        $uncrawled = $this->em->getRepository(Match::class)->findBy(array(
-            'crawled' => false,
-        ));
-
-        $debug ? $io->note('Crawling uncrawled Games') : null;
-        foreach($uncrawled as $uc){
-
-            try{
-                $result = $lsCrawl->update_match($uc);
-                $colorText = $result ? '<fg=green>updated</>' : '<fg=red>not found</>';
-                $debug ? $io->text('-->Game '.$uc->getMatchId().' / '.$uc->getSummoner()->getRegion()->getShort().'-'.$uc->getSummoner()->getName().' '.$colorText) : null;
-
-                /**
-                 * Update current LeagueStats of Summoner
-                 */
-                $lsCrawl->update_summoner($uc->getSummoner());
-                $debug ? $io->text('-->Update Stats: <fg=green>success</>') : null;
-
-            }catch (CrawlException $e){
-                $io->error('Exception: '.$e->getMessage());
-            }
+        try{
+            $lsCrawl->versions();
+        }catch (CrawlException $e){
+            throw new CrawlException('Could not gather Versions: '.$e->getMessage());
         }
 
         /**
@@ -104,7 +90,7 @@ class CrawlMatchHistoryCommand extends Command
         Locker::remove(__FILE__);
 
         try {
-            $debug ? $io->comment('Finished. Duration: ' . StopWatch::stop($start)) : null;
+            $debug ? $io->comment('Finished. Duration: ' . StopWatch::stop($start) ) : null;
         } catch (StopwatchException $e) {
             throw new StopwatchException('Exception with Stopping Timer. ' . $e->getMessage());
         }

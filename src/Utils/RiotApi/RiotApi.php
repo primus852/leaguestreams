@@ -23,6 +23,7 @@ class RiotApi
     private const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
     private const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
     private const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
+    private const API_STATIC_VERSION = 'https://ddragon.leagueoflegends.com/api/versions.json';
 
     /**
      * Cache Timeout for requests to the Riot Api
@@ -148,6 +149,7 @@ class RiotApi
      * @param null $params
      * @return mixed
      * @throws RiotApiException
+     * @deprecated
      */
     public function getStatic($mod, $id = null, $params = null)
     {
@@ -164,6 +166,21 @@ class RiotApi
             return $this->getData($url, true);
         }catch (RiotApiException $e){
             throw new RiotApiException('GetStatic Exception: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * @return mixed
+     * @throws RiotApiException
+     */
+    public function getVersion()
+    {
+        $url = self::API_STATIC_VERSION;
+
+        try{
+            return $this->getData($url, true);
+        }catch (RiotApiException $e){
+            throw new RiotApiException('GetVersion Exception: '.$e->getMessage());
         }
     }
 

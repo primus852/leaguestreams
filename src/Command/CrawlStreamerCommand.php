@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Streamer;
+use App\Utils\Locker\Locker;
 use App\Utils\StreamPlatform\StreamPlatformException;
 use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -13,6 +14,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
 
 class CrawlStreamerCommand extends Command
 {
@@ -37,7 +39,8 @@ class CrawlStreamerCommand extends Command
     {
         $this
             ->setDescription('Crawl all Streamers and check if they are online and playing League')
-            ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug');
+            ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force Execution even if .lock exists');
     }
 
     /**
@@ -50,15 +53,25 @@ class CrawlStreamerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $debug = $input->getArgument('debug') === 'y' ? true : false;
-
-        /**
-         * Run forever... Bad?
-         */
+        $force = $input->getArgument('force') === 'y' ? true : false;
 
         /**
          * Start Stopwatch
          */
         $start = Stopwatch::start();
+
+        /**
+         * Check if it already running
+         */
+        if(Locker::check_lock(__FILE__, $force)){
+            $io->error('Lockfile already exists: '.__FILE__.Locker::EXT);
+            exit();
+        }
+
+        /**
+         * Create the Lockfile
+         */
+        Locker::touch(__FILE__);
 
         /**
          * All Streamers
@@ -94,6 +107,11 @@ class CrawlStreamerCommand extends Command
                 $debug ? $io->error('Platform not implemented: ' . $streamer->getPlatform()->getName()) : null;
             }
         }
+
+        /**
+         * Remove the Lockfile
+         */
+        Locker::remove(__FILE__);
 
         try {
             $perSecond = round(StopWatch::stop($start, true) / $streamCount, 2);

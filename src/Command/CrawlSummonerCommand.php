@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Streamer;
 use App\Entity\Summoner;
+use App\Utils\Locker\Locker;
 use App\Utils\LS\Crawl;
 use App\Utils\LS\CrawlException;
 use App\Utils\RiotApi\Region;
@@ -36,7 +37,8 @@ class CrawlSummonerCommand extends Command
     {
         $this
             ->setDescription('Crawl all Summoners of Streamers that are online')
-            ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug');
+            ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force Execution even if .lock exists');
         ;
     }
 
@@ -50,11 +52,25 @@ class CrawlSummonerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $debug = $input->getArgument('debug') === 'y' ? true : false;
+        $force = $input->getArgument('force') === 'y' ? true : false;
 
         /**
          * Start Stopwatch
          */
         $start = Stopwatch::start();
+
+        /**
+         * Check if it already running
+         */
+        if(Locker::check_lock(__FILE__, $force)){
+            $io->error('Lockfile already exists: '.__FILE__.Locker::EXT);
+            exit();
+        }
+
+        /**
+         * Create the Lockfile
+         */
+        Locker::touch(__FILE__);
 
         /**
          * All Streamers which are online
@@ -96,6 +112,11 @@ class CrawlSummonerCommand extends Command
 
             }
         }
+
+        /**
+         * Remove the Lockfile
+         */
+        Locker::remove(__FILE__);
 
         try {
             $debug ? $io->comment('Finished. Duration: ' . StopWatch::stop($start)) : null;

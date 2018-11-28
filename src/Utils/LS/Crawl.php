@@ -12,6 +12,7 @@ use App\Entity\Region;
 use App\Entity\Spell;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
+use App\Entity\Versions;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
 use App\Utils\RiotApi\Settings;
@@ -21,8 +22,11 @@ class Crawl
 {
 
     private $em;
-    private $api;
 
+    /**
+     * Crawl constructor.
+     * @param ObjectManager $em
+     */
     public function __construct(ObjectManager $em)
     {
         $this->em = $em;
@@ -291,6 +295,45 @@ class Crawl
         } catch (\Exception $e) {
             throw new CrawlException('MySQL Error: ' . $e->getMessage());
         }
+
+    }
+
+    /**
+     * @throws CrawlException
+     */
+    public function versions()
+    {
+
+        /**
+         * Use NA1 for Static
+         */
+        $api = new RiotApi(new Settings());
+
+        try {
+            $version = $api->getVersion()[0];
+        } catch (RiotApiException $e) {
+            throw new CrawlException('Gather Versions Exception: ' . $e->getMessage());
+        }
+
+        $v = $this->em->getRepository(Versions::class)->find(1);
+        $v->setVersion($version);
+        $v->setChampion($version);
+        $v->setProfileicon($version);
+        $v->setItem($version);
+        $v->setMap($version);
+        $v->setMastery($version);
+        $v->setSpell($version);
+        $v->setRune($version);
+        $v->setModified();
+
+        $this->em->persist($v);
+
+        try {
+            $this->em->flush();
+        } catch (\Exception $e) {
+            throw new CrawlException('MySQL Error: ' . $e->getMessage());
+        }
+
 
     }
 
