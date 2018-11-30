@@ -238,7 +238,7 @@ class Crawl
                 try {
                     $matches = $api->getMatchList($match->getSummoner()->getAccountId(), null, $upgrade);
                 } catch (RiotApiException $e) {
-                    throw new CrawlException('could not get Matchhistory: ' . $e->getMessage());
+                    throw new CrawlException('Could not get Matchhistory: ' . $e->getMessage());
                 }
 
                 foreach ($matches as $game) {
