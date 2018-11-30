@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Match;
 use App\Utils\Locker\Locker;
+use App\Utils\Locker\LockerException;
 use App\Utils\LS\Crawl;
 use App\Utils\LS\CrawlException;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -46,7 +47,8 @@ class CrawlMatchHistoryCommand extends Command
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int|void|null
+     * @throws LockerException
      * @throws StopwatchException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -63,9 +65,13 @@ class CrawlMatchHistoryCommand extends Command
         /**
          * Check if it already running
          */
-        if(Locker::check_lock(__FILE__, $force)){
-            $io->error('Lockfile already exists: '.__FILE__.Locker::EXT);
-            exit();
+        try {
+            if (Locker::check_lock(__FILE__, $force)) {
+                $io->error('Lockfile already exists: ' . __FILE__ . Locker::EXT);
+                exit();
+            }
+        } catch (LockerException $e) {
+            throw new LockerException($e->getMessage());
         }
 
         /**

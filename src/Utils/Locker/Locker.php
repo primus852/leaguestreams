@@ -21,6 +21,7 @@ class Locker
      * @param string $file
      * @param bool $force
      * @return bool
+     * @throws LockerException
      */
     public static function check_lock(string $file, bool $force)
     {
@@ -30,7 +31,11 @@ class Locker
             if ($fs->exists($file . '.lock')) {
 
                 $last_update = \DateTime::createFromFormat('Y-m-d H:i:s', date("Y-m-d H:i:s", filemtime($file . '.lock')));
+                try{
                 $now = new \DateTime();
+                }catch(\Exception $e){
+                    throw new LockerException('Invalid Datetime');
+                }
                 $age = $now->diff($last_update);
 
                 /**

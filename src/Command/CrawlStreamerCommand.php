@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Streamer;
 use App\Utils\Locker\Locker;
+use App\Utils\Locker\LockerException;
 use App\Utils\StreamPlatform\StreamPlatformException;
 use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -14,7 +15,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 
 class CrawlStreamerCommand extends Command
 {
@@ -46,7 +46,8 @@ class CrawlStreamerCommand extends Command
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int|void|null
+     * @throws LockerException
      * @throws StopwatchException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -63,9 +64,13 @@ class CrawlStreamerCommand extends Command
         /**
          * Check if it already running
          */
-        if(Locker::check_lock(__FILE__, $force)){
-            $io->error('Lockfile already exists: '.__FILE__.Locker::EXT);
-            exit();
+        try {
+            if (Locker::check_lock(__FILE__, $force)) {
+                $io->error('Lockfile already exists: ' . __FILE__ . Locker::EXT);
+                exit();
+            }
+        } catch (LockerException $e) {
+            throw new LockerException($e->getMessage());
         }
 
         /**

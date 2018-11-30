@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Utils\Locker\Locker;
+use App\Utils\Locker\LockerException;
 use App\Utils\LS\Crawl;
 use App\Utils\LS\CrawlException;
 use App\Utils\RiotApi\Region;
@@ -38,14 +39,14 @@ class CrawlSummonerCommand extends Command
         $this
             ->setDescription('Crawl all Summoners of Streamers that are online')
             ->addArgument('debug', InputArgument::OPTIONAL, 'Enable Debug')
-            ->addArgument('force', InputArgument::OPTIONAL, 'Force Execution even if .lock exists');
-        ;
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force Execution even if .lock exists');;
     }
 
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int|void|null
+     * @throws LockerException
      * @throws StopwatchException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -62,9 +63,13 @@ class CrawlSummonerCommand extends Command
         /**
          * Check if it already running
          */
-        if(Locker::check_lock(__FILE__, $force)){
-            $io->error('Lockfile already exists: '.__FILE__.Locker::EXT);
-            exit();
+        try {
+            if (Locker::check_lock(__FILE__, $force)) {
+                $io->error('Lockfile already exists: ' . __FILE__ . Locker::EXT);
+                exit();
+            }
+        } catch (LockerException $e) {
+            throw new LockerException($e->getMessage());
         }
 
         /**
@@ -81,32 +86,32 @@ class CrawlSummonerCommand extends Command
 
         $lsCrawl = new Crawl($this->em);
 
-        foreach($streamers as $streamer){
+        foreach ($streamers as $streamer) {
 
-            $debug ? $io->note('Checking Streamer '.$streamer->getChannelName()) : null;
+            $debug ? $io->note('Checking Streamer ' . $streamer->getChannelName()) : null;
 
             /* @var $summoner Summoner */
-            foreach($lsCrawl->summoners($streamer) as $summoner){
+            foreach ($lsCrawl->summoners($streamer) as $summoner) {
 
-                try{
+                try {
                     $isPlaying = $lsCrawl->check_game_summoner($summoner, true);
-                }catch (CrawlException $e){
+                } catch (CrawlException $e) {
                     $isPlaying = false;
                 }
                 $text = $isPlaying ? '<fg=green>InGame</>, skipping rest...' : '<fg=red>Not InGame</>';
 
-                if($debug){
-                    if($isPlaying){
-                        $io->text('-->Summoner '.Region::name($summoner->getRegion()).'-'.$summoner->getName().': '.$text);
-                    }else{
-                        $io->text('-->Summoner '.Region::name($summoner->getRegion()).'-'.$summoner->getName().': '.$text);
+                if ($debug) {
+                    if ($isPlaying) {
+                        $io->text('-->Summoner ' . Region::name($summoner->getRegion()) . '-' . $summoner->getName() . ': ' . $text);
+                    } else {
+                        $io->text('-->Summoner ' . Region::name($summoner->getRegion()) . '-' . $summoner->getName() . ': ' . $text);
                     }
                 }
 
                 /**
                  * Do not crawl more Summoners if one is playing...
                  */
-                if($isPlaying){
+                if ($isPlaying) {
                     break;
                 }
 
