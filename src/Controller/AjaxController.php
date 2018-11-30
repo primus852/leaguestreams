@@ -81,7 +81,7 @@ class AjaxController extends Controller
          * Find the Summoner at Riot
          */
         try {
-            $summoner = $riot->getSummonerByName($request->get('summoner'));
+            $summoner = $riot->getSummonerByName($request->get('summoner'), true);
         } catch (RiotApiException $e) {
             return ShortResponse::error('Search for <strong>' . $request->get('summoner') . '</strong>: ' . $e->getMessage());
         }

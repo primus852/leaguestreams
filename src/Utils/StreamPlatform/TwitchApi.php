@@ -232,39 +232,41 @@ class TwitchApi implements StreamPlatformInterface
             throw new StreamPlatformException($e->getMessage());
         }
 
-        if (array_key_exists('videos', $data)) {
+        if ($data !== null) {
+            if (array_key_exists('videos', $data)) {
 
-            foreach ($data['videos'] as $vod) {
+                foreach ($data['videos'] as $vod) {
 
-                $thumb = $vod['preview']['medium'];
-                $videoId = $vod['_id'];
-                $length = $vod['length'];
-                $created = $vod['created_at'];
+                    $thumb = $vod['preview']['medium'];
+                    $videoId = $vod['_id'];
+                    $length = $vod['length'];
+                    $created = $vod['created_at'];
 
-                /**
-                 * Check if it is the right game and publicly viewable
-                 */
-                if ($vod['game'] === 'League of Legends' && $vod['viewable'] === 'public') {
+                    /**
+                     * Check if it is the right game and publicly viewable
+                     */
+                    if ($vod['game'] === 'League of Legends' && $vod['viewable'] === 'public') {
 
-                    $v = $this->em->getRepository(Vod::class)->find($videoId);
+                        $v = $this->em->getRepository(Vod::class)->find($videoId);
 
-                    if ($v === null) {
-                        $v = new Vod();
-                        $v->setVideoId($videoId);
-                    }
+                        if ($v === null) {
+                            $v = new Vod();
+                            $v->setVideoId($videoId);
+                        }
 
-                    $v->setThumbnail($thumb);
-                    $v->setCreated($created);
-                    $v->setLength($length);
-                    $v->setLastCheck(new \DateTime());
-                    $v->setStreamer($streamer);
+                        $v->setThumbnail($thumb);
+                        $v->setCreated($created);
+                        $v->setLength($length);
+                        $v->setLastCheck(new \DateTime());
+                        $v->setStreamer($streamer);
 
-                    $this->em->persist($v);
+                        $this->em->persist($v);
 
-                    try {
-                        $this->em->flush();
-                    } catch (\Exception $e) {
-                        throw new StreamPlatformException('MySQL Error: ' . $e->getMessage());
+                        try {
+                            $this->em->flush();
+                        } catch (\Exception $e) {
+                            throw new StreamPlatformException('MySQL Error: ' . $e->getMessage());
+                        }
                     }
                 }
             }

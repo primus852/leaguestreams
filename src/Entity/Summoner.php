@@ -24,7 +24,7 @@ class Summoner
     protected $name;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=255)
      */
     protected $summonerId;
 
@@ -69,7 +69,7 @@ class Summoner
     protected $league;
 
     /**
-     * @ORM\Column(type="string", length=25, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $accountId;
 

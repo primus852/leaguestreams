@@ -17,11 +17,16 @@ class RiotApi
     /* Riot API endpoints */
     private const API_URL_PLATFORM = "https://{platform}.api.riotgames.com/lol/platform/v3/";
     private const API_URL_CHAMPION_MASTERY = "https://{platform}.api.riotgames.com/lol/champion-mastery/v3/";
+    private const API_URL_CHAMPION_MASTERY_V4 = "https://{platform}.api.riotgames.com/lol/champion-mastery/v4/";
     private const API_URL_SPECTATOR = 'https://{platform}.api.riotgames.com/lol/spectator/v3/';
+    private const API_URL_SPECTATOR_V4 = 'https://{platform}.api.riotgames.com/lol/spectator/v4/';
     private const API_URL_STATIC = 'https://{platform}.api.riotgames.com/lol/static-data/v3/';
     private const API_URL_MATCH = 'https://{platform}.api.riotgames.com/lol/match/v3/';
+    private const API_URL_MATCH_V4 = 'https://{platform}.api.riotgames.com/lol/match/v4/';
     private const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
+    private const API_URL_LEAGUE_V4 = 'https://{platform}.api.riotgames.com/lol/league/v4/';
     private const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
+    private const API_URL_SUMMONER_V4 = 'https://{platform}.api.riotgames.com/lol/summoner/v4/';
     private const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
     private const API_STATIC_VERSION = 'https://ddragon.leagueoflegends.com/api/versions.json';
 
@@ -75,10 +80,10 @@ class RiotApi
         $mod = 'champions';
         $url = self::API_URL_PLATFORM . $mod . '?freeToPlay=' . $free;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetChampion Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetChampion Exception: ' . $e->getMessage());
         }
 
     }
@@ -95,20 +100,21 @@ class RiotApi
         $mod = 'champions/' . $id . '?locale=' . $locale;
         $url = self::API_URL_STATIC . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetChampionById Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetChampionById Exception: ' . $e->getMessage());
         }
     }
 
     /**
      * @param $id
      * @param bool $championId
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getChampionMastery($id, $championId = false)
+    public function getChampionMastery($id, $championId = false, bool $upgrade = false)
     {
 
         $mod = 'champion-masteries/by-summoner/' . $id;
@@ -116,30 +122,31 @@ class RiotApi
         if ($championId)
             $mod .= "/by-champion/" . $championId;
 
-        $url = self::API_URL_CHAMPION_MASTERY . $mod;
+        $url = $upgrade === false ? self::API_URL_CHAMPION_MASTERY . $mod : self::API_URL_CHAMPION_MASTERY_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetChampionMastery Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetChampionMastery Exception: ' . $e->getMessage());
         }
     }
 
     /**
      * @param $id
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getCurrentGame($id)
+    public function getCurrentGame($id, bool $upgrade = false)
     {
 
         $mod = 'active-games/by-summoner/' . $id;
-        $url = self::API_URL_SPECTATOR . $mod;
+        $url = $upgrade === false ? self::API_URL_SPECTATOR . $mod : self::API_URL_SPECTATOR_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetCurrentGame Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetCurrentGame Exception: ' . $e->getMessage());
         }
     }
 
@@ -162,10 +169,10 @@ class RiotApi
         if ($params !== null)
             $url .= "?" . $params;
 
-        try{
+        try {
             return $this->getData($url, true);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetStatic Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetStatic Exception: ' . $e->getMessage());
         }
     }
 
@@ -177,35 +184,36 @@ class RiotApi
     {
         $url = self::API_STATIC_VERSION;
 
-        try{
+        try {
             return $this->getData($url, true);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetVersion Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetVersion Exception: ' . $e->getMessage());
         }
     }
 
     /**
      * @param $matchId
      * @param bool $includeTimeline
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getMatch($matchId, $includeTimeline = true)
+    public function getMatch($matchId, $includeTimeline = true, bool $upgrade = false)
     {
 
         $mod = 'matches/' . $matchId;
-        $url = self::API_URL_MATCH . $mod;
+        $url = $upgrade === false ? self::API_URL_MATCH . $mod : self::API_URL_MATCH_V4 . $mod;
 
         if (!$includeTimeline) {
-            try{
+            try {
                 return $this->getData($url);
-            }catch (RiotApiException $e){
-                throw new RiotApiException('GetMatch Exception: '.$e->getMessage());
+            } catch (RiotApiException $e) {
+                throw new RiotApiException('GetMatch Exception: ' . $e->getMessage());
             }
         }
 
         $modTimeline = 'timelines/by-match/' . $matchId;
-        $urlTimeline = self::API_URL_MATCH . $modTimeline;
+        $urlTimeline = $upgrade === false ? self::API_URL_MATCH . $modTimeline : self::API_URL_MATCH_V4 . $modTimeline;
 
         $data = $this->getMultipleData(array(
             "data" => $url,
@@ -227,22 +235,23 @@ class RiotApi
     {
 
         $mod = 'timelines/by-match/' . $matchId;
-        $url = self::API_URL_MATCH . $mod;
+        $url = self::API_URL_MATCH_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetTimeline Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetTimeline Exception: ' . $e->getMessage());
         }
     }
 
     /**
      * @param $accountId
      * @param null $params
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getMatchList($accountId, $params = null)
+    public function getMatchList($accountId, $params = null, bool $upgrade = false)
     {
 
         $mod = 'matchlists/by-account/' . $accountId;
@@ -265,12 +274,12 @@ class RiotApi
                 $mod .= $params . '&';
         }
 
-        $url = self::API_URL_MATCH . $mod;
+        $url = $upgrade === false ? self::API_URL_MATCH . $mod : self::API_URL_MATCH_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetMatchList Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetMatchList Exception: ' . $e->getMessage());
         }
     }
 
@@ -283,12 +292,13 @@ class RiotApi
     {
 
         $mod = 'matchlists/by-account/' . $accountId . '/recent';
-        $url = self::API_URL_MATCH . $mod;
+        $url = self::API_URL_MATCH_V4 . $mod;
 
-        try{
+
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetRecentMatchList Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetRecentMatchList Exception: ' . $e->getMessage());
         }
     }
 
@@ -301,27 +311,27 @@ class RiotApi
     {
 
         $mod = 'leagues/by-summoner/' . $id;
-        $url = self::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetLeague Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetLeague Exception: ' . $e->getMessage());
         }
     }
-
 
     /**
      * @param $id
      * @param string $type
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getLeaguePosition($id, $type = 'RANKED_SOLO_5x5')
+    public function getLeaguePosition($id, $type = 'RANKED_SOLO_5x5', bool $upgrade = false)
     {
 
         $mod = 'positions/by-summoner/' . $id;
-        $url = self::API_URL_LEAGUE . $mod;
+        $url = $upgrade === false ? self::API_URL_LEAGUE . $mod : self::API_URL_LEAGUE_V4 . $mod;
 
         $positions = $this->getData($url);
 
@@ -333,7 +343,7 @@ class RiotApi
 
         }
 
-        throw new RiotApiException(self::RIOT_ERROR_CODES[404].' [404]');
+        throw new RiotApiException(self::RIOT_ERROR_CODES[404] . ' [404]');
 
     }
 
@@ -346,12 +356,12 @@ class RiotApi
     {
 
         $mod = 'challengerleagues/by-queue/' . $queue;
-        $url = self::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetChallenger Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetChallenger Exception: ' . $e->getMessage());
         }
     }
 
@@ -364,12 +374,12 @@ class RiotApi
     {
 
         $mod = 'masterleagues/by-queue/' . $queue;
-        $url = self::API_URL_LEAGUE . $mod;
+        $url = self::API_URL_LEAGUE_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetMaster Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetMaster Exception: ' . $e->getMessage());
         }
     }
 
@@ -383,10 +393,10 @@ class RiotApi
 
         $name = strtolower($name);
 
-        try{
-            $summoner = $this->getSummonerByName($name);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetSummonerId Exception: '.$e->getMessage());
+        try {
+            $summoner = $this->getSummonerByName($name, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetSummonerId Exception: ' . $e->getMessage());
         }
 
 
@@ -404,23 +414,25 @@ class RiotApi
 
         $name = strtolower($name);
 
-        try{
-            $summoner = $this->getSummonerByName($name);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetSummonerAccountId Exception: '.$e->getMessage());
+        try {
+            $summoner = $this->getSummonerByName($name, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetSummonerAccountId Exception: ' . $e->getMessage());
         }
 
 
         return $summoner['accountId'];
     }
 
+
     /**
      * @param $id
      * @param bool $accountId
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getSummoner($id, $accountId = false)
+    public function getSummoner($id, $accountId = false, bool $upgrade = false)
     {
 
         $mod = 'summoners/';
@@ -429,31 +441,32 @@ class RiotApi
         }
 
         $mod .= $id;
-        $url = self::API_URL_SUMMONER . $mod;
+        $url = $upgrade === false ? self::API_URL_SUMMONER . $mod : self::API_URL_SUMMONER_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetSummoner Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetSummoner Exception: ' . $e->getMessage().' Url: '.$url);
         }
     }
 
 
     /**
      * @param $name
+     * @param bool $upgrade
      * @return mixed
      * @throws RiotApiException
      */
-    public function getSummonerByName($name)
+    public function getSummonerByName($name, bool $upgrade = false)
     {
 
         $mod = 'summoners/by-name/' . rawurlencode($name);
-        $url = self::API_URL_SUMMONER . $mod;
+        $url = $upgrade === false ? self::API_URL_SUMMONER . $mod : self::API_URL_SUMMONER_V4 . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetSummonerByName Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetSummonerByName Exception: ' . $e->getMessage());
         }
     }
 
@@ -468,10 +481,10 @@ class RiotApi
         $mod = 'masteries/by-summoner/' . $id;
         $url = self::API_URL_PLATFORM . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetMasteries Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetMasteries Exception: ' . $e->getMessage());
         }
     }
 
@@ -486,10 +499,10 @@ class RiotApi
         $mod = 'runes/by-summoner/' . $id;
         $url = self::API_URL_PLATFORM . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetRunes Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetRunes Exception: ' . $e->getMessage());
         }
     }
 
@@ -504,10 +517,10 @@ class RiotApi
         $mod = 'runes-reforged/by-summoner/' . $id;
         $url = self::API_URL_PLATFORM . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetRunesReforged Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetRunesReforged Exception: ' . $e->getMessage());
         }
     }
 
@@ -521,10 +534,10 @@ class RiotApi
         $mod = 'shard-data';
         $url = self::API_URL_STATUS . $mod;
 
-        try{
+        try {
             return $this->getData($url);
-        }catch (RiotApiException $e){
-            throw new RiotApiException('GetStatus Exception: '.$e->getMessage());
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetStatus Exception: ' . $e->getMessage());
         }
     }
 
@@ -610,7 +623,7 @@ class RiotApi
                     $this->cache->put($url, $result, self::CACHE_REFRESH);
                 }
             } else {
-                throw new RiotApiException(self::RIOT_ERROR_CODES[$this->responseCode].' ['.$this->responseCode.']');
+                throw new RiotApiException(self::RIOT_ERROR_CODES[$this->responseCode] . ' [' . $this->responseCode . ']');
             }
         }
 

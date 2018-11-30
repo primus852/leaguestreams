@@ -70,7 +70,7 @@ class Crawl
         if ($summoner['summonerLevel'] >= 30) {
 
             try {
-                $stats = $riotApi->getLeaguePosition($summoner['id']);
+                $stats = $riotApi->getLeaguePosition($summoner['id'], 'RANKED_SOLO_5x5', true);
             } catch (RiotApiException $e) {
                 throw new CrawlException('Could not get Summoner Stats: ' . $e->getMessage());
             }
@@ -121,8 +121,14 @@ class Crawl
         $isPlaying = true;
         $game = null;
 
+
+        /**
+         * Check if we have an updated SummonerId already
+         */
+        $upgrade = strlen($summoner->getSummonerId()) > 12 ? true : false;
+
         try {
-            $game = $api->getCurrentGame($summoner->getSummonerId());
+            $game = $api->getCurrentGame($summoner->getSummonerId(), $upgrade);
         } catch (RiotApiException $e) {
             $isPlaying = false;
         }
@@ -151,8 +157,13 @@ class Crawl
         $notFound = false;
         $history = null;
 
+        /**
+         * Check if we have an updated SummonerId already
+         */
+        $upgrade = strlen($match->getSummoner()->getSummonerId()) > 12 ? true : false;
+
         try {
-            $history = $api->getMatch($match->getMatchId(), false);
+            $history = $api->getMatch($match->getMatchId(), false, $upgrade);
         } catch (RiotApiException $e) {
             $notFound = true;
         }
@@ -217,10 +228,15 @@ class Crawl
             } else {
 
                 /**
+                 * Check if we have an updated SummonerId already
+                 */
+                $upgrade = strlen($match->getSummoner()->getSummonerId()) > 12 ? true : false;
+
+                /**
                  * We have a private Game, see if we find the game in the according match history
                  */
                 try {
-                    $matches = $api->getMatchList($match->getSummoner()->getAccountId());
+                    $matches = $api->getMatchList($match->getSummoner()->getAccountId(), null, $upgrade);
                 } catch (RiotApiException $e) {
                     throw new CrawlException('could not get Matchhistory: ' . $e->getMessage());
                 }
@@ -276,10 +292,15 @@ class Crawl
     public function update_summoner(Summoner $summoner)
     {
 
+        /**
+         * Check if we have an updated SummonerId already
+         */
+        $upgrade = strlen($summoner->getSummonerId()) > 12 ? true : false;
+
         $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
 
         try {
-            $stats = $api->getLeaguePosition($summoner->getSummonerId());
+            $stats = $api->getLeaguePosition($summoner->getSummonerId(), 'RANKED_SOLO_5x5', $upgrade);
         } catch (RiotApiException $e) {
             throw new CrawlException('Update Summoner Exception: ' . $e->getMessage());
         }
@@ -294,6 +315,63 @@ class Crawl
             $this->em->flush();
         } catch (\Exception $e) {
             throw new CrawlException('MySQL Error: ' . $e->getMessage());
+        }
+
+    }
+
+    /**
+     * @throws CrawlException
+     */
+    public function update_summoner_names()
+    {
+
+        /**
+         * Get all Summoners
+         */
+        $summoners = $this->em->getRepository(Summoner::class)->findAll();
+
+
+        /**
+         * Loop through all to update names
+         * @var $summoner Summoner
+         */
+        foreach ($summoners as $summoner) {
+
+            $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
+
+            try {
+
+                /**
+                 * If we already have the upgraded ID/AccID, use them
+                 */
+                $upgrade = strlen($summoner->getSummonerId()) > 12 ? true : false;
+
+                $s = $api->getSummoner($summoner->getSummonerId(), false, $upgrade);
+            } catch (RiotApiException $e) {
+                throw new CrawlException('Summoner Info Exception: ' . $e->getMessage());
+            }
+
+            /**
+             * With the freshly updated name, crawl the new V4 API to get the encrypted Account ID
+             */
+            try {
+                $info = $api->getSummonerByName($s['name'], true);
+            } catch (RiotApiException $e) {
+                throw new CrawlException('Summoner Info Upgrade Exception: ' . $e->getMessage());
+            }
+
+            $summoner->setAccountId($info['accountId']);
+            $summoner->setSummonerId($info['id']);
+
+            $this->em->persist($summoner);
+
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                throw new CrawlException('MySQL Error: ' . $e->getMessage());
+            }
+
+
         }
 
     }
@@ -514,7 +592,7 @@ class Crawl
         $spell2 = null;
         foreach ($game['participants'] as $participant) {
 
-            if ($participant['summonerId'] === $summoner->getSummonerId()) {
+            if ((string)$participant['summonerId'] === $summoner->getSummonerId()) {
 
                 $team = $participant['teamId'];
                 $perks = array(
