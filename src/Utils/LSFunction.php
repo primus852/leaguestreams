@@ -12,6 +12,7 @@ use App\Entity\Spell;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Entity\Versions;
+use App\Utils\RiotApi\RiotApi;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\Id\AssignedGenerator;
@@ -31,12 +32,6 @@ class LSFunction
     private $region;
     private $package;
 
-    /**
-     * LSFunction constructor.
-     * @param ObjectManager $em
-     * @param RiotApi|null $riot
-     * @param Streamer|null $streamer
-     */
     public function __construct(ObjectManager $em, RiotApi $riot = null, Streamer $streamer = null)
     {
         $this->riot = $riot;

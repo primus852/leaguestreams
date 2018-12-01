@@ -480,7 +480,7 @@ class AjaxController extends AbstractController
         $streamer = $summoner->getStreamer();
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi(new RiotApiSetting());
+        $riot = new RiotApi(new Settings());
         $riot->setRegion($region->getLong());
 
         /* @var $ls LSFunction */
