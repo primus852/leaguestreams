@@ -23,14 +23,40 @@ use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
 use primus852\ShortResponse\ShortResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class AjaxController extends Controller
+class AjaxController extends AbstractController
 {
+
+    /**
+     * @Route("/_ajax/_checkSession", name="checkSession")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function checkSessionAction(Request $request)
+    {
+
+        if ($request->hasSession() && ($session = $request->getSession())) {
+
+            $status = $session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner'));
+
+            if ($status === 'Finished') {
+                $session->invalidate();
+            }
+
+        } else {
+            $status = 'empty';
+        }
+
+        return ShortResponse::success('Session found', array(
+            'status' => $status,
+        ));
+    }
 
 
     /**
@@ -62,8 +88,19 @@ class AjaxController extends Controller
             'region' => $region
         ));
         if ($summoner !== null) {
-            return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
+            //return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
         }
+
+        /**
+         * Start a new Session to report progress
+         * @todo replace with something nice(r)?
+         */
+        if (!$request->hasSession() || !($session = $request->getSession())) {
+            $session = new Session();
+            $session->start();
+        }
+
+        $sessionName = $request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner');
 
         /* @var $singleSmurf PersistentCollection */
         $singleSmurf = $em->getRepository(Smurf::class)->findBy(array(
@@ -79,10 +116,13 @@ class AjaxController extends Controller
 
         /**
          * Find the Summoner at Riot
+         * and update the session status
          */
         try {
+            $session->set($sessionName, 'Searching Summoner');
             $summoner = $riot->getSummonerByName($request->get('summoner'), true);
         } catch (RiotApiException $e) {
+            $session->invalidate();
             return ShortResponse::error('Search for <strong>' . $request->get('summoner') . '</strong>: ' . $e->getMessage());
         }
 
@@ -99,8 +139,10 @@ class AjaxController extends Controller
              * Add the Summoner to the Database
              */
             try {
+                $session->set($sessionName, 'Adding Summoner');
                 $s = $crawl->add_summoner($summoner, $streamer, $region, $riot);
             } catch (CrawlException $e) {
+                $session->invalidate();
                 return ShortResponse::error('Error: ' . $e->getMessage());
             }
 
@@ -120,10 +162,12 @@ class AjaxController extends Controller
                 /**
                  * Update the Games
                  */
+                $session->set($sessionName, 'Updating Matchhistory');
                 foreach ($matches as $match) {
                     try {
                         $crawl->update_match($match);
                     } catch (CrawlException $e) {
+                        $session->invalidate();
                         return ShortResponse::error('Error: ' . $e->getMessage());
                     }
                 }
@@ -135,7 +179,8 @@ class AjaxController extends Controller
             $isPlaying = true;
             $game = null;
             try {
-                $game = $riot->getCurrentGame($s->getSummonerId());
+                $session->set($sessionName, 'Checking Live Games');
+                $game = $riot->getCurrentGame($s->getSummonerId(), true);
             } catch (RiotApiException $e) {
                 $isPlaying = false;
             }
@@ -144,12 +189,13 @@ class AjaxController extends Controller
              * If Summoner is in a live game, update
              */
             try {
+                $session->set($sessionName, 'Updating Current Match');
                 $isPlaying ? $crawl->current_match_update($s, $game) : $crawl->current_match_remove($s);
             } catch (CrawlException $e) {
                 return ShortResponse::exception('There was a problem updating Live Match, please try again in a few minutes', $e->getMessage());
             }
 
-
+            $session->set($sessionName, 'Finished');
             return ShortResponse::success('Summoner inserted, updated Summoner Stats');
 
         }
@@ -167,6 +213,7 @@ class AjaxController extends Controller
          * Already reported (from this IP)
          */
         if ($singleSmurfCheck !== null) {
+            $session->invalidate();
             return ShortResponse::error('Summoner already added. More reports needed.');
         }
 
@@ -187,6 +234,7 @@ class AjaxController extends Controller
             return ShortResponse::mysql($e->getMessage());
         }
 
+        $session->set($sessionName, 'Finished');
         return ShortResponse::success('Summoner added. More reports needed in order to attach it to the Streamer.');
     }
 

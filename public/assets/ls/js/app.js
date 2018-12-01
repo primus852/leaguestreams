@@ -147,11 +147,11 @@ $(document).on("click", ".refreshInGamePlayer", function (e) {
     checkRunesInGame($(this), true, true);
 });
 
-$(document).on('click','.toggle-chat',function(){
+$(document).on('click', '.toggle-chat', function () {
 
     var $click = $(this);
 
-    if($click.hasClass('clicked')){
+    if ($click.hasClass('clicked')) {
         return false;
     }
 
@@ -887,19 +887,58 @@ $(document).on("click", "#submitSummoner", function () {
         return false;
     }
     $btn.addClass("is-disabled").html("Checking...");
-    $.get($url, {
-        streamerId: $streamer,
-        summoner: $summoner,
-        region: $region
-    }).done(function (data) {
-        openNoty(data.result, data.message);
-        $("#streamerAC").val("").focus();
-        $("#summoner").val("");
-        $btn.removeClass("is-disabled").html("Check");
-    }).fail(function () {
-        openNoty("error", "Ajax failed. The administrator was informed about the incident");
-        $btn.removeClass("is-disabled").html("Check");
-    });
+
+    /**
+     * Periodically check Session Status
+     */
+    var to,
+        clearTime = false,
+        called = 0,
+        set_delay = 1000,
+        callout = function () {
+            console.log('Called SessionCheck ' + called);
+            $.get($('#ajax-route-check-session').val(), {
+                streamerId: $streamer,
+                summoner: $summoner,
+                region: $region
+            })
+                .done(function (response) {
+                    if (called === 0) {
+                        console.log('Search Streamer');
+                        $.get($url, {
+                            streamerId: $streamer,
+                            summoner: $summoner,
+                            region: $region
+                        }).done(function (data) {
+                            openNoty(data.result, data.message);
+                            $("#streamerAC").val("").focus();
+                            $("#summoner").val("");
+                            $btn.removeClass("is-disabled").html("Check");
+                            if (to) {
+                                clearTimeout(to);
+                                clearTime = true;
+                            }
+                        }).fail(function () {
+                            if (to) {
+                                clearTime = true;
+                                clearTimeout(to);
+                            }
+                            openNoty("error", "Ajax failed. The administrator was informed about the incident");
+                            $btn.removeClass("is-disabled").html("Check");
+                        });
+                    }
+                    called++;
+                    console.log(response.extra.status);
+                })
+                .always(function () {
+                    if (clearTime === false) {
+                        to = setTimeout(callout, set_delay);
+                    }
+                });
+        };
+
+    callout();
+
 });
 
 $(document).on('click', '.trigger-message-close', function () {
