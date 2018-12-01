@@ -42,13 +42,7 @@ class AjaxController extends AbstractController
     {
 
         if ($request->hasSession() && ($session = $request->getSession())) {
-
             $status = $session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner'));
-
-            if ($status === 'Finished') {
-                $session->invalidate();
-            }
-
         } else {
             $status = 'empty';
         }
@@ -95,9 +89,11 @@ class AjaxController extends AbstractController
          * Start a new Session to report progress
          * @todo replace with something nice(r)?
          */
-        if (!$request->hasSession() || !($session = $request->getSession())) {
+        if (!$request->hasSession()) {
             $session = new Session();
             $session->start();
+        }else{
+            $session = $request->getSession();
         }
 
         $sessionName = $request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner');
