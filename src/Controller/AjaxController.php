@@ -446,7 +446,6 @@ class AjaxController extends AbstractController
     public function updateStreamerSingleAction(Request $request)
     {
 
-
         /* @var $helper Helper */
         $helper = new Helper();
 
@@ -460,31 +459,17 @@ class AjaxController extends AbstractController
         $action = 'none';
 
         /* @var $summoner Summoner */
-        $summoner = $em->getRepository('App:Summoner')->find($sc->decode($crypt_id));
+        $summoner = $em->getRepository(Summoner::class)->find($sc->decode($crypt_id));
         if ($summoner === null) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Summoner not found',
-                'extra' => array(
-                    'icon' => $icon,
-                    'iClass' => $iClass,
-                    'action' => $action,
-                )
+            return ShortResponse::error('Summoner not found',array(
+                'icon' => $icon,
+                'iClass' => $iClass,
+                'action' => $action,
             ));
         }
 
-        /* @var $region Region */
-        $region = $summoner->getRegion();
-
         /* @var $streamer Streamer */
         $streamer = $summoner->getStreamer();
-
-        /* @var $riot RiotApi */
-        $riot = new RiotApi(new Settings());
-        $riot->setRegion($region->getLong());
-
-        /* @var $ls LSFunction */
-        $ls = new LSFunction($em, $riot, $streamer);
 
         /* @var $platform Platform */
         $platform = $streamer->getPlatform();
@@ -493,38 +478,34 @@ class AjaxController extends AbstractController
 
         $isOnline = false;
         if ($pClass !== null) {
+            /* @var $pApi TwitchApi */
             $pApi = new $pClass($em, $streamer);
             try {
-                $isOnline = $pApi->checkStreamOnline(true);
-            } catch (Exception $e) {
-                return new JsonResponse(array(
-                    'result' => 'error',
-                    'message' => 'An error occurred: ' . $e->getMessage(),
-                ));
+                $isOnline = $pApi->check_online($streamer->getChannelId(), true);
+            } catch (StreamPlatformException $e) {
+                return ShortResponse::mysql();
             }
 
         }
 
         if ($isOnline === false) {
-            return new JsonResponse(array(
-                'result' => 'warning',
-                'message' => 'Streamer is offline, removed panel...',
-                'extra' => array(
-                    'icon' => 'remove',
-                    'iClass' => 'warning',
-                    'action' => 'remove',
-                )
+            return ShortResponse::json('warning', 'Streamer offline, removed panel...',array(
+                'icon' => 'remove',
+                'iClass' => 'warning',
+                'action' => 'remove',
             ));
         }
 
+        /**
+         * New Crawler
+         */
+        $crawl = new Crawl($em);
+
         /* Check and Update Live Game */
         try {
-            $liveGame = $ls->updateLiveGame($summoner);
-        } catch (Exception $e) {
-            return new JsonResponse(array(
-                'result' => 'error',
-                'message' => 'Could not check/update Streamer Live Game',
-            ));
+            $liveGame = $crawl->check_game_summoner($summoner, true);
+        } catch (CrawlException $e) {
+            return ShortResponse::error('Could not check/update Streamers game');
         }
 
         if ($liveGame === true) {
@@ -533,14 +514,10 @@ class AjaxController extends AbstractController
             $action = 'found';
         }
 
-        return new JsonResponse(array(
-            'result' => 'success',
-            'message' => 'Summoner crawled',
-            'extra' => array(
-                'icon' => $icon,
-                'iClass' => $iClass,
-                'action' => $action,
-            )
+        return ShortResponse::success('Summoner crawled', array(
+            'icon' => $icon,
+            'iClass' => $iClass,
+            'action' => $action,
         ));
     }
 

@@ -83,7 +83,7 @@ class Helper
         switch ($platform->getName()) {
             case 'Twitch.tv':
                 /* @var $pApi TwitchApi */
-                $pClass = '\App\Utils\TwitchApi';
+                $pClass = '\App\Utils\StreamPlatform\TwitchApi';
                 break;
             default:
                 $pClass = null;
