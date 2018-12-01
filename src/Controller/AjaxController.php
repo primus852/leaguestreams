@@ -82,7 +82,7 @@ class AjaxController extends AbstractController
             'region' => $region
         ));
         if ($summoner !== null) {
-            //return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
+            return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
         }
 
         /**
