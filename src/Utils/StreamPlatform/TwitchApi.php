@@ -32,6 +32,29 @@ class TwitchApi implements StreamPlatformInterface
 
     /**
      * @param string $channel_id
+     * @return mixed
+     * @throws StreamPlatformException
+     */
+    public function channel_info(string $channel_id)
+    {
+
+        /**
+         * API: v5
+         */
+        $url = '/kraken/streams/' . $channel_id;
+
+        try {
+            $data = $this->data($url, true);
+        } catch (StreamPlatformException $e) {
+            throw new StreamPlatformException($e->getMessage());
+        }
+
+        return $data;
+
+    }
+
+    /**
+     * @param string $channel_id
      * @param bool $update
      * @return bool|mixed
      * @throws StreamPlatformException
@@ -97,8 +120,6 @@ class TwitchApi implements StreamPlatformInterface
                 $platform = $this->em->getRepository(Platform::class)->find(1);
 
                 $streamer = new Streamer();
-                $streamer->setChannelName($channelData['display_name']);
-                $streamer->setChannelUser($channelData['name']);
                 $streamer->setChannelId($channel_id);
                 $streamer->setPlatform($platform);
                 $streamer->setTotalOnline(0);
@@ -108,6 +129,10 @@ class TwitchApi implements StreamPlatformInterface
                 $was = $streamer->getIsOnline();
             }
 
+            if ($channelData != null) {
+                $streamer->setChannelName($channelData['display_name']);
+                $streamer->setChannelUser($channelData['name']);
+            }
             $streamer->setIsPartner($isPartner);
             $streamer->setIsOnline($result);
             $streamer->setDescription($channelData['status']);
