@@ -10,23 +10,22 @@ use App\Entity\Region;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Entity\Versions;
-use App\Utils\Constants;
 use App\Utils\Helper;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
-use App\Utils\RiotApi;
-use App\Utils\RiotApiSetting;
+use App\Utils\RiotApi\RiotApi;
+use App\Utils\RiotApi\Settings;
 use App\Utils\SimpleCrypt;
 use App\Utils\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class RenderController extends Controller
+class RenderController extends AbstractController
 {
     /**
      * @Route("/_render/_player-stats-vod", name="renderPlayerStatsVod")
@@ -249,7 +248,7 @@ class RenderController extends Controller
             $streamer = $summoner->getStreamer();
 
             /* @var $riot RiotApi */
-            $riot = new RiotApi(new RiotApiSetting());
+            $riot = new RiotApi(new Settings());
             $riot->setRegion($region->getLong());
 
             /* @var $ls LSFunction */
@@ -621,8 +620,9 @@ class RenderController extends Controller
 
     /**
      * @Route("/_render/_vodByChampion/{c}", name="renderVodByChampion", defaults={"c"="0"})
-     * @param $c int
+     * @param $c
      * @return Response
+     * @throws \Exception
      */
     public function renderVodChampionTableAction($c)
     {
