@@ -131,8 +131,7 @@ if ($isPlayer.length) {
         player = new Twitch.Player("playerMain", options);
     }
 
-    player.setVolume(0.5);
-
+    //player.setVolume(0.5);
     checkRunesInGame($isPlayer, false, true);
 
 }
