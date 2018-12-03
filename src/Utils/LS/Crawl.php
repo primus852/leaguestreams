@@ -89,7 +89,7 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new CrawlException('Database Error, please try again in a few minutes');
+            throw new CrawlException('Database Error, please try again in a few minutes: '.$e->getMessage());
         }
 
         /**

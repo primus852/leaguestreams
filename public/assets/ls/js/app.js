@@ -869,12 +869,18 @@ $(document).on("change", "#cmn-toggle-4", function () {
     }
     $('#showLabel').html('&nbsp;Spoilers');
 });
-$(document).on("click", "#submitSummoner", function () {
+$(document).on("click", "#submitSummoner", function (e) {
+
+
     var $btn = $(this);
     var $streamer = $("#streamerId").val().trim();
     var $summoner = $("#summoner").val();
     var $region = $("#region").val();
+    var $regionText = $("#region option:selected").text();
     var $url = $("#ajax-route-check-summoner").val();
+    var $prog = $('.progress');
+    var $progBar = $('.progress-bar');
+
     if ($btn.hasClass("is-disabled")) {
         return false;
     }
@@ -886,7 +892,10 @@ $(document).on("click", "#submitSummoner", function () {
         openNoty("error", "Please enter a Streamer (from List)");
         return false;
     }
-    $btn.addClass("is-disabled").html("Checking...");
+    $btn.addClass("is-disabled").html('<i class="fa fa-spin fa-spinner"></i> Checking...');
+    if ($prog.length) {
+        $progBar.html('Searching ' + $regionText).css('width', '0%').attr('aria-valuenow', '0').show();
+    }
 
     /**
      * Periodically check Session Status
@@ -896,7 +905,6 @@ $(document).on("click", "#submitSummoner", function () {
         called = 0,
         set_delay = 1000,
         callout = function () {
-            console.log('Called SessionCheck ' + called);
             $.get($('#ajax-route-check-session').val(), {
                 streamerId: $streamer,
                 summoner: $summoner,
@@ -904,7 +912,6 @@ $(document).on("click", "#submitSummoner", function () {
             })
                 .done(function (response) {
                     if (called === 0) {
-                        console.log('Search Streamer');
                         $.get($url, {
                             streamerId: $streamer,
                             summoner: $summoner,
@@ -914,6 +921,10 @@ $(document).on("click", "#submitSummoner", function () {
                             $("#streamerAC").val("").focus();
                             $("#summoner").val("");
                             $btn.removeClass("is-disabled").html("Check");
+                            if ($prog.length) {
+                                $progBar.html('').css('width', '0%').attr('aria-valuenow', 0);
+                                $prog.hide();
+                            }
                             if (to) {
                                 clearTimeout(to);
                                 clearTime = true;
@@ -925,14 +936,30 @@ $(document).on("click", "#submitSummoner", function () {
                             }
                             openNoty("error", "Ajax failed. The administrator was informed about the incident");
                             $btn.removeClass("is-disabled").html("Check");
+                            if ($prog.length) {
+                                $progBar.html('').css('width', '0%').attr('aria-valuenow', 0);
+                                $prog.hide();
+                            }
                         });
                     }
                     called++;
-                    console.log(response.extra.status);
+                    if ($prog.length) {
+                        $prog.show();
+                        if (response.extra.pct > 0) {
+                            $progBar.html(response.extra.status).css('width', response.extra.pct + '%').attr('aria-valuenow', response.extra.pct);
+                        }else{
+                            $progBar.html('Searching...').css('width', '15%').attr('aria-valuenow', 15);
+                        }
+                    }
                 })
                 .always(function () {
                     if (clearTime === false) {
                         to = setTimeout(callout, set_delay);
+                    }else{
+                        if ($prog.length) {
+                            $prog.hide();
+                            $progBar.html('').css('width', '0%').attr('aria-valuenow', 0);
+                        }
                     }
                 });
         };

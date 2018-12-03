@@ -219,6 +219,7 @@ class LSVods extends LSFunction
     /**
      * @param Champion $champ
      * @return array
+     * @throws \Exception
      */
     public function getByChampion(Champion $champ)
     {

@@ -15,9 +15,9 @@
         <div class="message-container">
             <div class="row">
                 <div class="col-12">
-                    <div class="message-box">
-                        <div class="row ls-border-container"
-                             style="min-height:200px;background:white url('{{ preload(asset('assets/ls/img/champions/'~champ.key~'_0.png')) }}') no-repeat top right;">
+                    <div class="message-box" style="padding: 0 15px 10px !important;">
+                        <div class="row"
+                             style="border-bottom: 1px solid #ccc !important;min-height:200px;background:white url('{{ preload(asset('assets/ls/img/champions/'~champ.key~'_0.png')) }}') no-repeat top right;">
                             <div class="col-5">
                                 <div class="row">
                                     <div class="col-12">
@@ -78,7 +78,7 @@
                             </div>
                             <div class="col-4">
                                 <br/>
-                                <div class="message-box show-main-streamers" data-champion="{{ champ.id }}"
+                                <div class="show-main-streamers" data-champion="{{ champ.id }}"
                                      data-url="{{ path('renderMainStreamerByChampion') }}">
                                     <h4><i class="fa fa-spin fa-spinner"></i> Loading Streamers</h4>
                                     <div class="row" style="border-bottom:1px solid #ccc;padding-top:5px;">
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-10">
+                            <div class="col-12">
                                 <br/>
                                 <strong>Lore</strong><br/>
                                 {{ champ.blurb }} <i class="fa fa-info-circle tt ttLong" title="{{ champ.lore }}"></i>

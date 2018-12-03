@@ -41,14 +41,23 @@ class AjaxController extends AbstractController
     public function checkSessionAction(Request $request)
     {
 
-        if ($request->hasSession() && ($session = $request->getSession())) {
-            $status = $session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner'));
+        if ($request->hasSession()) {
+            $session = $request->getSession();
+            $pre = explode('|||',$session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner')));
+            $status = $pre[0];
+            $pct = array_key_exists(1,$pre) ? $pre[1] : 0;
+            $sName = $session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner'));
+
         } else {
             $status = 'empty';
+            $pct = 0;
+            $sName = 'empty';
         }
 
         return ShortResponse::success('Session found', array(
             'status' => $status,
+            'pct' => $pct,
+            'full' => $sName
         ));
     }
 
@@ -114,11 +123,11 @@ class AjaxController extends AbstractController
          * Find the Summoner at Riot
          * and update the session status
          */
+        $session->set($sessionName, 'Searching Summoner|||10');
+        $session->save();
         try {
-            $session->set($sessionName, 'Searching Summoner');
             $summoner = $riot->getSummonerByName($request->get('summoner'), true);
         } catch (RiotApiException $e) {
-            $session->invalidate();
             return ShortResponse::error('Search for <strong>' . $request->get('summoner') . '</strong>: ' . $e->getMessage());
         }
 
@@ -134,11 +143,11 @@ class AjaxController extends AbstractController
             /**
              * Add the Summoner to the Database
              */
+            $session->set($sessionName, 'Found, getting Summoner Stats|||50');
+            $session->save();
             try {
-                $session->set($sessionName, 'Adding Summoner');
                 $s = $crawl->add_summoner($summoner, $streamer, $region, $riot);
             } catch (CrawlException $e) {
-                $session->invalidate();
                 return ShortResponse::error('Error: ' . $e->getMessage());
             }
 
@@ -158,12 +167,12 @@ class AjaxController extends AbstractController
                 /**
                  * Update the Games
                  */
-                $session->set($sessionName, 'Updating Matchhistory');
+                $session->set($sessionName, 'Updating Matchhistory|||67');
+                $session->save();
                 foreach ($matches as $match) {
                     try {
                         $crawl->update_match($match);
                     } catch (CrawlException $e) {
-                        $session->invalidate();
                         return ShortResponse::error('Error: ' . $e->getMessage());
                     }
                 }
@@ -174,8 +183,9 @@ class AjaxController extends AbstractController
              */
             $isPlaying = true;
             $game = null;
+            $session->set($sessionName, 'Checking Live Games|||75');
+            $session->save();
             try {
-                $session->set($sessionName, 'Checking Live Games');
                 $game = $riot->getCurrentGame($s->getSummonerId(), true);
             } catch (RiotApiException $e) {
                 $isPlaying = false;
@@ -184,14 +194,15 @@ class AjaxController extends AbstractController
             /**
              * If Summoner is in a live game, update
              */
+            $session->set($sessionName, 'Updating Current Match|||85');
+            $session->save();
             try {
-                $session->set($sessionName, 'Updating Current Match');
                 $isPlaying ? $crawl->current_match_update($s, $game) : $crawl->current_match_remove($s);
             } catch (CrawlException $e) {
                 return ShortResponse::exception('There was a problem updating Live Match, please try again in a few minutes', $e->getMessage());
             }
 
-            $session->set($sessionName, 'Finished');
+            $session->set($sessionName, 'Finished|||0');
             return ShortResponse::success('Summoner inserted, updated Summoner Stats');
 
         }
@@ -209,7 +220,6 @@ class AjaxController extends AbstractController
          * Already reported (from this IP)
          */
         if ($singleSmurfCheck !== null) {
-            $session->invalidate();
             return ShortResponse::error('Summoner already added. More reports needed.');
         }
 
@@ -230,7 +240,7 @@ class AjaxController extends AbstractController
             return ShortResponse::mysql($e->getMessage());
         }
 
-        $session->set($sessionName, 'Finished');
+        $session->set($sessionName, 'Finished|||0');
         return ShortResponse::success('Summoner added. More reports needed in order to attach it to the Streamer.');
     }
 
