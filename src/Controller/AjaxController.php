@@ -12,7 +12,7 @@ use App\Entity\Summoner;
 use App\Utils\Constants;
 use App\Utils\Helper;
 use App\Utils\LS\Crawl;
-use App\Utils\LS\CrawlException;
+use App\Utils\LS\LSException;
 use App\Utils\LSFunction;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
@@ -147,7 +147,7 @@ class AjaxController extends AbstractController
             $session->save();
             try {
                 $s = $crawl->add_summoner($summoner, $streamer, $region, $riot);
-            } catch (CrawlException $e) {
+            } catch (LSException $e) {
                 return ShortResponse::error('Error: ' . $e->getMessage());
             }
 
@@ -172,7 +172,7 @@ class AjaxController extends AbstractController
                 foreach ($matches as $match) {
                     try {
                         $crawl->update_match($match);
-                    } catch (CrawlException $e) {
+                    } catch (LSException $e) {
                         return ShortResponse::error('Error: ' . $e->getMessage());
                     }
                 }
@@ -198,7 +198,7 @@ class AjaxController extends AbstractController
             $session->save();
             try {
                 $isPlaying ? $crawl->current_match_update($s, $game) : $crawl->current_match_remove($s);
-            } catch (CrawlException $e) {
+            } catch (LSException $e) {
                 return ShortResponse::exception('There was a problem updating Live Match, please try again in a few minutes', $e->getMessage());
             }
 
@@ -514,7 +514,7 @@ class AjaxController extends AbstractController
         /* Check and Update Live Game */
         try {
             $liveGame = $crawl->check_game_summoner($summoner, true);
-        } catch (CrawlException $e) {
+        } catch (LSException $e) {
             return ShortResponse::error('Could not check/update Streamers game');
         }
 

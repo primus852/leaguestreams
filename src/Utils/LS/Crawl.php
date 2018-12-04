@@ -39,7 +39,7 @@ class Crawl
      * @param Region $region
      * @param RiotApi $riotApi
      * @return Summoner
-     * @throws CrawlException
+     * @throws LSException
      */
     public function add_summoner(array $summoner, Streamer $streamer, Region $region, RiotApi $riotApi)
     {
@@ -72,7 +72,7 @@ class Crawl
             try {
                 $stats = $riotApi->getLeaguePosition($summoner['id'], 'RANKED_SOLO_5x5', true);
             } catch (RiotApiException $e) {
-                throw new CrawlException('Could not get Summoner Stats: ' . $e->getMessage());
+                throw new LSException('Could not get Summoner Stats: ' . $e->getMessage());
             }
 
             $s->setDivision($stats['rank']);
@@ -89,7 +89,7 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new CrawlException('Database Error, please try again in a few minutes: '.$e->getMessage());
+            throw new LSException('Database Error, please try again in a few minutes: '.$e->getMessage());
         }
 
         /**
@@ -112,7 +112,7 @@ class Crawl
      * @param Summoner $summoner
      * @param bool $update
      * @return bool
-     * @throws CrawlException
+     * @throws LSException
      */
     public function check_game_summoner(Summoner $summoner, bool $update = false)
     {
@@ -136,8 +136,8 @@ class Crawl
         if ($update) {
             try {
                 $isPlaying ? $this->current_match_update($summoner, $game) : $this->current_match_remove($summoner);
-            } catch (CrawlException $e) {
-                throw new CrawlException($e->getMessage());
+            } catch (LSException $e) {
+                throw new LSException($e->getMessage());
             }
         }
 
@@ -149,7 +149,7 @@ class Crawl
     /**
      * @param Match $match
      * @return bool
-     * @throws CrawlException
+     * @throws LSException
      */
     public function update_match(Match $match)
     {
@@ -218,8 +218,8 @@ class Crawl
 
                             try {
                                 $enemy = $this->loadEntity(Champion::class, $p['championId']);
-                            } catch (CrawlException $e) {
-                                throw new CrawlException('Update Match Exception: ' . $e->getMessage());
+                            } catch (LSException $e) {
+                                throw new LSException('Update Match Exception: ' . $e->getMessage());
                             }
                         }
                     }
@@ -238,7 +238,7 @@ class Crawl
                 try {
                     $matches = $api->getMatchList($match->getSummoner()->getAccountId(), null, $upgrade);
                 } catch (RiotApiException $e) {
-                    throw new CrawlException('Could not get Matchhistory: ' . $e->getMessage());
+                    throw new LSException('Could not get Matchhistory: ' . $e->getMessage());
                 }
 
                 foreach ($matches as $game) {
@@ -278,7 +278,7 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new CrawlException('MySQL Error: ' . $e->getMessage());
+            throw new LSException('MySQL Error: ' . $e->getMessage());
         }
 
         return !$notFound;
@@ -287,7 +287,7 @@ class Crawl
 
     /**
      * @param Summoner $summoner
-     * @throws CrawlException
+     * @throws LSException
      */
     public function update_summoner(Summoner $summoner)
     {
@@ -302,7 +302,7 @@ class Crawl
         try {
             $stats = $api->getLeaguePosition($summoner->getSummonerId(), 'RANKED_SOLO_5x5', $upgrade);
         } catch (RiotApiException $e) {
-            throw new CrawlException('Update Summoner Exception: ' . $e->getMessage());
+            throw new LSException('Update Summoner Exception: ' . $e->getMessage());
         }
 
         $summoner->setDivision($stats['rank']);
@@ -314,13 +314,13 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new CrawlException('MySQL Error: ' . $e->getMessage());
+            throw new LSException('MySQL Error: ' . $e->getMessage());
         }
 
     }
 
     /**
-     * @throws CrawlException
+     * @throws LSException
      */
     public function update_summoner_names()
     {
@@ -348,7 +348,7 @@ class Crawl
 
                 $s = $api->getSummoner($summoner->getSummonerId(), false, $upgrade);
             } catch (RiotApiException $e) {
-                throw new CrawlException('Summoner Info Exception: ' . $e->getMessage());
+                throw new LSException('Summoner Info Exception: ' . $e->getMessage());
             }
 
             /**
@@ -357,7 +357,7 @@ class Crawl
             try {
                 $info = $api->getSummonerByName($s['name'], true);
             } catch (RiotApiException $e) {
-                throw new CrawlException('Summoner Info Upgrade Exception: ' . $e->getMessage());
+                throw new LSException('Summoner Info Upgrade Exception: ' . $e->getMessage());
             }
 
             $summoner->setAccountId($info['accountId']);
@@ -368,7 +368,7 @@ class Crawl
             try {
                 $this->em->flush();
             } catch (\Exception $e) {
-                throw new CrawlException('MySQL Error: ' . $e->getMessage());
+                throw new LSException('MySQL Error: ' . $e->getMessage());
             }
 
 
@@ -377,7 +377,7 @@ class Crawl
     }
 
     /**
-     * @throws CrawlException
+     * @throws LSException
      */
     public function versions()
     {
@@ -390,7 +390,7 @@ class Crawl
         try {
             $version = $api->getVersion()[0];
         } catch (RiotApiException $e) {
-            throw new CrawlException('Gather Versions Exception: ' . $e->getMessage());
+            throw new LSException('Gather Versions Exception: ' . $e->getMessage());
         }
 
         $v = $this->em->getRepository(Versions::class)->find(1);
@@ -409,7 +409,7 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new CrawlException('MySQL Error: ' . $e->getMessage());
+            throw new LSException('MySQL Error: ' . $e->getMessage());
         }
 
 
@@ -470,7 +470,7 @@ class Crawl
 
     /**
      * @param Summoner $summoner
-     * @throws CrawlException
+     * @throws LSException
      */
     public function current_match_remove(Summoner $summoner)
     {
@@ -488,7 +488,7 @@ class Crawl
             try {
                 $this->em->flush();
             } catch (\Exception $e) {
-                throw new CrawlException('MySQL Error: ' . $e->getMessage());
+                throw new LSException('MySQL Error: ' . $e->getMessage());
             }
 
             /**
@@ -496,8 +496,8 @@ class Crawl
              */
             try {
                 $this->insert_match_history($current);
-            } catch (CrawlException $e) {
-                throw new CrawlException('Insert Matchhistory Exception: ' . $e->getMessage());
+            } catch (LSException $e) {
+                throw new LSException('Insert Matchhistory Exception: ' . $e->getMessage());
             }
 
         }
@@ -506,7 +506,7 @@ class Crawl
 
     /**
      * @param CurrentMatch $match
-     * @throws CrawlException
+     * @throws LSException
      */
     private function insert_match_history(CurrentMatch $match)
     {
@@ -546,7 +546,7 @@ class Crawl
             try {
                 $this->em->flush();
             } catch (\Exception $e) {
-                throw new CrawlException('MySQL Error: ' . $e->getMessage());
+                throw new LSException('MySQL Error: ' . $e->getMessage());
             }
 
 
@@ -557,7 +557,7 @@ class Crawl
     /**
      * @param Summoner $summoner
      * @param array $game
-     * @throws CrawlException
+     * @throws LSException
      */
     public function current_match_update(Summoner $summoner, array $game)
     {
@@ -578,8 +578,8 @@ class Crawl
                 $qId = $game['gameQueueConfigId'];
             }
             $queue = self::loadEntity(Queue::class, $qId);
-        } catch (CrawlException $e) {
-            throw new CrawlException($e->getMessage());
+        } catch (LSException $e) {
+            throw new LSException($e->getMessage());
         }
 
         /**
@@ -605,8 +605,8 @@ class Crawl
                     $champion = self::loadEntity(Champion::class, $participant['championId']);
                     $spell1 = self::loadEntity(Spell::class, $participant['spell1Id']);
                     $spell2 = self::loadEntity(Spell::class, $participant['spell2Id']);
-                } catch (CrawlException $e) {
-                    throw new CrawlException($e->getMessage());
+                } catch (LSException $e) {
+                    throw new LSException($e->getMessage());
                 }
 
             }
@@ -614,7 +614,7 @@ class Crawl
         }
 
         if ($champion === null) {
-            throw new CrawlException('Summoner is not playing a champion');
+            throw new LSException('Summoner is not playing a champion');
         }
 
         /**
@@ -648,7 +648,7 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new CrawlException('MySQL Error: ' . $e->getMessage());
+            throw new LSException('MySQL Error: ' . $e->getMessage());
         }
     }
 
@@ -656,7 +656,7 @@ class Crawl
      * @param string $entity
      * @param int $id
      * @return null|object
-     * @throws CrawlException
+     * @throws LSException
      */
     private function loadEntity(string $entity, int $id)
     {
@@ -664,7 +664,7 @@ class Crawl
         $e = $this->em->getRepository($entity)->find($id);
 
         if ($e === null) {
-            throw new CrawlException('Could not find ' . $entity . '. ID: ' . $id);
+            throw new LSException('Could not find ' . $entity . '. ID: ' . $id);
         }
 
         return $e;

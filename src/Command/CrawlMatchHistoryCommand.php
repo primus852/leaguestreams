@@ -6,7 +6,7 @@ use App\Entity\Match;
 use App\Utils\Locker\Locker;
 use App\Utils\Locker\LockerException;
 use App\Utils\LS\Crawl;
-use App\Utils\LS\CrawlException;
+use App\Utils\LS\LSException;
 use Doctrine\Common\Persistence\ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
@@ -99,7 +99,7 @@ class CrawlMatchHistoryCommand extends Command
                 $lsCrawl->update_summoner($uc->getSummoner());
                 $debug ? $io->text('-->Update Stats: <fg=green>success</>') : null;
 
-            }catch (CrawlException $e){
+            }catch (LSException $e){
                 $io->error('Exception: '.$e->getMessage());
             }
         }

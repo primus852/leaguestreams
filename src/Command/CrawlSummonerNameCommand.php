@@ -5,7 +5,7 @@ namespace App\Command;
 use App\Entity\Summoner;
 use App\Utils\Locker\Locker;
 use App\Utils\Locker\LockerException;
-use App\Utils\LS\CrawlException;
+use App\Utils\LS\LSException;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
 use App\Utils\RiotApi\Settings;
@@ -50,7 +50,7 @@ class CrawlSummonerNameCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|void|null
-     * @throws CrawlException
+     * @throws LSException
      * @throws LockerException
      * @throws StopwatchException
      */
@@ -111,7 +111,7 @@ class CrawlSummonerNameCommand extends Command
                 $info = $api->getSummoner($summoner->getSummonerId(), false, $upgrade);
 
             } catch (RiotApiException $e) {
-                throw new CrawlException('Summoner Info Exception: ' . $e->getMessage());
+                throw new LSException('Summoner Info Exception: ' . $e->getMessage());
             }
 
             $debug ? $io->text('-->Found Summoner Name is: <fg=green>' . $info['name'] . '</> updating Summoner ID and Account ID...') : null;
@@ -123,7 +123,7 @@ class CrawlSummonerNameCommand extends Command
                 try {
                     $info = $api->getSummonerByName($info['name'], true);
                 } catch (RiotApiException $e) {
-                    throw new CrawlException('Summoner Info Upgrade Exception: ' . $e->getMessage());
+                    throw new LSException('Summoner Info Upgrade Exception: ' . $e->getMessage());
                 }
             }
 
@@ -143,7 +143,7 @@ class CrawlSummonerNameCommand extends Command
                 $this->em->flush();
                 $debug ? $io->text('Flushing DB: <fg=green>Success</>') : null;
             } catch (\Exception $e) {
-                throw new CrawlException('MySQL Error: ' . $e->getMessage());
+                throw new LSException('MySQL Error: ' . $e->getMessage());
             }
 
             $debug ? $io->text('-------------------------------------------------------') : null;

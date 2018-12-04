@@ -5,7 +5,7 @@ namespace App\Command;
 use App\Utils\Locker\Locker;
 use App\Utils\Locker\LockerException;
 use App\Utils\LS\Crawl;
-use App\Utils\LS\CrawlException;
+use App\Utils\LS\LSException;
 use Doctrine\Common\Persistence\ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
@@ -47,7 +47,7 @@ class CrawlVersionCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|void|null
-     * @throws CrawlException
+     * @throws LSException
      * @throws LockerException
      * @throws StopwatchException
      */
@@ -86,8 +86,8 @@ class CrawlVersionCommand extends Command
 
         try{
             $lsCrawl->versions();
-        }catch (CrawlException $e){
-            throw new CrawlException('Could not gather Versions: '.$e->getMessage());
+        }catch (LSException $e){
+            throw new LSException('Could not gather Versions: '.$e->getMessage());
         }
 
         /**

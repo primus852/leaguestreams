@@ -7,7 +7,7 @@ use App\Entity\Summoner;
 use App\Utils\Locker\Locker;
 use App\Utils\Locker\LockerException;
 use App\Utils\LS\Crawl;
-use App\Utils\LS\CrawlException;
+use App\Utils\LS\LSException;
 use App\Utils\RiotApi\Region;
 use Doctrine\Common\Persistence\ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
@@ -95,7 +95,7 @@ class CrawlSummonerCommand extends Command
 
                 try {
                     $isPlaying = $lsCrawl->check_game_summoner($summoner, true);
-                } catch (CrawlException $e) {
+                } catch (LSException $e) {
                     $isPlaying = false;
                 }
                 $text = $isPlaying ? '<fg=green>InGame</>, skipping rest...' : '<fg=red>Not InGame</>';
