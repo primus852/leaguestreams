@@ -135,7 +135,7 @@ class FrontendController extends Controller
             'search' => $searchString,
             'summoners' => $s->getSummoner(),
             'title' => $s->getDescription(),
-            'channel' => $s->getChannelName(),
+            'channel' => $s->getChannelUser(),
             'streamerName' => $s->getChannelUser(),
             'streamStartedTime' => $startDate->format('d.m.Y H:i'),
             'streamStarted' => $ls->getTimeAgo($s->getStarted()),
