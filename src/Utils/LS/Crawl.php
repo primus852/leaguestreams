@@ -89,7 +89,7 @@ class Crawl
         try {
             $this->em->flush();
         } catch (\Exception $e) {
-            throw new LSException('Database Error, please try again in a few minutes: '.$e->getMessage());
+            throw new LSException('Database Error, please try again in a few minutes: ' . $e->getMessage());
         }
 
         /**
@@ -189,9 +189,11 @@ class Crawl
              */
             $participant = null;
             foreach ($history['participantIdentities'] as $pId) {
-                if ($pId['player']['summonerId'] === $match->getSummoner()->getSummonerId()) {
-                    $participant = $pId['participantId'];
-                    break;
+                if (array_key_exists('player', $pId)) {
+                    if ($pId['player']['summonerId'] === $match->getSummoner()->getSummonerId()) {
+                        $participant = $pId['participantId'];
+                        break;
+                    }
                 }
             }
 
@@ -242,20 +244,21 @@ class Crawl
                 }
 
                 foreach ($matches as $game) {
+                    if (is_array($game)) {
+                        if (array_key_exists('gameId', $game)) {
+                            if ($game['gameId'] === $match->getMatchId()) {
 
-                    if ($game['gameId'] === $match->getMatchId()) {
+                                if (array_key_exists('stats', $game)) {
+                                    $roleNo = array_key_exists('playerRole', $game['stats']) ? $game['stats']['playerRole'] : 99;
+                                    $laneNo = array_key_exists('playerPosition', $game['stats']) ? $game['stats']['playerPosition'] : 99;
+                                    $win = $game['stats']['win'];
 
-                        if (array_key_exists('stats', $game)) {
-                            $roleNo = array_key_exists('playerRole', $game['stats']) ? $game['stats']['playerRole'] : 99;
-                            $laneNo = array_key_exists('playerPosition', $game['stats']) ? $game['stats']['playerPosition'] : 99;
-                            $win = $game['stats']['win'];
-
-                            $role = self::getRole($roleNo);
-                            $lane = self::getLane($laneNo);
+                                    $role = self::getRole($roleNo);
+                                    $lane = self::getLane($laneNo);
+                                }
+                            }
                         }
-
                     }
-
                 }
             }
 

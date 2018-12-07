@@ -15,20 +15,25 @@ use App\Entity\Vod;
 use App\Utils\LSFunction;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\Routing\RouterInterface;
 
 class VodHandler
 {
 
     private $em;
+    private $router;
     const DAYS = 55;
 
     /**
      * VodHandler constructor.
      * @param ObjectManager $em
+     * @param RouterInterface $router
      */
-    public function __construct(ObjectManager $em)
+    public function __construct(ObjectManager $em, RouterInterface $router)
     {
         $this->em = $em;
+        $this->router = $router;
     }
 
     public function by_champion(Champion $champion)
@@ -74,9 +79,9 @@ class VodHandler
          * Loop through all the matches
          * @var $match Match
          */
-        foreach($matches as $match){
+        foreach ($matches as $match) {
 
-            if($match->getGameCreation() !== "" && $match->getGameCreation() !== null){
+            if ($match->getGameCreation() !== "" && $match->getGameCreation() !== null) {
 
                 /**
                  * Not UTC
@@ -95,7 +100,7 @@ class VodHandler
                 /**
                  * Skip if streamer has no VODs
                  */
-                if($vods === null){
+                if ($vods === null) {
                     continue;
                 }
 
@@ -103,7 +108,7 @@ class VodHandler
                  * Loop through all the VODs
                  * @var $vod Vod
                  */
-                foreach($vods as $vod){
+                foreach ($vods as $vod) {
 
                     /**
                      * Convert Start to UTC
@@ -126,22 +131,59 @@ class VodHandler
                             $eChampKey = $match->getEnemyChampion()->getKey();
                         }
 
-                    }
+                        $result['videos'][] = array(
+                            'champion' => $match->getChampion()->getName(),
+                            'championKey' => $match->getChampion()->getKey(),
+                            'enemyChampion' => $eChamp,
+                            'enemyChampionKey' => $eChampKey,
+                            'id' => $vod->getVideoId(),
+                            'gameStart' => $start->format('Y-m-d H:i'),
+                            'streamStart' => $startVod->format('Y-m-d H:i'),
+                            'offset' => self::offset($startVod, $start, false),
+                            'offsetSeconds' => self::offset($startVod, $start, true),
+                            'link' => "https://www.twitch.tv/videos/" . str_replace("v", "", $vod->getVideoId()) . "?t=" . self::offset($startVod, $start),
+                            'videoId' => $vod->getVideoId(),
+                            'win' => $match->getWin(),
+                            'version' => self::game_version($match->getGameVersion()),
+                            'length' => round($match->getLength() / 60),
+                            'queue' => $match->getQueue()->getName(),
+                            'league' => $match->getSummoner()->getLeague(),
+                            'channelUser' => $match->getStreamer()->getChannelUser(),
+                            'internalLink' => $this->router->generate('vodsPlayer', array(
+                                'vId' => $vod->getVideoId(),
+                                'offset' => self::offset($startVod, $start, true),
+                                'match' => $match->getId(),
+                            )),
+                            'lang' => substr($match->getStreamer()->getLanguage(), -2),
+                            'role' => $role,
+                        );
 
+                    }
                 }
 
+                usort($result['videos'], function ($a, $b) {
+                    return $b['gameStart'] <=> $a['gameStart'];
+                });
 
             }
-
         }
+
+        return $result;
 
     }
 
-    private function game_version(string $version){
+    /**
+     * @param string $version
+     * @return string
+     */
+    private function game_version(string $version)
+    {
 
         /* Chunk Game Version */
         $gv = explode('.', $version);
-        $gameVersion = $gv[0] . '.' . $gv[1];
+
+        return array_key_exists(1, $gv) ? $gv[0] . '.' . $gv[1] : 'N/A';
+
     }
 
     /**
@@ -150,7 +192,8 @@ class VodHandler
      * @param bool $seconds
      * @return float|int|string
      */
-    private function offset(\DateTime $startVod, \DateTime $start, bool $seconds = true){
+    private function offset(\DateTime $startVod, \DateTime $start, bool $seconds = true)
+    {
 
         $startOffset = $startVod->diff($start);
         $minutes = $startOffset->days * 24 * 60;

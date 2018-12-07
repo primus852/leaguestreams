@@ -11,6 +11,7 @@ use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Entity\Versions;
 use App\Utils\Helper;
+use App\Utils\LS\VodHandler;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
 use App\Utils\RiotApi\RiotApi;
@@ -638,11 +639,10 @@ class RenderController extends AbstractController
             throw new NotFoundHttpException('Champion not found. Name: ' . $c);
         }
 
-        $versions = $em->getRepository('App:Versions')->find(1);
+        $versions = $em->getRepository(Versions::class)->find(1);
 
-        /* @var $vods LSVods */
-        $vods = new LSVods($em, null, null, $this->container->get('router'));
-        $result = $vods->getByChampion($champion);
+        $vodHandler = new VodHandler($em, $this->container->get('router'));
+        $result = $vodHandler->by_champion($champion);
 
         return $this->render('render/vodByChampion.html.twig', array(
             'vods' => $result,
