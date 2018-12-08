@@ -17,15 +17,6 @@
             <div class="nano-content" id="pScrollerMain">
                 <div class="container-fluid">
                     <div class="row justify-content-center">
-                        <div class="col col-10 col-xl-6">
-                            {% if streamer.banner is not empty %}
-                                <img src="{{ streamer.banner }}" alt="{{ streamer.channelUser }} Banner"
-                                     class="img-responsive img-thumbnail"/>
-                            {% else %}
-                                <img class="img-fluid img-thumbnail" src="{{ preload(asset('assets/ls/img/nobanner.jpg')) }}"
-                                     alt="{{ streamer.channelUser }} Banner"/>
-                            {% endif %}
-                        </div>
                         <div class="col-xl-4 offset-xl-0 col-10">
                             <div class="row">
                                 <div class="card">
@@ -76,10 +67,7 @@
                                 <br/>&nbsp;
                             </div>
                         </div>
-                    </div>
-                    <br/>&nbsp;
-                    <div class="row justify-content-center">
-                        <div class="col-10 col-xl-3 pBox">
+                        <div class="col-10 col-xl-6">
                             <strong>Summoners</strong><br/><br/>
                             {% for summoner in streamer.summoner %}
                                 <div class="row" id="sDiv_{{ summoner.id }}">
@@ -106,6 +94,9 @@
                                 </div>
                             {% endfor %}
                         </div>
+                    </div>
+                    <hr/>&nbsp;
+                    <div class="row justify-content-center">
                         <div class="col-10 col-xl-2 pBox">
                             <strong class="tt" title="Min. 100 Games and &gt; 90&percnt; played">One-Trick-Pony <i
                                         class="fa fa-info-circle"></i></strong><br/>
