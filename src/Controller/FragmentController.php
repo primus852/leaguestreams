@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Streamer;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 class FragmentController extends Controller
 {
@@ -29,22 +31,16 @@ class FragmentController extends Controller
     }
 
     /**
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function getLive()
     {
-        $em = $this->getDoctrine()->getManager();
-        $live = $em->getRepository("App:Live")->find(1);
 
-        $l = null;
-        if($live !== null){
-            $l = $live->getCount();
-        }
+        $live = $this->getDoctrine()->getRepository(Streamer::class)->findBy(array(
+            'isOnline' => true,
+        ));
 
-        return $this->render(
-            'fragment/live.html.twig',
-            array('live' => $l)
-        );
+        return new Response(count($live));
     }
 
     /**
