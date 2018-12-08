@@ -43,9 +43,9 @@ class AjaxController extends AbstractController
 
         if ($request->hasSession()) {
             $session = $request->getSession();
-            $pre = explode('|||',$session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner')));
+            $pre = explode('|||', $request->get('platform') . '-' . $session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner')));
             $status = $pre[0];
-            $pct = array_key_exists(1,$pre) ? $pre[1] : 0;
+            $pct = array_key_exists(1, $pre) ? $pre[1] : 0;
             $sName = $session->get($request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner'));
 
         } else {
@@ -61,22 +61,111 @@ class AjaxController extends AbstractController
         ));
     }
 
-
     /**
      * @Route("/_ajax/_checkSummoner", name="checkSummoner")
      * @param Request $request
      * @return JsonResponse
+     * @throws \Exception
      */
     public function checkSummonerAction(Request $request)
     {
 
+        /**
+         * Start a new Session to report progress
+         * @todo replace with something nice(r)?
+         */
+        if (!$request->hasSession()) {
+            $session = new Session();
+            $session->start();
+        } else {
+            $session = $request->getSession();
+        }
+
+        $sessionName = $request->get('platform') . '-' . $request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner');
+
+
         /* @var $em ObjectManager */
         $em = $this->getDoctrine()->getManager();
 
+        /* @var $platform Platform */
+        $platform = $this->getDoctrine()->getRepository(Platform::class)->find($request->get('platform'));
+
+        if ($platform === null) {
+            return ShortResponse::error('Invalid Platform');
+        }
+
         /* @var $streamer Streamer */
-        $streamer = $em->getRepository(Streamer::class)->find($request->get('streamerId'));
+        $streamer = $em->getRepository(Streamer::class)->findOneBy(array(
+            'channelName' => $request->get('streamerId'),
+            'platform' => $platform
+        ));
+
         if ($streamer === null) {
-            return ShortResponse::error('Streamer not found, please try again and select Streamer from list.');
+
+            /**
+             * Check implementation
+             */
+            if ($platform->getName() !== 'Twitch.tv') {
+                return ShortResponse::error('Platform not implemented');
+            }
+
+            $session->set($sessionName, 'Creating Streamer|||10');
+            $session->save();
+
+            /**
+             * Create a new Streamer
+             */
+            $ta = new TwitchApi($em);
+
+            try {
+                $result = $ta->info($request->get('streamerId'));
+            } catch (StreamPlatformException $e) {
+                return ShortResponse::error('Not saved: ' . $e->getMessage());
+            }
+
+            /* Send to Database */
+            $streamer = new Streamer();
+            $streamer->setChannelName($result["channel_name"]);
+            $streamer->setChannelUser($result["display_name"]);
+            $streamer->setChannelId($result["channel_id"]);
+            $streamer->setIsOnline(false);
+            $streamer->setModified();
+            $streamer->setPlatform($platform);
+            $streamer->setTotalOnline(0);
+            $streamer->setCreated();
+            $streamer->setIsPartner(false);
+            $streamer->setViewers(0);
+            $streamer->setResolution(0);
+            $streamer->setFps(0);
+            $streamer->setDelay(0);
+            $streamer->setDescription('NONE');
+            $streamer->setLanguage('en');
+            $streamer->setThumbnail('NONE');
+            $streamer->setLogo('NONE');
+            $streamer->setBanner('NONE');
+            $streamer->setStarted(new \DateTime());
+            $streamer->setIsFeatured(false);
+            $em->persist($streamer);
+
+            try {
+                $em->flush();
+            } catch (\Exception $e) {
+                return new JsonResponse(array(
+                    'result' => 'error',
+                    'message' => 'Database Error. The Administrator is informed about the incident.'
+                ));
+            }
+
+            $ta->setStreamer($streamer);
+
+            $session->set($sessionName, 'Updating Streamer Stats|||20');
+            $session->save();
+
+            try {
+                $ta->check_online(true);
+            } catch (StreamPlatformException $e) {
+                return ShortResponse::json('warning', 'Streamer added! Could not update Streamer Info, it will be updated automatically in approx. 5 minutes');
+            }
         }
 
         /* @var region Region */
@@ -94,18 +183,6 @@ class AjaxController extends AbstractController
             return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
         }
 
-        /**
-         * Start a new Session to report progress
-         * @todo replace with something nice(r)?
-         */
-        if (!$request->hasSession()) {
-            $session = new Session();
-            $session->start();
-        }else{
-            $session = $request->getSession();
-        }
-
-        $sessionName = $request->get('streamerId') . '-' . $request->get('region') . '-' . $request->get('summoner');
 
         /* @var $singleSmurf PersistentCollection */
         $singleSmurf = $em->getRepository(Smurf::class)->findBy(array(
@@ -123,7 +200,7 @@ class AjaxController extends AbstractController
          * Find the Summoner at Riot
          * and update the session status
          */
-        $session->set($sessionName, 'Searching Summoner|||10');
+        $session->set($sessionName, 'Searching Summoner|||35');
         $session->save();
         try {
             $summoner = $riot->getSummonerByName($request->get('summoner'), true);
@@ -471,7 +548,7 @@ class AjaxController extends AbstractController
         /* @var $summoner Summoner */
         $summoner = $em->getRepository(Summoner::class)->find($sc->decode($crypt_id));
         if ($summoner === null) {
-            return ShortResponse::error('Summoner not found',array(
+            return ShortResponse::error('Summoner not found', array(
                 'icon' => $icon,
                 'iClass' => $iClass,
                 'action' => $action,
@@ -499,7 +576,7 @@ class AjaxController extends AbstractController
         }
 
         if ($isOnline === false) {
-            return ShortResponse::json('warning', 'Streamer offline, removed panel...',array(
+            return ShortResponse::json('warning', 'Streamer offline, removed panel...', array(
                 'icon' => 'remove',
                 'iClass' => 'warning',
                 'action' => 'remove',

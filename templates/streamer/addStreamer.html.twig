@@ -16,91 +16,96 @@
         <div id="main-nano-wrapper" class="nano">
             <div class="nano-content" id="pScrollerMain">
                 <div class="container">
+
                     <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <div class="module form-module">
-
-                                <h2>Please fill the form to add a <strong>Streamer</strong></h2>
-                                <div class="row justify-content-center">
-                                    <div class="col-xs-12 col-sm-6 col-md-5">
-                                        <label for="channel">Channelname</label>
-                                        <input id="channel" name="channel" required="required" type="text">
+                        <div class="col-12 col-sm-8 col-md-6 mx-auto">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="card-title">
+                                        <h2 class="text-center">Add Streamer/Summoner</h2>
                                     </div>
-                                    <div class="col-xs-12 col-sm-6 col-md-5">
-                                        <label for="platform">Platform</label>
-                                        <select id="platform" name="platform">
-                                            <option value="1">Twitch.tv</option>
-                                            <!--<option value="2">Azubu.tv</option>-->
-                                            <option value="3">Beam.pro</option>
-                                        </select>
-                                    </div>
-
-                                </div>
-                                <hr/>
-                                <div class="row justify-content-center">
-                                    <div class="col-xs-12 col-sm-12 col-md-5 text-center">
-                                        <a role="button" id="submitStreamer" class="btn btn-green btn-block rounded-0">Check</a>
-                                        <br/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <br />&nbsp;
-                    <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <div class="module form-module">
-                                <div class="form">
-                                    <h2>Please fill the form to add a <strong>Summoner</strong></h2>
-                                    <div class="row justify-content-center">
-                                        <div class="col-xs-12 col-sm-12 col-md-10 ">
-                                            <label for="streamerAC">Streamer</label>
-                                            <input type="text" id="streamerAC" >
-                                            <input type="hidden" id="streamerId" />
+                                    <hr>
+                                    <form action="" method="post" novalidate="novalidate">
+                                        <div class="form-group text-center">
+                                            <ul class="list-inline">
+                                                <li class="list-inline-item">
+                                                    <i class="text-muted fa fa-twitch fa-2x"></i>
+                                                </li>
+                                                <li class="list-inline-item">
+                                                    <i class="text-muted fa fa-youtube fa-2x"></i>
+                                                </li>
+                                            </ul>
                                         </div>
-
-                                    </div>
-                                    <br />
-                                    <div class="row justify-content-center">
-
-                                        <div class="col-xs-4 col-sm-4 col-md-3">
-                                            <label for="region">Region</label>
-                                            <select id="region" name="region">
-                                                <option value="1">br</option>
-                                                <option value="2">eune</option>
-                                                <option value="3">euw</option>
-                                                <option value="4">lan</option>
-                                                <option value="5">las</option>
-                                                <option value="6">na</option>
-                                                <option value="7">oce</option>
-                                                <option value="8">tr</option>
-                                                <option value="9">ru</option>
-                                                <option value="10">kr</option>
-                                                <option value="12">jp</option>
-                                                <option value="11">pbe</option>
-                                            </select>
+                                        <div class="form-group">
+                                            <label>Summary</label>
+                                            <h5>
+                                                Streamer: <span id="js-add-streamer-name"></span> <span id="js-summoner-db-status" style="display:none;">(from DB)</span><br />
+                                                Summoner: <span id="js-add-summoner-name"></span>
+                                            </h5>
                                         </div>
-                                        <div class="col-xs-7 col-sm-7 col-md-7">
-                                            <label for="summoner">Summoner</label>
-                                            <input type="text" id="summoner" >
-                                        </div>
-                                    </div>
-                                    <hr/>
-                                    <div class="row justify-content-center">
-                                        <div class="col-xs-12 col-sm-12 col-md-5 text-center">
-                                            <a role="button" id="submitSummoner"
-                                               class="btn btn-green btn-block rounded-0">Check</a>
-                                            <br/>
-                                        </div>
-                                    </div>
-                                    <div class="row justify-content-center">
-                                        <div class="col-xs-12 col-sm-12 col-md-10 text-center">
-                                            <div class="progress" style="display: none;">
-                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <div class="form-group">
+                                                    <label for="platform" class="control-label">Platform</label>
+                                                    <select id="platform" class="form-control">
+                                                        <option value="1">Twitch.tv</option>
+                                                        <!--<option value="2">Azubu.tv</option>-->
+                                                        <option value="3">Beam.pro</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-9">
+                                                <div class="form-group">
+                                                    <label for="streamerAC" class="control-label">Streamer</label>
+                                                    <input type="text" class="form-control" id="streamerAC">
+                                                    <input type="hidden" id="streamerId"/>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <br />
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <div class="form-group">
+                                                    <label for="region" class="control-label">Region</label>
+                                                    <select id="region" class="form-control">
+                                                        <option value="1">BR</option>
+                                                        <option value="2">EUNE</option>
+                                                        <option value="3">EUW</option>
+                                                        <option value="4">LAN</option>
+                                                        <option value="5">LAS</option>
+                                                        <option value="6">NA</option>
+                                                        <option value="7">OCE</option>
+                                                        <option value="8">TR</option>
+                                                        <option value="9">RU</option>
+                                                        <option value="10">KR</option>
+                                                        <option value="12">JP</option>
+                                                        <option value="11">PBE</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-9">
+                                                <label for="summoner" class="control-label">Summoner</label>
+                                                <div class="input-group">
+                                                    <input id="summoner" name="summoner" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-xs-12 col-sm-12 col-md-10 text-center">
+                                                <div class="progress" style="display: none;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                                         role="progressbar" style="width: 0;" aria-valuenow="0"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="row justify-content-center">
+                                            <div class="col-xs-12 col-sm-12 col-md-10 text-center">
+                                                <a role="button" id="submitSummoner"
+                                                   class="btn btn-green btn-block rounded-0">Check</a>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -109,14 +114,15 @@
             </div>
         </div>
     </main>
-    <input type="hidden" id="ajax-route-check-streamer" value="{{ path('checkStreamer') }}" />
-    <input type="hidden" id="ajax-route-find-streamer-ac" value="{{ path('findStreamer') }}" />
-    <input type="hidden" id="ajax-route-check-summoner" value="{{ path('checkSummoner') }}" />
-    <input type="hidden" id="ajax-route-check-session" value="{{ path('checkSession') }}" />
+    <input type="hidden" id="ajax-route-check-streamer" value="{{ path('checkStreamer') }}"/>
+    <input type="hidden" id="ajax-route-find-streamer-ac" value="{{ path('findStreamer') }}"/>
+    <input type="hidden" id="ajax-route-check-summoner" value="{{ path('checkSummoner') }}"/>
+    <input type="hidden" id="ajax-route-check-session" value="{{ path('checkSession') }}"/>
 {% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ preload(asset('assets/node_modules/jquery-autocomplete/jquery.autocomplete.css')) }}" />
+    <link rel="stylesheet"
+          href="{{ preload(asset('assets/node_modules/jquery-autocomplete/jquery.autocomplete.css')) }}"/>
 {% endblock stylesheets %}
 
 {% block javascripts %}

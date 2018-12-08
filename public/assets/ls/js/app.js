@@ -55,7 +55,7 @@ $(function () {
         });
     }
 
-    var $selectls = $('select');
+    var $selectls = $('select:not(.form-control)');
     if ($selectls.length) {
         $selectls.select2({
             width: '100%',
@@ -667,6 +667,8 @@ if ($streamerAc.length) {
         minLength: 2
     }).on("selected.xdsoft", function (e, value) {
         $("#streamerId").val(value.id);
+        $('#streamerAC').trigger('keyup');
+        $('#js-summoner-db-status').show();
     }).keyup(function (event) {
     }).focus();
 }
@@ -868,13 +870,63 @@ $(document).on("change", "#cmn-toggle-4", function () {
     }
     $('#showLabel').html('&nbsp;Spoilers');
 });
+
+
+$(document).on('keyup', '#summoner', function (e) {
+    e.preventDefault();
+    trigger_summoner();
+});
+
+$(document).on('change', '#region', function (e) {
+    e.preventDefault();
+    trigger_summoner();
+});
+
+$(document).on('keyup', '#streamerAC', function (e) {
+    e.preventDefault();
+    trigger_streamer();
+});
+
+$(document).on('change', '#platform', function (e) {
+    e.preventDefault();
+    trigger_streamer();
+});
+
+function trigger_summoner(){
+    var $val = $('#summoner');
+    var $region = $('#region option:selected');
+    var $result = $('#js-add-summoner-name');
+
+    if ($.trim($val.val()) === '') {
+        $result.html('');
+    } else {
+        $result.html($region.text() + '-' + $val.val());
+    }
+}
+
+function trigger_streamer(){
+    var $val = $('#streamerAC');
+    var $platform = $('#platform option:selected');
+    var $result = $('#js-add-streamer-name');
+
+    $('#js-summoner-db-status').hide();
+
+    if ($.trim($val.val()) === '') {
+        $result.html('');
+    } else {
+        $result.html($platform.text() + ' - ' + $val.val());
+    }
+}
+
+
 $(document).on("click", "#submitSummoner", function (e) {
 
 
     var $btn = $(this);
-    var $streamer = $("#streamerId").val().trim();
+    var $streamer = $("#streamerAC").val().trim();
     var $summoner = $("#summoner").val();
     var $region = $("#region").val();
+    var $platform = $("#platform").val();
     var $regionText = $("#region option:selected").text();
     var $url = $("#ajax-route-check-summoner").val();
     var $prog = $('.progress');
@@ -907,14 +959,16 @@ $(document).on("click", "#submitSummoner", function (e) {
             $.get($('#ajax-route-check-session').val(), {
                 streamerId: $streamer,
                 summoner: $summoner,
-                region: $region
+                region: $region,
+                platform: $platform
             })
                 .done(function (response) {
                     if (called === 0) {
                         $.get($url, {
                             streamerId: $streamer,
                             summoner: $summoner,
-                            region: $region
+                            region: $region,
+                            platform: $platform
                         }).done(function (data) {
                             openNoty(data.result, data.message);
                             $("#streamerAC").val("").focus();
@@ -946,7 +1000,7 @@ $(document).on("click", "#submitSummoner", function (e) {
                         $prog.show();
                         if (response.extra.pct > 0) {
                             $progBar.html(response.extra.status).css('width', response.extra.pct + '%').attr('aria-valuenow', response.extra.pct);
-                        }else{
+                        } else {
                             $progBar.html('Searching...').css('width', '15%').attr('aria-valuenow', 15);
                         }
                     }
@@ -954,7 +1008,7 @@ $(document).on("click", "#submitSummoner", function (e) {
                 .always(function () {
                     if (clearTime === false) {
                         to = setTimeout(callout, set_delay);
-                    }else{
+                    } else {
                         if ($prog.length) {
                             $prog.hide();
                             $progBar.html('').css('width', '0%').attr('aria-valuenow', 0);
