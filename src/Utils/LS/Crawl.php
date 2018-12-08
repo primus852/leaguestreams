@@ -687,9 +687,7 @@ class Crawl
             /**
              * Check if Champion exists
              */
-            $champion = $this->em->getRepository(Champion::class)->findOneBy(array(
-                'name' => $champion_data['id']
-            ));
+            $champion = $this->em->getRepository(Champion::class)->find($id);
 
             if($champion === null){
                 $champion = new Champion();
