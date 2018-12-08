@@ -174,12 +174,12 @@ class LSVods extends LSFunction
                             $eChampKey = null;
                             if ($match->getEnemyChampion() !== null) {
                                 $eChamp = $match->getEnemyChampion()->getName();
-                                $eChampKey = $match->getEnemyChampion()->getKey();
+                                $eChampKey = $match->getEnemyChampion()->getChampKey();
                             }
 
                             $vodArray['videos'][] = array(
                                 'champion' => $match->getChampion()->getName(),
-                                'championKey' => $match->getChampion()->getKey(),
+                                'championKey' => $match->getChampion()->getChampKey(),
                                 'enemyChampion' => $eChamp,
                                 'enemyChampionKey' => $eChampKey,
                                 'id' => $vod->getVideoId(),
@@ -229,7 +229,7 @@ class LSVods extends LSFunction
             'champion' => array(
                 'id' => $champ->getId(),
                 'name' => $champ->getName(),
-                'key' => $champ->getKey(),
+                'key' => $champ->getChampKey(),
                 'img' => $champ->getImage(),
             ),
             'videos' => array(),
@@ -280,7 +280,7 @@ class LSVods extends LSFunction
                             $eChampKey = null;
                             if ($match->getEnemyChampion() !== null) {
                                 $eChamp = $match->getEnemyChampion()->getName();
-                                $eChampKey = $match->getEnemyChampion()->getKey();
+                                $eChampKey = $match->getEnemyChampion()->getChampKey();
                             }
 
                             /* Chunk Game Version */
@@ -290,7 +290,7 @@ class LSVods extends LSFunction
 
                             $vodArray['videos'][] = array(
                                 'champion' => $match->getChampion()->getName(),
-                                'championKey' => $match->getChampion()->getKey(),
+                                'championKey' => $match->getChampion()->getChampKey(),
                                 'enemyChampion' => $eChamp,
                                 'enemyChampionKey' => $eChampKey,
                                 'id' => $vod->getVideoId(),
@@ -342,7 +342,7 @@ class LSVods extends LSFunction
         /* All Matches */
         $nowU = new \DateTime();
         $nowU->modify('-55 days');
-        $matches = parent::getEm()->getRepository('App:Match')->lastDaysRole($nowU->format('U'));
+        $matches = parent::getEm()->getRepository(Match::class)->lastDaysRole($nowU->format('U'));
         $gameVersion = 'unknown';
 
         foreach ($matches as $match) {
@@ -384,7 +384,7 @@ class LSVods extends LSFunction
                             $eChampKey = null;
                             if ($match->getEnemyChampion() !== null) {
                                 $eChamp = $match->getEnemyChampion()->getName();
-                                $eChampKey = $match->getEnemyChampion()->getKey();
+                                $eChampKey = $match->getEnemyChampion()->getChampKey();
                             }
 
                             /* Chunk Game Version */
@@ -393,7 +393,7 @@ class LSVods extends LSFunction
 
                             $vodArray['videos'][] = array(
                                 'champion' => $match->getChampion()->getName(),
-                                'championKey' => $match->getChampion()->getKey(),
+                                'championKey' => $match->getChampion()->getChampKey(),
                                 'enemyChampion' => $eChamp,
                                 'enemyChampionKey' => $eChampKey,
                                 'id' => $vod->getVideoId(),
@@ -485,7 +485,7 @@ class LSVods extends LSFunction
 
                         $vodArray['videos'][] = array(
                             'champion' => $match->getChampion()->getName(),
-                            'championKey' => $match->getChampion()->getKey(),
+                            'championKey' => $match->getChampion()->getChampKey(),
                             'enemyChampion' => $eChamp,
                             'gameStart' => $start->format('Y-m-d H:i'),
                             'streamStart' => $startVod->format('Y-m-d H:i'),

@@ -179,7 +179,7 @@ class StreamerController extends Controller
                             $eChampKey = null;
                             if ($match->getEnemyChampion() !== null) {
                                 $eChamp = $match->getEnemyChampion()->getName();
-                                $eChampKey = $match->getEnemyChampion()->getKey();
+                                $eChampKey = $match->getEnemyChampion()->getChampKey();
                             }
 
                             $v = explode('.', $match->getGameVersion());
@@ -190,7 +190,7 @@ class StreamerController extends Controller
 
                             $vodArray[] = array(
                                 'champion' => $match->getChampion()->getName(),
-                                'championKey' => $match->getChampion()->getKey(),
+                                'championKey' => $match->getChampion()->getChampKey(),
                                 'enemyChampion' => $eChamp,
                                 'enemyChampionKey' => $eChampKey,
                                 'gameStart' => $start->format('Y-m-d H:i'),

@@ -603,7 +603,7 @@ class RenderController extends AbstractController
         }
 
         /* @var $champion Champion */
-        $champion = $em->getRepository('App:Champion')->find($cId);
+        $champion = $em->getRepository(Champion::class)->find($cId);
 
         if ($champion === null) {
             throw new NotFoundHttpException('Champion not found. ID: ' . $cId);
@@ -631,7 +631,7 @@ class RenderController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         /* @var $champion Champion */
-        $champion = $em->getRepository('App:Champion')->findOneBy(array(
+        $champion = $em->getRepository(Champion::class)->findOneBy(array(
             'name' => $c
         ));
 

@@ -3,6 +3,8 @@
 namespace App\Utils\RiotApi;
 
 
+use App\Entity\Champion;
+
 class RiotApi
 {
 
@@ -29,6 +31,8 @@ class RiotApi
     private const API_URL_SUMMONER_V4 = 'https://{platform}.api.riotgames.com/lol/summoner/v4/';
     private const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
     private const API_STATIC_VERSION = 'https://ddragon.leagueoflegends.com/api/versions.json';
+    private const API_STATIC_CHAMPIONS = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json';
+    private const API_STATIC_CHAMPION = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion/{champion}.json';
 
     /**
      * Cache Timeout for requests to the Riot Api
@@ -67,44 +71,6 @@ class RiotApi
         $this->cache = $cache;
         $this->setting = $riotApiSetting->getSettings();
         $this->key = $riotApiSetting->getKey();
-    }
-
-    /**
-     * @param bool $free
-     * @return mixed
-     * @throws RiotApiException
-     */
-    public function getChampion($free = false)
-    {
-
-        $mod = 'champions';
-        $url = self::API_URL_PLATFORM . $mod . '?freeToPlay=' . $free;
-
-        try {
-            return $this->getData($url);
-        } catch (RiotApiException $e) {
-            throw new RiotApiException('GetChampion Exception: ' . $e->getMessage());
-        }
-
-    }
-
-    /**
-     * @param $id
-     * @param string $locale
-     * @return mixed
-     * @throws RiotApiException
-     */
-    public function getChampionById($id, $locale = 'en_US')
-    {
-
-        $mod = 'champions/' . $id . '?locale=' . $locale;
-        $url = self::API_URL_STATIC . $mod;
-
-        try {
-            return $this->getData($url);
-        } catch (RiotApiException $e) {
-            throw new RiotApiException('GetChampionById Exception: ' . $e->getMessage());
-        }
     }
 
     /**
@@ -189,6 +155,42 @@ class RiotApi
         } catch (RiotApiException $e) {
             throw new RiotApiException('GetVersion Exception: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * @param string $version
+     * @return mixed
+     * @throws RiotApiException
+     */
+    public function getChampions(string $version)
+    {
+        $url = str_replace('{version}', $version, self::API_STATIC_CHAMPIONS);
+
+        try {
+            return $this->getData($url, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetChampions Exception: ' . $e->getMessage());
+        }
+
+    }
+
+    /**
+     * @param string $version
+     * @param string $champion
+     * @return mixed
+     * @throws RiotApiException
+     */
+    public function getChampion(string $version, string $champion)
+    {
+
+        $url = str_replace('{version}', $version, str_replace('{champion}', $champion, self::API_STATIC_CHAMPION));
+
+        try {
+            return $this->getData($url, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetChampion Exception: ' . $e->getMessage());
+        }
+
     }
 
     /**
@@ -446,7 +448,7 @@ class RiotApi
         try {
             return $this->getData($url);
         } catch (RiotApiException $e) {
-            throw new RiotApiException('GetSummoner Exception: ' . $e->getMessage().' Url: '.$url);
+            throw new RiotApiException('GetSummoner Exception: ' . $e->getMessage() . ' Url: ' . $url);
         }
     }
 

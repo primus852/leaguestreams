@@ -76,7 +76,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-4">
+                        </div>
+                        <div class="row">
+                            <div class="col-5">
+                                <br/>
+                                <strong>Lore</strong><br/>
+                                {{ champ.blurb }} <i class="fa fa-info-circle tt ttLong" title="{{ champ.lore }}"></i>
+                            </div>
+                            <div class="col-7">
                                 <br/>
                                 <div class="show-main-streamers" data-champion="{{ champ.id }}"
                                      data-url="{{ path('renderMainStreamerByChampion') }}">
@@ -87,13 +94,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <br/>
-                                <strong>Lore</strong><br/>
-                                {{ champ.blurb }} <i class="fa fa-info-circle tt ttLong" title="{{ champ.lore }}"></i>
                             </div>
                         </div>
                     </div>

@@ -3,9 +3,9 @@
            cellspacing="0" width="100%">
         <thead>
         <tr>
-            <th class="text-center">
-                Main
-            </th>
+            <th colspan="3" class="text-center">Main Streamers</th>
+        </tr>
+        <tr>
             {% for streamer in mainStreamer %}
                 <th class="text-center">
                     <a href="{{ path('profileStreamer', {'streamer':streamer.id}) }}">{{ streamer.name }}</a> ({% if streamer.on == true %}<a href="{{ path('loadPlayer', {'searchString': streamer.name}) }}"><i style="color:#61b041;" class="fa fa-play tt" title="Watch Stream now"></i></a>{% else %}<i style="color:#cc1c23;" class="fa fa-remove tt" title="Streamer offline"></i>{% endif %})
@@ -15,12 +15,9 @@
         </thead>
         <tbody>
         <tr>
-            <td class="text-center">
-                Play &percnt;
-            </td>
             {% for streamer in mainStreamer %}
             <td class="text-center">
-                {{ streamer.pct }}&percnt;
+                <strong>{{ streamer.pct }}&percnt;</strong>
             </td>
             {% endfor %}
         </tr>

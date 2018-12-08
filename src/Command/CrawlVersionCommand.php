@@ -86,6 +86,7 @@ class CrawlVersionCommand extends Command
 
         try{
             $lsCrawl->versions();
+            $lsCrawl->update_champions();
         }catch (LSException $e){
             throw new LSException('Could not gather Versions: '.$e->getMessage());
         }

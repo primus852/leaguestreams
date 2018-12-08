@@ -656,6 +656,89 @@ class Crawl
     }
 
     /**
+     * @throws LSException
+     */
+    public function update_champions(){
+
+        /**
+         * Use NA1 for Static
+         */
+        $api = new RiotApi(new Settings());
+
+        /**
+         * Get the current Version
+         */
+        $version = $this->em->getRepository(Versions::class)->find(1);
+
+        try {
+            $champions = $api->getChampions($version->getChampion());
+        } catch (RiotApiException $e) {
+            throw new LSException('Gather Versions Exception: ' . $e->getMessage());
+        }
+
+        /**
+         * Loop through champions
+         * @var $champion Champion
+         */
+        foreach($champions['data'] as $champion_data){
+
+            $id = (int)$champion_data['key'];
+
+            /**
+             * Check if Champion exists
+             */
+            $champion = $this->em->getRepository(Champion::class)->findOneBy(array(
+                'name' => $champion_data['id']
+            ));
+
+            if($champion === null){
+                $champion = new Champion();
+                $champion->setId($id);
+            }
+
+            $name = $champion_data['id'];
+
+            try {
+                $champion_api = $api->getChampion($version->getChampion(), $name);
+            } catch (RiotApiException $e) {
+                throw new LSException('Gather Versions Exception: ' . $e->getMessage());
+            }
+
+            $champion->setModified(new \DateTime());
+            $champion->setName($name);
+            $champion->setTitle($champion_api['data'][$name]['title']);
+            $champion->setImage($champion_api['data'][$name]['image']['full']);
+            $champion->setChampKey($champion_api['data'][$name]['id']);
+            $champion->setBlurb($champion_api['data'][$name]['blurb']);
+            $champion->setLore($champion_api['data'][$name]['lore']);
+            $champion->setSpellPassiveImage($champion_api['data'][$name]['passive']['image']['full']);
+            $champion->setSpellPassiveName($champion_api['data'][$name]['passive']['name']);
+            $champion->setSpellPassiveDescription($champion_api['data'][$name]['passive']['description']);
+            $champion->setSpellQImage($champion_api['data'][$name]['spells'][0]['image']['full']);
+            $champion->setSpellQName($champion_api['data'][$name]['spells'][0]['name']);
+            $champion->setSpellQDescription($champion_api['data'][$name]['spells'][0]['description']);
+            $champion->setSpellEImage($champion_api['data'][$name]['spells'][1]['image']['full']);
+            $champion->setSpellEName($champion_api['data'][$name]['spells'][1]['name']);
+            $champion->setSpellEDescription($champion_api['data'][$name]['spells'][1]['description']);
+            $champion->setSpellWImage($champion_api['data'][$name]['spells'][2]['image']['full']);
+            $champion->setSpellWName($champion_api['data'][$name]['spells'][2]['name']);
+            $champion->setSpellWDescription($champion_api['data'][$name]['spells'][2]['description']);
+            $champion->setSpellRImage($champion_api['data'][$name]['spells'][3]['image']['full']);
+            $champion->setSpellRName($champion_api['data'][$name]['spells'][3]['name']);
+            $champion->setSpellRDescription($champion_api['data'][$name]['spells'][3]['description']);
+            $this->em->persist($champion);
+
+        }
+
+        try{
+            $this->em->flush();
+        }catch (\Exception $e){
+            throw new LSException('MySQL Error: '.$e->getMessage());
+        }
+
+    }
+
+    /**
      * @param string $entity
      * @param int $id
      * @return null|object

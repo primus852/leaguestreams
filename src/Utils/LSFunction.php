@@ -867,7 +867,7 @@ class LSFunction
                         'cImagePlain' => $summoner->getCurrentMatch()->getChampion()->getImage(),
                         'multiStream' => $multiStream,
                         'multiStreamCount' => $mCount,
-                        'banner' => $this->package->getUrl('assets/ls/img/champions/' . $summoner->getCurrentMatch()->getChampion()->getKey() . '_0.png'),
+                        'banner' => $this->package->getUrl('assets/ls/img/champions/' . $summoner->getCurrentMatch()->getChampion()->getChampKey() . '_0.png'),
                     );
                 }
             }

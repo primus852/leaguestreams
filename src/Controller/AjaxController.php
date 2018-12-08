@@ -323,7 +323,7 @@ class AjaxController extends AbstractController
         $champs[] = array(
             'name' => $champion->getName(),
             'img' => $champion->getImage(),
-            'key' => $champion->getKey(),
+            'key' => $champion->getChampKey(),
             'id' => $champion->getId(),
             'streamers' => $sFinal,
         );

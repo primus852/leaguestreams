@@ -13,7 +13,6 @@ class Champion
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -51,7 +50,7 @@ class Champion
     /**
      * @ORM\Column(type="string", length=100)
      */
-    protected $key;
+    protected $champKey;
 
     /**
      * @ORM\Column(type="text")
@@ -250,17 +249,17 @@ class Champion
     /**
      * @return mixed
      */
-    public function getKey()
+    public function getChampKey()
     {
-        return $this->key;
+        return $this->champKey;
     }
 
     /**
-     * @param mixed $key
+     * @param mixed $champKey
      */
-    public function setKey($key): void
+    public function setChampKey($champKey): void
     {
-        $this->key = $key;
+        $this->champKey = $champKey;
     }
 
     /**

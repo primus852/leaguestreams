@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Champion;
 use App\Entity\Streamer;
+use App\Utils\LS\LSException;
+use App\Utils\LS\VodHandler;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
 use Doctrine\Common\Collections\Criteria;
@@ -112,25 +114,29 @@ class VodController extends Controller
             throw new NotFoundHttpException();
         }
 
-        /* @var $vods LSVods */
-        $vods = new LSVods($this->getDoctrine()->getManager(), null, null, $this->container->get('router'));
+        /* @var $vodHandler VodHandler */
+        $vodHandler = new VodHandler($this->getDoctrine()->getManager(), $this->container->get('router'));
 
-        if ($role === 'top' || $role === 'toplane') {
-            $result = $vods->getByRole('Top');
-            $lane = 'Top';
-        } elseif ($role === 'mid' || $role === 'middle' || $role === 'midlane') {
-            $result = $vods->getByRole('Mid');
-            $lane = 'Mid';
-        } elseif ($role === 'jungle' || $role === 'jgl') {
-            $result = $vods->getByRole('Jungle');
-            $lane = 'Jungle';
-        } elseif ($role === 'adc' || $role === 'bot' || $role === 'botlane') {
-            $result = $vods->getByRole('Bot');
-            $lane = 'Bot';
-        } elseif ($role === 'support' || $role === 'sup' || $role === 'supp') {
-            $result = $vods->getByRole('Support');
-            $lane = 'Support';
-        } else {
+        try {
+            if ($role === 'top' || $role === 'toplane') {
+                $result = $vodHandler->by_role('Top');
+                $lane = 'Top';
+            } elseif ($role === 'mid' || $role === 'middle' || $role === 'midlane') {
+                $result = $vodHandler->by_role('Mid');
+                $lane = 'Mid';
+            } elseif ($role === 'jungle' || $role === 'jgl') {
+                $result = $vodHandler->by_role('Jungle');
+                $lane = 'Jungle';
+            } elseif ($role === 'adc' || $role === 'bot' || $role === 'botlane') {
+                $result = $vodHandler->by_role('Bot');
+                $lane = 'Bot';
+            } elseif ($role === 'support' || $role === 'sup' || $role === 'supp') {
+                $result = $vodHandler->by_role('Support');
+                $lane = 'Support';
+            } else {
+                throw new NotFoundHttpException();
+            }
+        } catch (LSException $e) {
             throw new NotFoundHttpException();
         }
 
@@ -152,14 +158,14 @@ class VodController extends Controller
 
         $cArray = array();
         $criteria = Criteria::create();
-        if($c !== "all"){
+        if ($c !== "all") {
 
             $champs = explode(',', $c);
-            foreach($champs as $champ){
+            foreach ($champs as $champ) {
                 $criteria->orWhere(Criteria::expr()->eq('name', $champ));
             }
-        }else{
-            $criteria->where(Criteria::expr()->neq('name',''));
+        } else {
+            $criteria->where(Criteria::expr()->neq('name', ''));
         }
 
         $em = $this->getDoctrine()->getManager();
