@@ -6,6 +6,7 @@ use App\Entity\Champion;
 use App\Entity\CurrentMatch;
 use App\Entity\Map;
 use App\Entity\Match;
+use App\Entity\Perk;
 use App\Entity\Queue;
 use App\Entity\Region;
 use App\Entity\Spell;
@@ -783,7 +784,7 @@ class LSFunction
 
                     /* Get who player is playing with (other streamers) */
                     $lGames = $this->em
-                        ->getRepository('App:CurrentMatch')
+                        ->getRepository(CurrentMatch::class)
                         ->findBy(array(
                             'matchId' => $summoner->getCurrentMatch()->getMatchId(),
                         ));
@@ -821,8 +822,8 @@ class LSFunction
                     }
 
                     if (!empty($perks)) {
-                        $perkStyle = $this->em->getRepository('App:Perk')->find($perks['perkIds'][0]);
-                        $perkSubStyle = $this->em->getRepository('App:Perk')->find($perks['perkIds'][4]);
+                        $perkStyle = $this->em->getRepository(Perk::class)->find($perks['perkIds'][0]);
+                        $perkSubStyle = $this->em->getRepository(Perk::class)->find($perks['perkIds'][4]);
                         if ($perkStyle !== null) {
                             $perkArray['perkStyle'] = array(
                                 'id' => $perkStyle->getId(),

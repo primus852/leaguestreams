@@ -29,6 +29,7 @@
     "bootstrap": "^4.0.0",
     "cookieconsent": "^3.0.6",
     "datatables.net-responsive-bs": "^2.2.1",
+    "flag-icon-css": "^3.2.1",
     "font-awesome": "^4.7.0",
     "intro.js": "^2.8.0-alpha.1",
     "jquery": "^3.3.1",

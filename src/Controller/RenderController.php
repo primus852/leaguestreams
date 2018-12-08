@@ -379,7 +379,7 @@ class RenderController extends AbstractController
     {
 
         /* @var $streamer Streamer */
-        $streamer = $this->getDoctrine()->getRepository('App:Streamer')->find($s);
+        $streamer = $this->getDoctrine()->getRepository(Streamer::class)->find($s);
 
         if ($streamer === null) {
             throw new NotFoundHttpException();
@@ -395,7 +395,7 @@ class RenderController extends AbstractController
         $helper = new Helper();
 
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
         /* Gather needed vars */
