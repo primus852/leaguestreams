@@ -86,7 +86,9 @@ class CrawlVersionCommand extends Command
 
         try{
             $lsCrawl->versions();
+            $debug ? $io->text('Updated Versions: <fg=green>success</>') : null;
             $lsCrawl->update_champions();
+            $debug ? $io->text('Updated Champions: <fg=green>success</>') : null;
         }catch (LSException $e){
             throw new LSException('Could not gather Versions: '.$e->getMessage());
         }
