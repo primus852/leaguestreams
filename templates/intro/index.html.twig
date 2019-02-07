@@ -1,0 +1,22 @@
+{% extends 'introVue.html.twig' %}
+
+{% block body %}
+
+    <header class="header">
+        <div class="text-vertical-center">
+            <h1><img src="{{ asset('assets/ls/img/intro/logo_intro.png') }}" style="margin-top: -50px;" alt="LeagueStreams Logo" />LeagueStreams.net</h1>
+            <h3>Your source for filtered LoL Content</h3>
+            <br>
+            <a href="{{ path('mainPage') }}" class="btn btn-danger btn-lg js-scroll-trigger rounded-0" style="width:75px;">Live</a>
+            <a href="{{ path('vodsByChampion') }}" class="btn btn-dark btn-lg js-scroll-trigger rounded-0" style="width:75px;">VODs</a>
+            <br />
+            <br />
+            <br />
+            <h5>Most recent live</h5>
+            <div class="row justify-content-center">
+                <recent-live></recent-live>
+            </div>
+        </div>
+    </header>
+
+{% endblock %}

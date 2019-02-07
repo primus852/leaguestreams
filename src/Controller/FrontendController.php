@@ -8,22 +8,16 @@ use App\Entity\Streamer;
 use App\Entity\Versions;
 use App\Utils\LSFunction;
 use App\Utils\TwitchApi;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class FrontendController extends Controller
+class FrontendController extends AbstractController
 {
-    /**
-     * @Route("/", name="introPage")
-     * @return Response
-     */
-    public function introAction()
-    {
-        return $this->render('intro.html.twig', array());
-    }
+
 
     /**
      * @Route("/privacy-policy", name="privacyPolicy")

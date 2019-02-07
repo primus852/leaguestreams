@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\CurrentMatch;
 use App\Entity\Streamer;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Entity\Versions;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-class FragmentController extends Controller
+class FragmentController extends AbstractController
 {
     /**
      * @return \Symfony\Component\HttpFoundation\Response
@@ -15,10 +17,10 @@ class FragmentController extends Controller
     {
 
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
-        $lives = $this->getDoctrine()->getRepository('App:CurrentMatch')->findBy(
+        $lives = $this->getDoctrine()->getRepository(CurrentMatch::class)->findBy(
             array('isPlaying' => true),
             array('modified' => 'DESC'),
             4
