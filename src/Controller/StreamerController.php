@@ -9,12 +9,13 @@ use App\Entity\Versions;
 use App\Entity\Vod;
 use App\Utils\LSFunction;
 use Doctrine\Common\Collections\Criteria;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class StreamerController extends Controller
+class StreamerController extends AbstractController
 {
 
     /**
@@ -38,7 +39,7 @@ class StreamerController extends Controller
         }
 
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
 
