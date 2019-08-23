@@ -62,6 +62,145 @@ class AjaxController extends AbstractController
     }
 
     /**
+     * @Route("/_ajax/_addSmurf", name="addSmurf")
+     * @param Request $request
+     * @param ObjectManager $em
+     * @return JsonResponse
+     */
+    public function checkSmurfAction(Request $request, ObjectManager $em)
+    {
+
+        /**
+         * Vars
+         */
+        $streamerId = $request->get('streamerId');
+        if($streamerId === null || $streamerId === ''){
+            return ShortResponse::error('Streamer ID empty');
+        }
+
+        $streamer = $em->getRepository(Streamer::class)->find($streamerId);
+
+        if($streamer === null){
+            return ShortResponse::error('Streamer not found');
+        }
+
+        /* @var region Region */
+        $region = $em->getRepository(Region::class)->find($request->get('region'));
+        if ($region === null) {
+            return ShortResponse::error('Region not found, please try again and select region from list.');
+        }
+
+        /* @var $summoner Summoner */
+        $summoner = $em->getRepository(Summoner::class)->findOneBy(array(
+            'name' => $request->get('summoner'),
+            'region' => $region
+        ));
+        if ($summoner !== null) {
+            return ShortResponse::error('Summoner ' . $request->get('summoner') . ' already assigned to ' . $summoner->getStreamer()->getChannelName());
+        }
+
+
+        /* @var $singleSmurf PersistentCollection */
+        $singleSmurf = $em->getRepository(Smurf::class)->findBy(array(
+            'name' => $request->get('summoner'),
+        ));
+
+        /* @var $crawl Crawl */
+        $crawl = new Crawl($em);
+
+        /* @var $riot RiotApi */
+        $riot = new RiotApi(new Settings());
+        $riot->setRegion($region->getLong());
+
+        /**
+         * Find the Summoner at Riot
+         * and update the session status
+         */
+        try {
+            $summoner = $riot->getSummonerByName($request->get('summoner'), true);
+        } catch (RiotApiException $e) {
+            return ShortResponse::error('Search for <strong>' . $request->get('summoner') . '</strong>: ' . $e->getMessage());
+        }
+
+        /**
+         * Check if we are an admin, enough smurf report or reporting disabled (direct add)
+         */
+        if (
+            (count($singleSmurf) >= Constants::SMURFS_REQUIRED && $singleSmurf !== null) ||
+            Constants::SMURFS_ENABLED === false ||
+            $this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')
+        ) {
+
+            /**
+             * Add the Summoner to the Database
+             */
+            try {
+                $s = $crawl->add_summoner($summoner, $streamer, $region, $riot);
+            } catch (LSException $e) {
+                return ShortResponse::error('Error: ' . $e->getMessage());
+            }
+
+            /**
+             * See if we have a live game
+             */
+            $isPlaying = true;
+            $game = null;
+            try {
+                $game = $riot->getCurrentGame($s->getSummonerId(), true);
+            } catch (RiotApiException $e) {
+                $isPlaying = false;
+            }
+
+            /**
+             * If Summoner is in a live game, update
+             */
+            try {
+                $isPlaying ? $crawl->current_match_update($s, $game) : $crawl->current_match_remove($s);
+            } catch (LSException $e) {
+                return ShortResponse::exception('There was a problem updating Live Match, please try again in a few minutes', $e->getMessage());
+            }
+
+            return ShortResponse::success('Smurf added');
+
+        }
+
+        /**
+         * Check for Smurfs in Database
+         */
+        $singleSmurfCheck = $em->getRepository(Smurf::class)->findOneBy(array(
+            'region' => $region,
+            'streamer' => $streamer,
+            'ip' => Helper::get_client_ip(),
+        ));
+
+        /**
+         * Already reported (from this IP)
+         */
+        if ($singleSmurfCheck !== null) {
+            return ShortResponse::error('Summoner already added. More reports needed.');
+        }
+
+        /**
+         * Create new Smurf
+         */
+        $smurf = new Smurf();
+        $smurf->setName($request->get('summoner'));
+        $smurf->setIp(Helper::get_client_ip());
+        $smurf->setStreamer($streamer);
+        $smurf->setRegion($region);
+        $smurf->setModified();
+
+        $em->persist($smurf);
+        try {
+            $em->flush();
+        } catch (\Exception $e) {
+            return ShortResponse::mysql($e->getMessage());
+        }
+
+        return ShortResponse::success('Summoner added. More reports needed in order to attach it to the Streamer.');
+    }
+
+    /**
      * @Route("/_ajax/_checkSummoner", name="checkSummoner")
      * @param Request $request
      * @return JsonResponse

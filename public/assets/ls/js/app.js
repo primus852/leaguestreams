@@ -1021,6 +1021,45 @@ $(document).on("click", "#submitSummoner", function (e) {
 
 });
 
+$(document).on("click", "#submitSmurf", function (e) {
+
+
+    var $btn = $(this);
+    var $streamer = $btn.attr('data-streamer');
+    var $summoner = $("#summoner").val();
+    var $region = $("#region").val();
+    var $regionText = $("#region option:selected").text();
+    var $url = $btn.attr('data-url');
+    var html = $btn.html();
+
+    if ($btn.hasClass("is-disabled")) {
+        return false;
+    }
+    if ($summoner === "") {
+        openNoty("error", "Please enter a Summoner");
+        return false;
+    }
+
+    $btn.addClass("is-disabled").html('<i class="fa fa-spin fa-spinner"></i>');
+
+    /**
+     * Make Request
+     */
+    $.get($url, {
+        streamerId: $streamer,
+        summoner: $summoner,
+        region: $region
+    }).done(function (data) {
+        openNoty(data.result, data.message);
+        $("#summoner").val("").focus();
+        $btn.removeClass("is-disabled").html(html);
+
+    }).fail(function () {
+        openNoty("error", "Ajax failed. The administrator was informed about the incident");
+        $btn.removeClass("is-disabled").html(html);
+    });
+});
+
 $(document).on('click', '.trigger-message-close', function () {
 
     var $mb = $(this).closest('.messageFly');

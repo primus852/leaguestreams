@@ -74,7 +74,6 @@
                                 <input class="form-control rounded-0 mr-sm-2" style="height:28px;" id="summoner" type="text" placeholder="Summoner Name">
                             </div>
                             <div class="col-3">
-                                <input type="hidden" id="streamerId" value="{{ streamerId }}"/>
                                 <select id="region" name="region" class="form-control mr-sm-2">
                                     <option value="1">br</option>
                                     <option value="2">eune</option>
@@ -91,7 +90,11 @@
                                 </select>
                             </div>
                             <div class="col-3">
-                                <a role="button" href="#" class="btn btn-outline-success my-2 my-sm-0 btn-green btn-block rounded-0" id="submitSummoner">
+                                <a role="button" href="#"
+                                   class="btn btn-outline-success my-2 my-sm-0 btn-green btn-block rounded-0"
+                                   id="submitSmurf" data-streamer="{{ streamerId }}"
+                                   data-url="{{ path('addSmurf') }}"
+                                >
                                     <i class="fa fa-plus"></i> Smurf
                                 </a>
                             </div>
