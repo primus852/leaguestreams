@@ -625,7 +625,7 @@ class RiotApi
                     $this->cache->put($url, $result, self::CACHE_REFRESH);
                 }
             } else {
-                throw new RiotApiException(self::RIOT_ERROR_CODES[$this->responseCode] . ' [' . $this->responseCode . ']');
+                throw new RiotApiException(self::RIOT_ERROR_CODES[$this->responseCode] . ' [' . $this->responseCode . '|'.$url.']');
             }
         }
 

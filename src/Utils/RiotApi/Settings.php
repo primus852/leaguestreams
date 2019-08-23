@@ -12,9 +12,8 @@ class Settings
     /**
      * Settings constructor.
      * @param array|null $settings
-     * @param bool $isDev
      */
-    public function __construct(array $settings = null, bool $isDev = true)
+    public function __construct(array $settings = null)
     {
 
         /* Default Settings */
@@ -28,7 +27,7 @@ class Settings
         }
 
         /* Developer Settings */
-        if($isDev){
+        if(getenv('APP_ENV') === 'dev'){
             $this->settings = array(
                 'max_requests_short' => 20, /* Max requests in short interval */
                 'max_requests_long' => 100, /* Max requests in long interval */
@@ -38,7 +37,7 @@ class Settings
         }
 
         /* Apply Settings */
-        if($settings !== null && !$isDev){
+        if($settings !== null && getenv('APP_ENV') !== 'dev'){
             $this->settings = $settings;
         }
 
