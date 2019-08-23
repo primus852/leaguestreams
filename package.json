@@ -1,22 +1,24 @@
 {
-    "devDependencies": {
-        "@symfony/webpack-encore": "^0.20.0",
-        "less-loader": "^4.1.0",
-        "vue": "^2.6.3",
-        "vue-loader": "^15.6.2",
-        "vue-template-compiler": "^2.6.3",
-        "webpack-notifier": "^1.6.0"
-    },
-    "license": "UNLICENSED",
-    "private": true,
-    "scripts": {
-        "dev-server": "encore dev-server",
-        "dev": "encore dev",
-        "watch": "encore dev --watch",
-        "build": "encore production"
-    },
-    "dependencies": {
-        "@babel/polyfill": "^7.2.5",
-        "axios": "^0.18.0"
-    }
+  "devDependencies": {
+    "@symfony/webpack-encore": "^0.20.0",
+    "less-loader": "^4.1.0",
+    "vue": "^2.6.4",
+    "vue-loader": "^15.6.2",
+    "vue-template-compiler": "^2.6.4",
+    "webpack-cli": "^3.2.3",
+    "webpack-notifier": "^1.6.0"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev-server": "encore dev-server",
+    "dev": "encore dev",
+    "watch": "encore dev --watch",
+    "build": "encore production"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5",
+    "axios": "^0.18.0",
+    "v-tooltip": "^2.0.0-rc.33"
+  }
 }

@@ -923,7 +923,7 @@ $(document).on("click", "#submitSummoner", function (e) {
 
 
     var $btn = $(this);
-    var $streamer = $("#streamerAC").val().trim();
+    var $streamer = $.trim($("#streamerAC").val());
     var $summoner = $("#summoner").val();
     var $region = $("#region").val();
     var $platform = $("#platform").val();

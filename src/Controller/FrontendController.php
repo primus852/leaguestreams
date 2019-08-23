@@ -126,6 +126,7 @@ class FrontendController extends AbstractController
 
         return $this->render('frontend/playerEmbed.html.twig', array(
             'streamerId' => $s->getId(),
+            'platformId' => $s->getPlatform()->getId(),
             'search' => $searchString,
             'summoners' => $s->getSummoner(),
             'title' => $s->getDescription(),

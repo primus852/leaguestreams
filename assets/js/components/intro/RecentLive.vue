@@ -8,7 +8,7 @@
         <div class="row justify-content-center" v-if="champions && champions.length">
             <div class="col-3" v-for="champion of champions">
                 <a class="liveChamp" :href="champion.watch">
-                    <img :src="champion.url" :title="champion.title" style="max-height:50px;" class="rounded-circle tt" :alt="champion.name" />
+                    <img v-tooltip="champion.title" :src="champion.url" style="max-height:50px;" class="rounded-circle" :alt="champion.name" />
                 </a>
             </div>
         </div>
@@ -46,5 +46,4 @@
 </script>
 
 <style scoped>
-
 </style>
