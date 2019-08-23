@@ -109,7 +109,7 @@ class AjaxController extends AbstractController
         $crawl = new Crawl($em);
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi(new Settings());
+        $riot = new RiotApi(new Settings(null, false));
         $riot->setRegion($region->getLong());
 
         /**
@@ -332,7 +332,7 @@ class AjaxController extends AbstractController
         $crawl = new Crawl($em);
 
         /* @var $riot RiotApi */
-        $riot = new RiotApi(new Settings());
+        $riot = new RiotApi(new Settings(null, false));
         $riot->setRegion($region->getLong());
 
         /**
