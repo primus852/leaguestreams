@@ -192,8 +192,13 @@ function checkRunesInGame(btn, toggleOpen, forceReload) {
                     $toggle.trigger('click');
                     $btn.hide();
                 }
-            }).fail(function () {
-            $btn.html('Error').removeClass('disabled').css('background', '#a01c1a');
+            }).fail(function (xhr, status) {
+                if(xhr.status === 404 || xhr.status === '404'){
+                    $btn.html('Offline').removeClass('disabled').css('background', '#fcb941');
+                }else{
+                    $btn.html('Error').removeClass('disabled').css('background', '#a01c1a');
+                }
+
         });
     }
 }
@@ -1051,7 +1056,9 @@ $(document).on("click", "#submitSmurf", function (e) {
         region: $region
     }).done(function (data) {
         openNoty(data.result, data.message);
-        $("#summoner").val("").focus();
+        if(data.result === 'success') {
+            $("#summoner").val("").focus();
+        }
         $btn.removeClass("is-disabled").html(html);
 
     }).fail(function () {

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Champion;
 use App\Entity\CurrentMatch;
 use App\Entity\Match;
+use App\Entity\Perk;
 use App\Entity\Platform;
 use App\Entity\Region;
 use App\Entity\Streamer;
@@ -17,7 +18,7 @@ use App\Utils\LSVods;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\Settings;
 use App\Utils\SimpleCrypt;
-use App\Utils\TwitchApi;
+use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -69,7 +70,7 @@ class RenderController extends AbstractController
             /* Perk Ids */
             foreach ($perksDb['perkIds'] as $p) {
 
-                $perk = $em->getRepository('App:Perk')->find($p);
+                $perk = $em->getRepository(Perk::class)->find($p);
 
                 if ($perk !== null) {
                     $perks['ids'][] = array(
@@ -82,7 +83,7 @@ class RenderController extends AbstractController
             }
 
             /* Perk Styles */
-            $perk = $em->getRepository('App:Perk')->find($perksDb['perkStyle']);
+            $perk = $em->getRepository(Perk::class)->find($perksDb['perkStyle']);
             if ($perk !== null) {
                 $perks['primary'] = array(
                     'id' => $perk->getId(),
@@ -92,7 +93,7 @@ class RenderController extends AbstractController
                 );
             }
 
-            $perk = $em->getRepository('App:Perk')->find($perksDb['perkSubStyle']);
+            $perk = $em->getRepository(Perk::class)->find($perksDb['perkSubStyle']);
             if ($perk !== null) {
                 $perks['secondary'] = array(
                     'id' => $perk->getId(),
@@ -140,7 +141,7 @@ class RenderController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         /* @var $s Streamer */
-        $s = $this->getDoctrine()->getRepository('App:Streamer')->find($streamer);
+        $s = $this->getDoctrine()->getRepository(Streamer::class)->find($streamer);
 
         if ($s === null) {
             $hasError = 'Streamer not found?!';
@@ -151,7 +152,7 @@ class RenderController extends AbstractController
 
         /* @var $version Versions */
         $version = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
         /* @var $champion Champion */
@@ -189,7 +190,7 @@ class RenderController extends AbstractController
                         /* Perk Ids */
                         foreach ($perksDb['perkIds'] as $p) {
 
-                            $perk = $em->getRepository('App:Perk')->find($p);
+                            $perk = $em->getRepository(Perk::class)->find($p);
 
                             if ($perk !== null) {
                                 $perks['ids'][] = array(
@@ -202,7 +203,7 @@ class RenderController extends AbstractController
                         }
 
                         /* Perk Styles */
-                        $perk = $em->getRepository('App:Perk')->find($perksDb['perkStyle']);
+                        $perk = $em->getRepository(Perk::class)->find($perksDb['perkStyle']);
                         if ($perk !== null) {
                             $perks['primary'] = array(
                                 'id' => $perk->getId(),
@@ -212,7 +213,7 @@ class RenderController extends AbstractController
                             );
                         }
 
-                        $perk = $em->getRepository('App:Perk')->find($perksDb['perkSubStyle']);
+                        $perk = $em->getRepository(Perk::class)->find($perksDb['perkSubStyle']);
                         if ($perk !== null) {
                             $perks['secondary'] = array(
                                 'id' => $perk->getId(),
@@ -265,7 +266,7 @@ class RenderController extends AbstractController
                 /* @var $pApi TwitchApi */
                 $pApi = new $pClass($em, $streamer);
                 try {
-                    $isOnline = $pApi->checkStreamOnline(true);
+                    $isOnline = $pApi->check_online($streamer->getChannelId(), true);
                 } catch (\Exception $e) {
                     throw new NotFoundHttpException();
                 }
@@ -293,7 +294,7 @@ class RenderController extends AbstractController
                 $league = $summoner->getLeague();
                 $division = $summoner->getDivision();
 
-                if ($league === 'CHALLENGER' || $league === 'MASTER' || $league === 'UNRANKED') {
+                if ($league === 'CHALLENGER' || $league === 'MASTER' || $league === 'GRANDMASTER' || $league === 'UNRANKED') {
                     $division = '';
                 }
 
@@ -304,7 +305,7 @@ class RenderController extends AbstractController
                     /* Perk Ids */
                     foreach ($perksDb['perkIds'] as $p) {
 
-                        $perk = $em->getRepository('App:Perk')->find($p);
+                        $perk = $em->getRepository(Perk::class)->find($p);
 
                         if ($perk !== null) {
                             $perks['ids'][] = array(
@@ -317,7 +318,7 @@ class RenderController extends AbstractController
                     }
 
                     /* Perk Styles */
-                    $perk = $em->getRepository('App:Perk')->find($perksDb['perkStyle']);
+                    $perk = $em->getRepository(Perk::class)->find($perksDb['perkStyle']);
                     if ($perk !== null) {
                         $perks['primary'] = array(
                             'id' => $perk->getId(),
@@ -327,7 +328,7 @@ class RenderController extends AbstractController
                         );
                     }
 
-                    $perk = $em->getRepository('App:Perk')->find($perksDb['perkSubStyle']);
+                    $perk = $em->getRepository(Perk::class)->find($perksDb['perkSubStyle']);
                     if ($perk !== null) {
                         $perks['secondary'] = array(
                             'id' => $perk->getId(),
