@@ -332,7 +332,7 @@ class RiotApi
     public function getLeaguePosition($id, $type = 'RANKED_SOLO_5x5', bool $upgrade = false)
     {
 
-        $mod = 'positions/by-summoner/' . $id;
+        $mod = 'entries/by-summoner/' . $id;
         $url = $upgrade === false ? self::API_URL_LEAGUE . $mod : self::API_URL_LEAGUE_V4 . $mod;
 
         $positions = $this->getData($url);
