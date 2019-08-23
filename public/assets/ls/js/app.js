@@ -1058,6 +1058,7 @@ $(document).on("click", "#submitSmurf", function (e) {
         openNoty("error", "Ajax failed. The administrator was informed about the incident");
         $btn.removeClass("is-disabled").html(html);
     });
+
 });
 
 $(document).on('click', '.trigger-message-close', function () {
