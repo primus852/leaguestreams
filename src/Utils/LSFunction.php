@@ -42,97 +42,188 @@ class LSFunction
         $this->package = new Package(new EmptyVersionStrategy());
 
         if ($this->riot !== null) {
-            $this->region = $this->em->getRepository('App:Region')->findOneBy(array(
+            $this->region = $this->em->getRepository(Region::class)->findOneBy(array(
                 'long' => $this->riot->getRegion(),
             ));
         }
     }
 
     /**
-     * Results will be cached for 12 hours as it wont change much during one day
-     * @param Champion $champion
-     * @return array|mixed
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @param string $role
+     * @param bool $enable_cache
+     * @return array
+     * @throws \Exception
      */
-    public function getMainStreamer(Champion $champion)
+    public function getMainRole(string $role, bool $enable_cache = true)
     {
 
-
         $cache = new FilesystemAdapter();
-        $msCache = $cache->getItem('mainstreamer.champion.' . $champion->getId());
-        $msCache->expiresAfter(\DateInterval::createFromDateString('24 hours'));
+        $msCache = $cache->getItem('mainstreamer.role.' . $role);
+        $msCache->expiresAfter(\DateInterval::createFromDateString('6 hours'));
 
-        if (!$msCache->isHit()) {
-
+        if (!$msCache->isHit() || $enable_cache === false) {
             $nowU = new \DateTime();
             $nowU->modify('-55 days');
+            $time_ms = $nowU->format('U') * 1000;
 
             $criteria = new Criteria();
             $criteria->where(Criteria::expr()->eq('crawled', true));
-            $criteria->andWhere(Criteria::expr()->gte('gameCreation', $nowU->format('U')));
+            $criteria->andWhere(Criteria::expr()->gte('gameCreation', $time_ms));
+
+            /**
+             * Criteria based on Role
+             */
+            $criteria = self::criteria_by_role($criteria, $role);
 
             $matches = $this->em->getRepository(Match::class)->matching($criteria);
 
-            $sArray = array();
-            $tArray = array();
-
-            /* @var $match Match */
+            /**
+             * Count the Streamers that played the role the last 55 days
+             */
+            $streamers = array();
             foreach ($matches as $match) {
 
-
-                if (!isset($sArray[$match->getChampion()->getId()])) {
-                    $sArray[$match->getChampion()->getId()] = array();
+                if (!array_key_exists($match->getStreamer()->getId(), $streamers)) {
+                    $streamers[$match->getStreamer()->getId()] = 0;
                 }
 
-                if (!isset($sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()])) {
-                    $sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()] = 0;
-                }
-
-                if (!isset($tArray[$match->getStreamer()->getChannelUser()])) {
-                    $tArray[$match->getStreamer()->getChannelUser()] = 1;
-                } else {
-                    $tArray[$match->getStreamer()->getChannelUser()]++;
-                }
-
-                $sArray[$match->getChampion()->getId()][$match->getStreamer()->getChannelUser()]++;
+                $streamers[$match->getStreamer()->getId()]++;
             }
 
-            $streamers = array();
-            if (isset($sArray[$champion->getId()])) {
-                $streamers = $sArray[$champion->getId()];
+            /**
+             * Cut it to top 3
+             */
+            arsort($streamers, SORT_NUMERIC);
+            $s = array_slice($streamers, 0, 3, true);
+
+            /**
+             * For the top 3, get the % of matches with that champion
+             */
+            $result = array();
+            foreach ($s as $sId => $total) {
+
+                $streamer = $this->em->getRepository(Streamer::class)->find($sId);
+
+                /**
+                 * Get Matches of past 55 days (re-use the criteria?)
+                 */
+                $criteriaS = new Criteria();
+                $criteriaS->where(Criteria::expr()->eq('crawled', true));
+                $criteriaS->andWhere(Criteria::expr()->gte('gameCreation', $time_ms));
+                $criteriaS->andWhere(Criteria::expr()->eq('streamer', $streamer));
+
+                $solo_matches = $this->em->getRepository(Match::class)->matching($criteriaS);
+                $all = $solo_matches->count();
+                $pct = round(100 * $total / $all, 2);
+
+                $result[] = array(
+                    'details' => array(
+                        'name' => $streamer->getChannelName(),
+                        'id' => $streamer->getId(),
+                        'on' => $streamer->getIsOnline(),
+                    ),
+                    'games' => $total,
+                    'pct' => $pct,
+                    'all' => $all
+                );
+
             }
 
-            arsort($streamers);
-            $s = array_slice($streamers, 0, 3);
-
-            $sFinal = array();
-            foreach ($s as $key => $sStreamer) {
-
-                if (isset($tArray[$key]) && $tArray[$key] > 0) {
-
-                    $sUser = $this->em->getRepository('App:Streamer')->findOneBy(array(
-                        'channelUser' => $key,
-                    ));
-
-                    $sFinal[$key] = array(
-                        'pct' => round($sStreamer * 100 / $tArray[$key], 2),
-                        'id' => $sUser->getId(),
-                        'on' => $sUser->getIsOnline(),
-                        'name' => $key
-                    );
-                }
-            }
-
-            arsort($sFinal);
-
-            $msCache->set($sFinal);
+            $msCache->set($result);
             $cache->save($msCache);
 
         } else {
-            $sFinal = $msCache->get();
+            $result = $msCache->get();
         }
 
-        return $sFinal;
+        return $result;
+    }
+
+    /**
+     * @param Champion $champion
+     * @param bool $enable_cache
+     * @return array
+     * @throws \Exception
+     */
+    public function getMainStreamer(Champion $champion, bool $enable_cache = true)
+    {
+
+        $cache = new FilesystemAdapter();
+        $msCache = $cache->getItem('mainstreamer.champion.' . $champion->getId());
+        $msCache->expiresAfter(\DateInterval::createFromDateString('6 hours'));
+
+        if (!$msCache->isHit() || $enable_cache === false) {
+            $nowU = new \DateTime();
+            $nowU->modify('-55 days');
+            $time_ms = $nowU->format('U') * 1000;
+
+            $criteria = new Criteria();
+            $criteria->where(Criteria::expr()->eq('crawled', true));
+            $criteria->andWhere(Criteria::expr()->gte('gameCreation', $time_ms));
+            $criteria->andWhere((Criteria::expr()->eq('champion', $champion)));
+
+            $matches = $this->em->getRepository(Match::class)->matching($criteria);
+
+            /**
+             * Count the Streamers that played the champion the last 55 days
+             */
+            $streamers = array();
+            foreach ($matches as $match) {
+
+                if (!array_key_exists($match->getStreamer()->getId(), $streamers)) {
+                    $streamers[$match->getStreamer()->getId()] = 0;
+                }
+
+                $streamers[$match->getStreamer()->getId()]++;
+            }
+
+            /**
+             * Cut it to top 3
+             */
+            arsort($streamers, SORT_NUMERIC);
+            $s = array_slice($streamers, 0, 3, true);
+
+            /**
+             * For the top 3, get the % of matches with that champion
+             */
+            $result = array();
+            foreach ($s as $sId => $total) {
+
+                $streamer = $this->em->getRepository(Streamer::class)->find($sId);
+
+                /**
+                 * Get Matches of past 55 days (re-use the criteria?)
+                 */
+                $criteriaS = new Criteria();
+                $criteriaS->where(Criteria::expr()->eq('crawled', true));
+                $criteriaS->andWhere(Criteria::expr()->gte('gameCreation', $time_ms));
+                $criteriaS->andWhere(Criteria::expr()->eq('streamer', $streamer));
+
+                $solo_matches = $this->em->getRepository(Match::class)->matching($criteriaS);
+                $all = $solo_matches->count();
+                $pct = round(100 * $total / $all, 2);
+
+                $result[] = array(
+                    'details' => array(
+                        'name' => $streamer->getChannelName(),
+                        'id' => $streamer->getId(),
+                        'on' => $streamer->getIsOnline(),
+                    ),
+                    'games' => $total,
+                    'pct' => $pct,
+                    'all' => $all
+                );
+
+            }
+
+            $msCache->set($result);
+            $cache->save($msCache);
+
+        } else {
+            $result = $msCache->get();
+        }
+
+        return $result;
 
     }
 
@@ -1044,10 +1135,149 @@ class LSFunction
     }
 
     /**
+     * @param Criteria $criteria
+     * @param string $role
+     * @return Criteria
+     */
+    private function criteria_by_role(Criteria $criteria, string $role)
+    {
+        if ($role === 'Top') {
+            $criteria->andWhere(Criteria::expr()->orX(
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'TOP'),
+                    Criteria::expr()->eq('role', 'SOLO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'TOP'),
+                    Criteria::expr()->eq('role', 'DUO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'TOP'),
+                    Criteria::expr()->eq('role', 'DUO_CARRY')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'TOP'),
+                    Criteria::expr()->eq('role', 'DUO_SUPPORT')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'TOP'),
+                    Criteria::expr()->eq('role', 'NONE')
+                )
+            ));
+        }
+
+        if ($role === 'Jungle') {
+            $criteria->andWhere(Criteria::expr()->orX(
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'JUNGLE'),
+                    Criteria::expr()->eq('role', 'NONE')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'JUNGLE'),
+                    Criteria::expr()->eq('role', 'N/A')
+                )
+            ));
+        }
+
+        if ($role === 'Mid') {
+            $criteria->andWhere(Criteria::expr()->orX(
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'DUO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'DUO_CARRY')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'DUO_SUPPORT')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'NONE')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'SOLO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'N/A')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'SUPPORT')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'MIDDLE'),
+                    Criteria::expr()->eq('role', 'CARRY')
+                )
+            ));
+        }
+
+        if ($role === 'Bot') {
+            $criteria->andWhere(Criteria::expr()->orX(
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'DUO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'DUO_CARRY')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'NONE')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'SOLO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'CARRY')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'N/A')
+                )
+            ));
+        }
+
+        if ($role === 'Support') {
+            $criteria->andWhere(Criteria::expr()->orX(
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'BOTTOM'),
+                    Criteria::expr()->eq('role', 'DUO_SUPPORT')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'TOP'),
+                    Criteria::expr()->eq('role', 'DUO_SUPPORT')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'N/A'),
+                    Criteria::expr()->eq('role', 'DUO')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'N/A'),
+                    Criteria::expr()->eq('role', 'SUPPORT')
+                ),
+                Criteria::expr()->andX(
+                    Criteria::expr()->eq('lane', 'NONE'),
+                    Criteria::expr()->eq('role', 'DUO_SUPPORT')
+                )
+            ));
+        }
+
+        return $criteria;
+    }
+
+    /**
      * @param \DateTime $ago
      * @param bool $full
-     * @copyright https://stackoverflow.com/questions/22083556/unknown-property-w/32723846#32723846
      * @return string
+     * @copyright https://stackoverflow.com/questions/22083556/unknown-property-w/32723846#32723846
      */
     function getTimeAgo(\DateTime $ago, $full = false)
     {

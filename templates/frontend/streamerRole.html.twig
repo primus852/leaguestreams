@@ -14,73 +14,50 @@
                 </a>Streamer by Role</h1>
         </header>
         <div id="main-nano-wrapper" class="nano">
-            <div class="nano-content" id="pScrollerMain">
+            <div class="nano-content" id="lScroll">
                 <div class="container-fluid">
-                    <div class="row justify-content-center" style="padding-left:15px;">
-                        <div class="col-10 text-center">
-                            <div class="ls-league">Check who plays your favourite role most during their streams.</div>
+                    <div class="row" style="padding-left:15px;">
+                        <div class="col-10 offset-1 text-center">
+                            <div class="ls-league">Check who plays your favourite role most during their streams.
+                            </div>
                         </div>
                     </div>
                     <br/>&nbsp;
                     <div class="row justify-content-center" style="padding-left:15px;">
                         <div class="col-10">
                             <div class="row">
-                                {% for key, role in roles %}
-                                    {% if key != "Unknown" %}
-                                        <div class="col-xl-6 offset-xl-0 col-10 offset-1">
-                                            <div class="row">
-                                                <div class="card">
-                                                    <div class="city-selected city-smaller">
-                                                        <article>
-                                                            <div class="info">
-                                                                <div class="city">
-                                                                    {{ key }}
-                                                                </div>
-                                                            </div>
-                                                        </article>
-                                                        <figure class="cFigure"
-                                                                style="background-image: url('{{ asset('assets/ls/img/roles/'~key|lower~'.png') }}')"></figure>
-                                                    </div>
-                                                    {% for details in role %}
-                                                        <div class="days">
-                                                            <div class="row row-no-gutter">
-                                                                <div class="col col-2">
-                                                                    <div class="day">
-                                                                        <h1>
-                                                                            {% if details.on == "true" %}
-                                                                                <a href="{{ path('loadPlayer', {'searchString': details.name}) }}"><i
-                                                                                            class="fa fa-check fa-2x tt"
-                                                                                            title="Online - Watch Now"
-                                                                                            style="color:#82b84f;"></i></a>
-                                                                            {% else %}
-                                                                                <i class="fa fa-remove fa-2x tt"
-                                                                                   title="Offline"
-                                                                                   style="color:#D9411E;"></i>
-                                                                            {% endif %}
-                                                                        </h1>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col col-6">
-                                                                    <div class="day">
-                                                                        <h1>
-                                                                            <a href="{{ path('profileStreamer', {'streamer': details.id}) }}">{{ details.name }}</a>
-                                                                        </h1>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col col-4 text-left">
-                                                                    <div class="day">
-                                                                        <h1>
-                                                                            {{ details.pct|number_format(2) }}&percnt;</h1>
-                                                                    </div>
-                                                                </div>
+                                {% for role in roles %}
+                                    <div class="col-xl-6 offset-xl-0 col-10">
+                                        <div class="row">
+                                            <div class="card">
+                                                <div class="city-selected city-medium pointer clickRoleStreamer"
+                                                     data-role="{{ role }}">
+                                                    <article>
+                                                        <div class="info">
+                                                            <div class="city">
+                                                                {{ role }}
                                                             </div>
                                                         </div>
-                                                    {% endfor %}
+                                                    </article>
+                                                    <figure class="cFigure lazy"
+                                                            data-src="{{ asset('assets/ls/img/roles/'~role|lower~'.png') }}"></figure>
                                                 </div>
-                                                <br/>&nbsp;
+                                                <div id="role_{{ role }}" class="roleToggle"
+                                                     data-role="{{ role }}"
+                                                     data-url="{{ path('renderMainStreamerByRole') }}"
+                                                     style="display:none;position:relative;">
+                                                    <h4><i class="fa fa-spin fa-spinner"></i> Loading Streamers</h4>
+                                                    <div class="row"
+                                                         style="border-bottom:1px solid #ccc;padding-top:5px;">
+                                                        <div class="col-12">
+                                                            This may take a while...
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <br/>&nbsp;
                                         </div>
-                                    {% endif %}
+                                    </div>
                                 {% endfor %}
                             </div>
                         </div>
@@ -90,6 +67,8 @@
             <br/>
         </div>
     </main>
+    <input type="hidden" id="ajax-route-path-profile" value="{{ path('profileStreamer') }}"/>
+    <input type="hidden" id="ajax-route-path-stream" value="{{ path('loadPlayer') }}"/>
 {% endblock %}
 
 {% block stylesheets %}
@@ -97,6 +76,7 @@
 {% endblock stylesheets %}
 
 {% block javascripts %}
+    <script src="{{ preload(asset('assets/node_modules/jquery-lazy/jquery.lazy.min.js')) }}"></script>
     <script>
         var LS_NAV = "mRole";
     </script>

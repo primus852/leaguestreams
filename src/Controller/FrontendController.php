@@ -8,6 +8,7 @@ use App\Entity\Streamer;
 use App\Entity\Versions;
 use App\Utils\LSFunction;
 use App\Utils\TwitchApi;
+use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Response;
@@ -234,16 +235,11 @@ class FrontendController extends AbstractController
      * @Route("/by-champion", name="byChampion")
      * @return Response
      */
-    public function byChampionAction()
+    public function byChampionAction(ObjectManager $em)
     {
-
-
-        /* Entity Manager */
-        $em = $this->getDoctrine()->getManager();
 
         /* Get Champions */
         $champs = $em->getRepository(Champion::class)->findBy(array(), array('name' => 'ASC'));
-
 
         $versions = $this->getDoctrine()
             ->getRepository(Versions::class)
@@ -263,80 +259,21 @@ class FrontendController extends AbstractController
     public function byRoleAction()
     {
 
-        /* Get CDN */
+        /* Get Roles */
+        $roles = array(
+            'Top',
+            'Jungle',
+            'Mid',
+            'Bot',
+            'Support'
+        );
         $versions = $this->getDoctrine()
             ->getRepository(Versions::class)
             ->find(1);
 
-        $matches = $this->getDoctrine()->getRepository(Match::class)->findBy(array(
-            'crawled' => true,
-        ));
-
-        $em = $this->getDoctrine()->getManager();
-
-        /* @var $ls LSFunction */
-        $ls = new LSFunction($em);
-
-        $rArray = array();
-        $tArray = array();
-        foreach ($matches as $match) {
-
-
-            $cRole = $match->getLane() . "_" . $match->getRole();
-            $role = $ls->getRoleName($cRole);
-
-            if (!isset($rArray[$role])) {
-                $rArray[$role] = array();
-            }
-
-            if (!isset($rArray[$role][$match->getStreamer()->getChannelUser()])) {
-                $rArray[$role][$match->getStreamer()->getChannelUser()] = 1;
-            } else {
-                $rArray[$role][$match->getStreamer()->getChannelUser()]++;
-            }
-
-            if (!isset($tArray[$match->getStreamer()->getChannelUser()])) {
-                $tArray[$match->getStreamer()->getChannelUser()] = 1;
-            } else {
-                $tArray[$match->getStreamer()->getChannelUser()]++;
-            }
-        }
-
-        $roleFinal = array();
-        foreach ($rArray as $keyRole => $roles) {
-
-            arsort($roles);
-            $roleA = array_slice($roles, 0, 10);
-
-            $sFinal = array();
-            foreach ($roleA as $key => $rRole) {
-
-                if (isset($tArray[$key]) && $tArray[$key] > 0) {
-
-                    $sUser = $this->getDoctrine()->getRepository(Streamer::class)->findOneBy(array(
-                        'channelUser' => $key,
-                    ));
-
-                    $sFinal[$key] = array(
-                        'pct' => $rRole * 100 / $tArray[$key],
-                        'id' => $sUser->getId(),
-                        'on' => $sUser->getIsOnline(),
-                        'name' => $sUser->getChannelUser(),
-                    );
-                }
-            }
-
-            $roleFinal[$keyRole] = $sFinal;
-
-            usort($roleFinal[$keyRole], function ($a, $b) {
-                return $b['pct'] <=> $a['pct'];
-            });
-
-        }
-
         return $this->render('frontend/streamerRole.html.twig', array(
+            'roles' => $roles,
             'version' => $versions,
-            'roles' => $roleFinal,
         ));
 
     }

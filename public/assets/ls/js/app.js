@@ -773,7 +773,7 @@ $(document).on("click", ".clickChampionStreamer", function () {
         return false;
     }
     if ($btn.hasClass('is-diabled')) {
-        openNoty('warning', 'Loading VODs already');
+        openNoty('warning', 'Loading Streamers already');
         return false;
     }
     //$('.champToggle').hide();
@@ -781,6 +781,25 @@ $(document).on("click", ".clickChampionStreamer", function () {
     $btn.addClass('is-disabled');
 
     initMainStreamer('#champ_' + $cId);
+});
+
+$(document).on("click", ".clickRoleStreamer", function () {
+
+    var $btn = $(this);
+    var $role = $btn.attr('data-role');
+    if ($('#role_' + $role).is(':visible')) {
+        $('#role_' + $role).slideToggle();
+        return false;
+    }
+    if ($btn.hasClass('is-diabled')) {
+        openNoty('warning', 'Loading Streamers already');
+        return false;
+    }
+    //$('.champToggle').hide();
+    $('#role_' + $role).slideToggle('slow').html('<h4><i class="fa fa-spin fa-spinner"></i> Loading Streamers</h4>\n<div class="row" style="border-bottom:1px solid #ccc;padding-top:5px;">\n    <div class="col-12">\n        This may take a while...\n    </div>\n</div>');
+    $btn.addClass('is-disabled');
+
+    initMainRoleStreamer('#role_' + $role);
 });
 
 $(document).on("keyup", "#searchChamp", function () {
@@ -1240,6 +1259,20 @@ function initMainStreamer(selector) {
         /* Ajax Call */
         $.post($(selector).attr('data-url'), {
             c: $(selector).attr('data-champion'),
+        }).done(function (data) {
+            $(selector).html(data);
+            initTooltips('.tt');
+        });
+
+    }
+}
+
+function initMainRoleStreamer(selector) {
+    if ($(selector).length) {
+        alert($(selector).attr('data-role'));
+        /* Ajax Call */
+        $.post($(selector).attr('data-url'), {
+            role: $(selector).attr('data-role'),
         }).done(function (data) {
             $(selector).html(data);
             initTooltips('.tt');

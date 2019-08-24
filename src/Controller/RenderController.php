@@ -21,6 +21,7 @@ use App\Utils\SimpleCrypt;
 use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\PersistentCollection;
+use primus852\ShortResponse\ShortResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -77,7 +78,7 @@ class RenderController extends AbstractController
                         'id' => $perk->getId(),
                         'name' => $perk->getName(),
                         'description' => $perk->getDescription(),
-                        'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                        'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                     );
                 }
             }
@@ -89,7 +90,7 @@ class RenderController extends AbstractController
                     'id' => $perk->getId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
-                    'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                    'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                 );
             }
 
@@ -99,7 +100,7 @@ class RenderController extends AbstractController
                     'id' => $perk->getId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
-                    'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                    'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                 );
             }
         }
@@ -197,7 +198,7 @@ class RenderController extends AbstractController
                                     'id' => $perk->getId(),
                                     'name' => $perk->getName(),
                                     'description' => $perk->getDescription(),
-                                    'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                                    'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                                 );
                             }
                         }
@@ -209,7 +210,7 @@ class RenderController extends AbstractController
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                                'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                             );
                         }
 
@@ -219,7 +220,7 @@ class RenderController extends AbstractController
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                                'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                             );
                         }
                     }
@@ -312,7 +313,7 @@ class RenderController extends AbstractController
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                                'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                             );
                         }
                     }
@@ -324,7 +325,7 @@ class RenderController extends AbstractController
                             'id' => $perk->getId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
-                            'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                            'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                         );
                     }
 
@@ -334,7 +335,7 @@ class RenderController extends AbstractController
                             'id' => $perk->getId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
-                            'link' => $version->getCdn().'/img/'.$perk->getImage(),
+                            'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                         );
                     }
                 }
@@ -586,11 +587,9 @@ class RenderController extends AbstractController
 
 
     /**
-     * Due to the enormous loading time, we render this separately via ajax
      * @Route("/_render/_mainStreamerByChampion", name="renderMainStreamerByChampion")
      * @param Request $request
      * @return Response
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function renderMainStreamerAction(Request $request)
     {
@@ -600,21 +599,54 @@ class RenderController extends AbstractController
         $cId = $request->get('c');
 
         if ($cId === null) {
-            throw new NotFoundHttpException('Champion cannot be empty');
+            return new Response('Error: Champion cannot be empty');
         }
 
         /* @var $champion Champion */
         $champion = $em->getRepository(Champion::class)->find($cId);
 
         if ($champion === null) {
-            throw new NotFoundHttpException('Champion not found. ID: ' . $cId);
+            return new Response('Error: Champion not found. ID: ' . $cId);
         }
 
         /* @var $ls LSFunction */
         $ls = new LSFunction($em);
-        $result = $ls->getMainStreamer($champion);
+        try {
+            $result = $ls->getMainStreamer($champion);
+        } catch (\Exception $e) {
+            return new Response('Error: ' . $e->getMessage());
+        }
 
         return $this->render('render/mainStreamer.html.twig', array(
+            'mainStreamer' => $result,
+        ));
+
+    }
+
+    /**
+     * @Route("/_render/_mainStreamerByRole", name="renderMainStreamerByRole")
+     * @param Request $request
+     * @param ObjectManager $em
+     * @return Response
+     */
+    public function renderMainRoleStreamerAction(Request $request, ObjectManager $em)
+    {
+
+        $role = $request->get('role');
+
+        if ($role === '' || $role === null) {
+            return new Response('Error: Role cannot be empty.');
+        }
+
+        /* @var $ls LSFunction */
+        $ls = new LSFunction($em);
+        try {
+            $result = $ls->getMainRole($role);
+        } catch (\Exception $e) {
+            return new Response('Error: ' . $e->getMessage());
+        }
+
+        return $this->render('render/mainRoleStreamer.html.twig', array(
             'mainStreamer' => $result,
         ));
 
@@ -637,7 +669,7 @@ class RenderController extends AbstractController
         ));
 
         if ($champion === null) {
-            throw new NotFoundHttpException('Champion not found. Name: ' . $c);
+            return new Response('Error: Champion not found. Name: ' . $c);
         }
 
         $versions = $em->getRepository(Versions::class)->find(1);
