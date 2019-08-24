@@ -1269,7 +1269,6 @@ function initMainStreamer(selector) {
 
 function initMainRoleStreamer(selector) {
     if ($(selector).length) {
-        alert($(selector).attr('data-role'));
         /* Ajax Call */
         $.post($(selector).attr('data-url'), {
             role: $(selector).attr('data-role'),
