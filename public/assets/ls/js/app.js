@@ -83,6 +83,7 @@ $(function () {
         $statsTable.DataTable({
             dom: '<"top"f>rt<"bottom"ip>',
             responsive: true,
+            'order': [[ 2, 'desc' ]],
             'columnDefs': [
                 {'orderData': [2], 'targets': [3]},
                 {

@@ -26,18 +26,15 @@
                                 <th class="text-center">LAST ON SORT</th>
                                 <th class="text-center">Last Online</th>
                                 <th class="text-center">Verified Summoners</th>
-                                <th class="text-center">&percnt; Winrate</th>
-                                <th class="text-center">&percnt; inGame</th>
-                                <th class="text-center">Awards</th>
                                 <th class="text-center">Action</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for streamer in streamers %}
                                 <tr id="sRow_{{ streamer.id }}">
-                                    <td>{{ streamer.platform }}</td>
+                                    <td>{{ streamer.platform.name }}</td>
                                     <td>
-                                        <a href="{{ path('profileStreamer', {"streamer":streamer.id}) }}">{{ streamer.channel }}</a>
+                                        <a href="{{ path('profileStreamer', {"streamer":streamer.id}) }}">{{ streamer.channelName }}</a>
                                     </td>
                                     <td>
                                         {% if streamer.started is defined and streamer.started is not null %}
@@ -62,8 +59,8 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if streamer.summoners is not null %}
-                                            {% for summoner in streamer.summoners %}
+                                        {% if streamer.summoner is not null %}
+                                            {% for summoner in streamer.summoner %}
                                                 <a href="https://{{ summoner.region.short }}.op.gg/summoner/userName={{ summoner.name }}">{{ summoner.region.short|upper }}
                                                     -{{ summoner.name }}</a> <span
                                                     style="font-size:0.7rem;">{{ summoner.league }}</span>
@@ -73,48 +70,16 @@
                                             None
                                         {% endif %}
                                     </td>
-                                    <td class="text-center">{{ streamer.winrate|number_format(2) }}&percnt;</td>
-                                    <td class="text-center">{{ streamer.totalInGame|number_format(2) }}&percnt;</td>
-                                    <td class="text-left">
-                                        {% if streamer.awards is defined and streamer.awards.otp is not null %}
-                                            <div class="awardImg tt"
-                                                 title="{{ streamer.awards.otp.name }} OneTrickPony<br /><span class='summonerSub'>{{ streamer.awards.otp.games }} of {{ streamer.awards.otp.totals }} Games</span>">
-                                                <span class="award-badge award-otp">OTP</span>
-                                                <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ streamer.awards.otp.img }}"
-                                                     class="" style="max-height:40px;"/>
-                                            </div>
-                                        {% endif %}
-                                        {% if streamer.awards is defined and streamer.awards.pro is not empty %}
-                                            {% for pro in streamer.awards.pro %}
-                                                <div class="awardImg tt"
-                                                     title="{{ pro.name }} Pro<br /><span class='summonerSub'>{{ pro.games }} of {{ pro.totals }} Games</span>">
-                                                    <span class="award-badge award-pro">Pro</span>
-                                                    <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ pro.img }}"
-                                                         class="" style="max-height:40px;"/>
-                                                </div>
-                                            {% endfor %}
-                                        {% endif %}
-                                        {% if streamer.awards is defined and streamer.awards.beast is not empty %}
-                                            {% for beast in streamer.awards.beast %}
-                                                <div class="awardImg tt"
-                                                     title="{{ beast.name }} Beast<br /><span class='summonerSub'>{{ beast.games }} Games with a {{ beast.winpct|number_format(2) }}&percnt; Winrate</span>">
-                                                    <span class="award-badge award-beast">Beast</span>
-                                                    <img src="{{ versions.cdn }}/{{ versions.champion }}/img/champion/{{ beast.img }}"
-                                                         class="" style="max-height:40px;"/>
-                                                </div>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </td>
                                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                                         <td>
                                             <a class="btn btn-red rounded-0 removeStreamer pointer md-trigger"
-                                               data-streamer="{{ streamer.id }}" data-channel="{{ streamer.cUser }}"
+                                               data-streamer="{{ streamer.id }}" data-channel="{{ streamer.channelUser }}"
                                                data-modal="modal-5">Remove <i class="fa fa-remove"></i> </a>
                                         </td>
                                     {% else %}
                                         <td>
                                             <a class="btn btn-red rounded-0 reportStreamer pointer md-trigger"
-                                               data-streamer="{{ streamer.id }}" data-channel="{{ streamer.cUser }}"
+                                               data-streamer="{{ streamer.id }}" data-channel="{{ streamer.channelUser }}"
                                                data-modal="modal-5">Report <i class="fa fa-exclamation"></i> </a>
                                         </td>
                                     {% endif %}

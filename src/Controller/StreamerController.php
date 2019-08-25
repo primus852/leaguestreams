@@ -8,12 +8,15 @@ use App\Entity\Streamer;
 use App\Entity\Versions;
 use App\Entity\Vod;
 use App\Utils\LSFunction;
+use DateTime;
+use DateTimeZone;
 use Doctrine\Common\Collections\Criteria;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class StreamerController extends AbstractController
 {
@@ -21,22 +24,15 @@ class StreamerController extends AbstractController
     /**
      * @Route("/streamer/all", name="allStreamer")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function allStreamerAction(Request $request)
     {
 
-        $streams = $this->getDoctrine()->getRepository(Streamer::class)->findBy(array(), array(
+        $streamers = $this->getDoctrine()->getRepository(Streamer::class)->findBy(array(), array(
             'channelName' => 'ASC'
         ));
-
-        $ls = new LSFunction($this->getDoctrine()->getManager());
-
-        $streamers = null;
-        foreach ($streams as $stream) {
-            $streamers[] = $ls->getStreamersStats($stream);
-        }
 
         $versions = $this->getDoctrine()
             ->getRepository(Versions::class)
@@ -52,8 +48,8 @@ class StreamerController extends AbstractController
     /**
      * @Route("/profile/{streamer}", name="profileStreamer", defaults={"streamer"="0"})
      * @param $streamer
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function profileStreamerAction($streamer)
     {
@@ -125,7 +121,7 @@ class StreamerController extends AbstractController
         $vodArray = array();
 
         /* Get VODs for the last 55 days for the streamer */
-        $dateVod = new \DateTime();
+        $dateVod = new DateTime();
         $dateVod->modify('-55 days');
         $criteriaVod = Criteria::create();
         $criteriaVod->where(Criteria::expr()->andX(
@@ -138,9 +134,9 @@ class StreamerController extends AbstractController
         foreach ($vods as $vod) {
 
 
-            $startVod = \DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new \DateTimeZone('UTC'));
+            $startVod = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new DateTimeZone('UTC'));
             $endVod = clone $startVod;
-            $today = new \DateTime('now', new \DateTimeZone('UTC'));
+            $today = new DateTime('now', new DateTimeZone('UTC'));
             $diff = $startVod->diff($today);
             if ($diff->days <= 55) {
                 $endVod->modify("+" . $vod->getLength() . " seconds");
@@ -156,12 +152,12 @@ class StreamerController extends AbstractController
                     if ($match->getGameCreation() !== "") {
 
                         /* NOT UTC */
-                        $start = \DateTime::createFromFormat('U', round(($match->getGameCreation() / 1000)));
+                        $start = DateTime::createFromFormat('U', round(($match->getGameCreation() / 1000)));
                         $end = clone $start;
                         $end->modify("+" . $match->getLength() . " seconds");
 
                         /* Start of Vod */
-                        $startVod = \DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new \DateTimeZone('UTC'));
+                        $startVod = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $vod->getCreated(), new DateTimeZone('UTC'));
 
                         $endVod = clone $startVod;
                         $endVod->modify("+" . $vod->getLength() . " seconds");
@@ -237,7 +233,7 @@ class StreamerController extends AbstractController
 
     /**
      * @Route("/streamer/add", name="addStreamer")
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function addAction()
     {
