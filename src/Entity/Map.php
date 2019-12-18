@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -38,6 +40,12 @@ class Map
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    public function __construct()
+    {
+        $this->match = new ArrayCollection();
+        $this->currentMatch = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -117,6 +125,52 @@ class Map
     public function setId($id): void
     {
         $this->id = $id;
+    }
+
+    public function addMatch(Match $match): self
+    {
+        if (!$this->match->contains($match)) {
+            $this->match[] = $match;
+            $match->setMap($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Match $match): self
+    {
+        if ($this->match->contains($match)) {
+            $this->match->removeElement($match);
+            // set the owning side to null (unless already changed)
+            if ($match->getMap() === $this) {
+                $match->setMap(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addCurrentMatch(CurrentMatch $currentMatch): self
+    {
+        if (!$this->currentMatch->contains($currentMatch)) {
+            $this->currentMatch[] = $currentMatch;
+            $currentMatch->setMap($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCurrentMatch(CurrentMatch $currentMatch): self
+    {
+        if ($this->currentMatch->contains($currentMatch)) {
+            $this->currentMatch->removeElement($currentMatch);
+            // set the owning side to null (unless already changed)
+            if ($currentMatch->getMap() === $this) {
+                $currentMatch->setMap(null);
+            }
+        }
+
+        return $this;
     }
 
 

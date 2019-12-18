@@ -7,16 +7,18 @@ use App\Entity\Champion;
 use App\Entity\CurrentMatch;
 use App\Entity\Map;
 use App\Entity\Match;
+use App\Entity\Perk;
 use App\Entity\Queue;
 use App\Entity\Region;
 use App\Entity\Spell;
 use App\Entity\Streamer;
 use App\Entity\Summoner;
+use App\Entity\VersionAll;
 use App\Entity\Versions;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
 use App\Utils\RiotApi\Settings;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 
 class Crawl
 {
@@ -382,6 +384,202 @@ class Crawl
     /**
      * @throws LSException
      */
+    public function perks()
+    {
+        /**
+         * Use NA1 for Static
+         */
+        $api = new RiotApi(new Settings());
+
+        try {
+            $perksStyles = $api->getPerkStyles();
+            $perks = $api->getPerks();
+        } catch (RiotApiException $e) {
+            throw new LSException('Gather Versions Exception: ' . $e->getMessage());
+        }
+
+        foreach($perksStyles['styles'] as $perk){
+
+            $p = $this->em->getRepository(Perk::class)->find($perk['id']);
+
+            if($p === null){
+                $p = new Perk();
+                $p->setId($perk['id']);
+            }
+
+            $p->setName($perk['name']);
+            $p->setDescription($perk['tooltip']);
+            $p->setImage($perk['iconPath']);
+            $p->setModified();
+
+            $this->em->persist($p);
+
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                throw new LSException('MySQL Error: ' . $e->getMessage());
+            }
+
+        }
+
+        foreach($perks as $perk){
+
+            $p = $this->em->getRepository(Perk::class)->find($perk['id']);
+
+            if($p === null){
+                $p = new Perk();
+                $p->setId($perk['id']);
+            }
+
+            $p->setName($perk['name']);
+            $p->setDescription($perk['shortDesc']);
+            $p->setImage($perk['iconPath']);
+            $p->setModified();
+
+            $this->em->persist($p);
+
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                throw new LSException('MySQL Error: ' . $e->getMessage());
+            }
+
+        }
+
+
+    }
+
+    /**
+     * @throws LSException
+     */
+    public function spells()
+    {
+        /**
+         * Use NA1 for Static
+         */
+        $api = new RiotApi(new Settings());
+
+        /**
+         * Get the current Version
+         */
+        $version = $this->em->getRepository(Versions::class)->find(1);
+
+        try {
+            $spells = $api->getSpells($version->getVersion());
+        } catch (RiotApiException $e) {
+            throw new LSException('Gather Versions Exception: ' . $e->getMessage());
+        }
+
+        foreach ($spells['data'] as $spell) {
+
+            $s = $this->em->getRepository(Spell::class)->find($spell['key']);
+
+            if($s === null){
+                $s = new Spell();
+                $s->setId($spell['key']);
+            }
+
+            $s->setName($spell['name']);
+            $s->setImage($spell['image']['full']);
+            $s->setModified();
+
+            $this->em->persist($s);
+
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                throw new LSException('MySQL Error: ' . $e->getMessage());
+            }
+
+        }
+    }
+
+
+    /**
+     * @throws LSException
+     */
+    public function queues()
+    {
+        /**
+         * Use NA1 for Static
+         */
+        $api = new RiotApi(new Settings());
+
+        try {
+            $queues = $api->getStatic('queues');
+        } catch (RiotApiException $e) {
+            throw new LSException('Gather Versions Exception: ' . $e->getMessage());
+        }
+
+        foreach ($queues as $queue) {
+
+            $q = $this->em->getRepository(Queue::class)->find($queue['queueId']);
+
+            /**
+             * Create it if it does not exist
+             */
+            if ($q === null) {
+                $q = new Queue();
+            }
+            $q->setName($queue['map']);
+            $q->setModified();
+            $q->setDescription($queue['description']);
+            $q->setNote($queue['notes']);
+
+            $this->em->persist($q);
+
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                throw new LSException('MySQL Error: ' . $e->getMessage());
+            }
+
+        }
+    }
+
+    /**
+     * @throws LSException
+     */
+    public function maps()
+    {
+        /**
+         * Use NA1 for Static
+         */
+        $api = new RiotApi(new Settings());
+
+        try {
+            $maps = $api->getStatic('maps');
+        } catch (RiotApiException $e) {
+            throw new LSException('Gather Versions Exception: ' . $e->getMessage());
+        }
+
+        foreach ($maps as $map) {
+
+            $m = $this->em->getRepository(Map::class)->find($map['mapId']);
+
+            /**
+             * Create it if it does not exist
+             */
+            if ($m === null) {
+                $m = new Map();
+            }
+            $m->setName($map['mapName']);
+            $m->setModified();
+
+            $this->em->persist($m);
+
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                throw new LSException('MySQL Error: ' . $e->getMessage());
+            }
+
+        }
+    }
+
+    /**
+     * @throws LSException
+     */
     public function versions()
     {
 
@@ -391,31 +589,52 @@ class Crawl
         $api = new RiotApi(new Settings());
 
         try {
-            $version = $api->getVersion()[0];
+            $versions = $api->getVersions();
         } catch (RiotApiException $e) {
             throw new LSException('Gather Versions Exception: ' . $e->getMessage());
         }
 
         $v = $this->em->getRepository(Versions::class)->find(1);
-        $v->setVersion($version);
-        $v->setChampion($version);
-        $v->setProfileicon($version);
-        $v->setItem($version);
-        $v->setMap($version);
-        $v->setMastery($version);
-        $v->setSpell($version);
-        $v->setRune($version);
+        $v->setVersion($versions[0]);
+        $v->setChampion($versions[0]);
+        $v->setProfileicon($versions[0]);
+        $v->setItem($versions[0]);
+        $v->setMap($versions[0]);
+        $v->setMastery($versions[0]);
+        $v->setSpell($versions[0]);
+        $v->setRune($versions[0]);
         $v->setModified();
 
         $this->em->persist($v);
+
+        /**
+         * Update all Versions as well
+         */
+        foreach ($versions as $version) {
+
+            $majors = explode('.', str_replace('lolpatch_', '', $version));
+            $major = $majors[0] . '.' . $majors[1];
+
+            $vs = $this->em->getRepository(VersionAll::class)->findOneBy(array(
+                'version' => $version
+            ));
+
+            if ($vs === null) {
+                $vs = new VersionAll();
+                $vs->setVersion($version);
+            }
+            $vs->setMajor($major);
+            $vs->setModified();
+
+            $this->em->persist($vs);
+
+        }
 
         try {
             $this->em->flush();
         } catch (\Exception $e) {
             throw new LSException('MySQL Error: ' . $e->getMessage());
         }
-
-
     }
 
     /**
@@ -658,7 +877,8 @@ class Crawl
     /**
      * @throws LSException
      */
-    public function update_champions(){
+    public function update_champions()
+    {
 
         /**
          * Use NA1 for Static

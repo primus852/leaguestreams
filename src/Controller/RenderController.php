@@ -19,7 +19,7 @@ use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\Settings;
 use App\Utils\SimpleCrypt;
 use App\Utils\StreamPlatform\TwitchApi;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Doctrine\ORM\PersistentCollection;
 use primus852\ShortResponse\ShortResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -62,6 +64,14 @@ class Region
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    public function __construct()
+    {
+        $this->smurf = new ArrayCollection();
+        $this->summoner = new ArrayCollection();
+        $this->report = new ArrayCollection();
+        $this->match = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -213,6 +223,103 @@ class Region
     public function setPort($port): void
     {
         $this->port = $port;
+    }
+
+    public function getModified(): ?\DateTimeInterface
+    {
+        return $this->modified;
+    }
+
+    public function addSmurf(Smurf $smurf): self
+    {
+        if (!$this->smurf->contains($smurf)) {
+            $this->smurf[] = $smurf;
+            $smurf->setRegion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSmurf(Smurf $smurf): self
+    {
+        if ($this->smurf->contains($smurf)) {
+            $this->smurf->removeElement($smurf);
+            // set the owning side to null (unless already changed)
+            if ($smurf->getRegion() === $this) {
+                $smurf->setRegion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addSummoner(Summoner $summoner): self
+    {
+        if (!$this->summoner->contains($summoner)) {
+            $this->summoner[] = $summoner;
+            $summoner->setRegion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSummoner(Summoner $summoner): self
+    {
+        if ($this->summoner->contains($summoner)) {
+            $this->summoner->removeElement($summoner);
+            // set the owning side to null (unless already changed)
+            if ($summoner->getRegion() === $this) {
+                $summoner->setRegion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addReport(Report $report): self
+    {
+        if (!$this->report->contains($report)) {
+            $this->report[] = $report;
+            $report->setRegion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReport(Report $report): self
+    {
+        if ($this->report->contains($report)) {
+            $this->report->removeElement($report);
+            // set the owning side to null (unless already changed)
+            if ($report->getRegion() === $this) {
+                $report->setRegion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addMatch(Match $match): self
+    {
+        if (!$this->match->contains($match)) {
+            $this->match[] = $match;
+            $match->setRegion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Match $match): self
+    {
+        if ($this->match->contains($match)) {
+            $this->match->removeElement($match);
+            // set the owning side to null (unless already changed)
+            if ($match->getRegion() === $this) {
+                $match->setRegion(null);
+            }
+        }
+
+        return $this;
     }
 
 

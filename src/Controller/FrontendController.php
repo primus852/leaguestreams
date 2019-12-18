@@ -8,7 +8,7 @@ use App\Entity\Streamer;
 use App\Entity\Versions;
 use App\Utils\LSFunction;
 use App\Utils\TwitchApi;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Response;

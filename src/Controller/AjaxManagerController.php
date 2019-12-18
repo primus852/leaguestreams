@@ -10,7 +10,7 @@ use App\Utils\Helper;
 use App\Utils\LSFunction;
 use App\Utils\RiotApi;
 use App\Utils\RiotApiSetting;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

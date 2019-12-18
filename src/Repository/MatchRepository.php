@@ -6,7 +6,7 @@ use App\Entity\Champion;
 use App\Entity\Match;
 use App\Entity\Streamer;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * @method Match|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,11 +16,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class MatchRepository extends ServiceEntityRepository
 {
-    /**
-     * MatchRepository constructor.
-     * @param RegistryInterface $registry
-     */
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Match::class);
     }
@@ -191,4 +187,33 @@ class MatchRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
 
     }
+
+    // /**
+    //  * @return Match[] Returns an array of Match objects
+    //  */
+    /*
+    public function findByExampleField($value)
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.exampleField = :val')
+            ->setParameter('val', $value)
+            ->orderBy('m.id', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    */
+
+    /*
+    public function findOneBySomeField($value): ?Match
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.exampleField = :val')
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+    */
 }

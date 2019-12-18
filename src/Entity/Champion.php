@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -142,6 +144,13 @@ class Champion
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    public function __construct()
+    {
+        $this->match = new ArrayCollection();
+        $this->matchEnemy = new ArrayCollection();
+        $this->currentMatch = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -557,6 +566,75 @@ class Champion
     public function setId($id): void
     {
         $this->id = $id;
+    }
+
+    public function addMatch(Match $match): self
+    {
+        if (!$this->match->contains($match)) {
+            $this->match[] = $match;
+            $match->setChampion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Match $match): self
+    {
+        if ($this->match->contains($match)) {
+            $this->match->removeElement($match);
+            // set the owning side to null (unless already changed)
+            if ($match->getChampion() === $this) {
+                $match->setChampion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addMatchEnemy(Match $matchEnemy): self
+    {
+        if (!$this->matchEnemy->contains($matchEnemy)) {
+            $this->matchEnemy[] = $matchEnemy;
+            $matchEnemy->setEnemyChampion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatchEnemy(Match $matchEnemy): self
+    {
+        if ($this->matchEnemy->contains($matchEnemy)) {
+            $this->matchEnemy->removeElement($matchEnemy);
+            // set the owning side to null (unless already changed)
+            if ($matchEnemy->getEnemyChampion() === $this) {
+                $matchEnemy->setEnemyChampion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addCurrentMatch(CurrentMatch $currentMatch): self
+    {
+        if (!$this->currentMatch->contains($currentMatch)) {
+            $this->currentMatch[] = $currentMatch;
+            $currentMatch->setChampion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCurrentMatch(CurrentMatch $currentMatch): self
+    {
+        if ($this->currentMatch->contains($currentMatch)) {
+            $this->currentMatch->removeElement($currentMatch);
+            // set the owning side to null (unless already changed)
+            if ($currentMatch->getChampion() === $this) {
+                $currentMatch->setChampion(null);
+            }
+        }
+
+        return $this;
     }
 
 

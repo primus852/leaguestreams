@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -38,6 +39,22 @@ class Queue
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $description;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $note;
+
+    public function __construct()
+    {
+        $this->match = new ArrayCollection();
+        $this->currentMatch = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -117,6 +134,76 @@ class Queue
     public function setId($id): void
     {
         $this->id = $id;
+    }
+
+    public function addMatch(Match $match): self
+    {
+        if (!$this->match->contains($match)) {
+            $this->match[] = $match;
+            $match->setQueue($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Match $match): self
+    {
+        if ($this->match->contains($match)) {
+            $this->match->removeElement($match);
+            // set the owning side to null (unless already changed)
+            if ($match->getQueue() === $this) {
+                $match->setQueue(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addCurrentMatch(CurrentMatch $currentMatch): self
+    {
+        if (!$this->currentMatch->contains($currentMatch)) {
+            $this->currentMatch[] = $currentMatch;
+            $currentMatch->setQueue($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCurrentMatch(CurrentMatch $currentMatch): self
+    {
+        if ($this->currentMatch->contains($currentMatch)) {
+            $this->currentMatch->removeElement($currentMatch);
+            // set the owning side to null (unless already changed)
+            if ($currentMatch->getQueue() === $this) {
+                $currentMatch->setQueue(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): self
+    {
+        $this->note = $note;
+
+        return $this;
     }
 
 

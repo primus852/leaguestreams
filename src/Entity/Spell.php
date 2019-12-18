@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -58,6 +60,15 @@ class Spell
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    public function __construct()
+    {
+        $this->summoner = new ArrayCollection();
+        $this->currentMatch_p1_s1 = new ArrayCollection();
+        $this->currentMatch_p1_s2 = new ArrayCollection();
+        $this->match_p1_s1 = new ArrayCollection();
+        $this->match_p1_s2 = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -201,6 +212,118 @@ class Spell
     public function setId($id): void
     {
         $this->id = $id;
+    }
+
+    public function addSummoner(Summoner $summoner): self
+    {
+        if (!$this->summoner->contains($summoner)) {
+            $this->summoner[] = $summoner;
+            $summoner->addSpell($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSummoner(Summoner $summoner): self
+    {
+        if ($this->summoner->contains($summoner)) {
+            $this->summoner->removeElement($summoner);
+            $summoner->removeSpell($this);
+        }
+
+        return $this;
+    }
+
+    public function addCurrentMatchP1S1(CurrentMatch $currentMatchP1S1): self
+    {
+        if (!$this->currentMatch_p1_s1->contains($currentMatchP1S1)) {
+            $this->currentMatch_p1_s1[] = $currentMatchP1S1;
+            $currentMatchP1S1->setP1Spell1($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCurrentMatchP1S1(CurrentMatch $currentMatchP1S1): self
+    {
+        if ($this->currentMatch_p1_s1->contains($currentMatchP1S1)) {
+            $this->currentMatch_p1_s1->removeElement($currentMatchP1S1);
+            // set the owning side to null (unless already changed)
+            if ($currentMatchP1S1->getP1Spell1() === $this) {
+                $currentMatchP1S1->setP1Spell1(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addCurrentMatchP1S2(CurrentMatch $currentMatchP1S2): self
+    {
+        if (!$this->currentMatch_p1_s2->contains($currentMatchP1S2)) {
+            $this->currentMatch_p1_s2[] = $currentMatchP1S2;
+            $currentMatchP1S2->setP1Spell2($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCurrentMatchP1S2(CurrentMatch $currentMatchP1S2): self
+    {
+        if ($this->currentMatch_p1_s2->contains($currentMatchP1S2)) {
+            $this->currentMatch_p1_s2->removeElement($currentMatchP1S2);
+            // set the owning side to null (unless already changed)
+            if ($currentMatchP1S2->getP1Spell2() === $this) {
+                $currentMatchP1S2->setP1Spell2(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addMatchP1S1(Match $matchP1S1): self
+    {
+        if (!$this->match_p1_s1->contains($matchP1S1)) {
+            $this->match_p1_s1[] = $matchP1S1;
+            $matchP1S1->setP1Spell1($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatchP1S1(Match $matchP1S1): self
+    {
+        if ($this->match_p1_s1->contains($matchP1S1)) {
+            $this->match_p1_s1->removeElement($matchP1S1);
+            // set the owning side to null (unless already changed)
+            if ($matchP1S1->getP1Spell1() === $this) {
+                $matchP1S1->setP1Spell1(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addMatchP1S2(Match $matchP1S2): self
+    {
+        if (!$this->match_p1_s2->contains($matchP1S2)) {
+            $this->match_p1_s2[] = $matchP1S2;
+            $matchP1S2->setP1Spell2($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatchP1S2(Match $matchP1S2): self
+    {
+        if ($this->match_p1_s2->contains($matchP1S2)) {
+            $this->match_p1_s2->removeElement($matchP1S2);
+            // set the owning side to null (unless already changed)
+            if ($matchP1S2->getP1Spell2() === $this) {
+                $matchP1S2->setP1Spell2(null);
+            }
+        }
+
+        return $this;
     }
 
 

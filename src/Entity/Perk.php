@@ -39,6 +39,14 @@ class Perk
     protected $modified;
 
     /**
+     * @param mixed $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
      * @ORM\PreUpdate
      */
     public function setModified()

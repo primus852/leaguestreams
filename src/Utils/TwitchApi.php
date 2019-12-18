@@ -3,7 +3,7 @@
 namespace App\Utils;
 
 use App\Entity\Streamer;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class TwitchApi implements StreamInterface

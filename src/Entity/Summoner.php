@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -84,6 +86,13 @@ class Summoner
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    public function __construct()
+    {
+        $this->summonerReport = new ArrayCollection();
+        $this->match = new ArrayCollection();
+        $this->spell = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -299,6 +308,70 @@ class Summoner
     public function getModified()
     {
         return $this->modified;
+    }
+
+    public function addSummonerReport(SummonerReport $summonerReport): self
+    {
+        if (!$this->summonerReport->contains($summonerReport)) {
+            $this->summonerReport[] = $summonerReport;
+            $summonerReport->setSummoner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSummonerReport(SummonerReport $summonerReport): self
+    {
+        if ($this->summonerReport->contains($summonerReport)) {
+            $this->summonerReport->removeElement($summonerReport);
+            // set the owning side to null (unless already changed)
+            if ($summonerReport->getSummoner() === $this) {
+                $summonerReport->setSummoner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addMatch(Match $match): self
+    {
+        if (!$this->match->contains($match)) {
+            $this->match[] = $match;
+            $match->setSummoner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Match $match): self
+    {
+        if ($this->match->contains($match)) {
+            $this->match->removeElement($match);
+            // set the owning side to null (unless already changed)
+            if ($match->getSummoner() === $this) {
+                $match->setSummoner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addSpell(Spell $spell): self
+    {
+        if (!$this->spell->contains($spell)) {
+            $this->spell[] = $spell;
+        }
+
+        return $this;
+    }
+
+    public function removeSpell(Spell $spell): self
+    {
+        if ($this->spell->contains($spell)) {
+            $this->spell->removeElement($spell);
+        }
+
+        return $this;
     }
 
 

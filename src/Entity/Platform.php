@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -47,6 +49,11 @@ class Platform
      * @ORM\Column(name="last_modified", type="datetime", nullable=false)
      */
     protected $modified;
+
+    public function __construct()
+    {
+        $this->streamer = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -150,6 +157,29 @@ class Platform
     public function getModified()
     {
         return $this->modified;
+    }
+
+    public function addStreamer(Streamer $streamer): self
+    {
+        if (!$this->streamer->contains($streamer)) {
+            $this->streamer[] = $streamer;
+            $streamer->setPlatform($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStreamer(Streamer $streamer): self
+    {
+        if ($this->streamer->contains($streamer)) {
+            $this->streamer->removeElement($streamer);
+            // set the owning side to null (unless already changed)
+            if ($streamer->getPlatform() === $this) {
+                $streamer->setPlatform(null);
+            }
+        }
+
+        return $this;
     }
 
 

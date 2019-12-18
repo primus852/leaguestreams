@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\Champion;
 use App\Utils\LSFunction;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
 use Symfony\Component\Console\Command\Command;

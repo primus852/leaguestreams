@@ -9,7 +9,7 @@ use App\Utils\LS\LSException;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
 use App\Utils\RiotApi\Settings;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
 use Symfony\Component\Console\Command\Command;

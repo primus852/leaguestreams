@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Queue;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * @method Queue|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,20 +14,36 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class QueueRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Queue::class);
     }
 
+    // /**
+    //  * @return Queue[] Returns an array of Queue objects
+    //  */
     /*
-    public function findBySomething($value)
+    public function findByExampleField($value)
     {
         return $this->createQueryBuilder('q')
-            ->where('q.something = :value')->setParameter('value', $value)
+            ->andWhere('q.exampleField = :val')
+            ->setParameter('val', $value)
             ->orderBy('q.id', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
             ->getResult()
+        ;
+    }
+    */
+
+    /*
+    public function findOneBySomeField($value): ?Queue
+    {
+        return $this->createQueryBuilder('q')
+            ->andWhere('q.exampleField = :val')
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getOneOrNullResult()
         ;
     }
     */

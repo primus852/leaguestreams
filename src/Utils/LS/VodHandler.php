@@ -14,7 +14,7 @@ use App\Entity\Match;
 use App\Entity\Vod;
 use App\Utils\LSFunction;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Routing\RouterInterface;
 

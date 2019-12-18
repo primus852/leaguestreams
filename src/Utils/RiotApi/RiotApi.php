@@ -22,7 +22,6 @@ class RiotApi
     private const API_URL_CHAMPION_MASTERY_V4 = "https://{platform}.api.riotgames.com/lol/champion-mastery/v4/";
     private const API_URL_SPECTATOR = 'https://{platform}.api.riotgames.com/lol/spectator/v3/';
     private const API_URL_SPECTATOR_V4 = 'https://{platform}.api.riotgames.com/lol/spectator/v4/';
-    private const API_URL_STATIC = 'https://{platform}.api.riotgames.com/lol/static-data/v3/';
     private const API_URL_MATCH = 'https://{platform}.api.riotgames.com/lol/match/v3/';
     private const API_URL_MATCH_V4 = 'https://{platform}.api.riotgames.com/lol/match/v4/';
     private const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
@@ -30,9 +29,13 @@ class RiotApi
     private const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
     private const API_URL_SUMMONER_V4 = 'https://{platform}.api.riotgames.com/lol/summoner/v4/';
     private const API_URL_STATUS = 'https://{platform}.api.riotgames.com/lol/status/v3/';
-    private const API_STATIC_VERSION = 'https://ddragon.leagueoflegends.com/api/versions.json';
+    private const API_STATIC_DATA = 'http://static.developer.riotgames.com/docs/lol/{endpoint}.json';
+    private const API_STATIC_VERSIONS = 'https://ddragon.leagueoflegends.com/api/versions.json';
+    private const API_STATIC_SPELLS = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/summoner.json';
     private const API_STATIC_CHAMPIONS = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json';
     private const API_STATIC_CHAMPION = 'http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion/{champion}.json';
+    private const API_PERKSTYLES_EXTERNAL = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perkstyles.json';
+    private const API_PERKS_EXTERNAL = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perks.json';
 
     /**
      * Cache Timeout for requests to the Riot Api
@@ -117,28 +120,35 @@ class RiotApi
     }
 
     /**
-     * @param $mod
-     * @param null $id
-     * @param null $params
+     * @param string $endpoint
      * @return mixed
      * @throws RiotApiException
-     * @deprecated
      */
-    public function getStatic($mod, $id = null, $params = null)
+    public function getStatic(string $endpoint)
     {
 
-        $url = self::API_URL_STATIC . $mod;
-
-        if ($id !== null)
-            $url .= "/" . $id;
-
-        if ($params !== null)
-            $url .= "?" . $params;
+        $url = str_replace('{endpoint}', $endpoint, self::API_STATIC_DATA);
 
         try {
             return $this->getData($url, true);
         } catch (RiotApiException $e) {
-            throw new RiotApiException('GetStatic Exception: ' . $e->getMessage());
+            throw new RiotApiException('getStatic Exception: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @param string $version
+     * @return mixed
+     * @throws RiotApiException
+     */
+    public function getSpells(string $version)
+    {
+        $url = str_replace('{version}', $version, self::API_STATIC_SPELLS);
+
+        try {
+            return $this->getData($url, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetSpells Exception: ' . $e->getMessage());
         }
     }
 
@@ -146,15 +156,16 @@ class RiotApi
      * @return mixed
      * @throws RiotApiException
      */
-    public function getVersion()
+    public function getVersions()
     {
-        $url = self::API_STATIC_VERSION;
+        $url = self::API_STATIC_VERSIONS;
 
         try {
             return $this->getData($url, true);
         } catch (RiotApiException $e) {
-            throw new RiotApiException('GetVersion Exception: ' . $e->getMessage());
+            throw new RiotApiException('GetVersions Exception: ' . $e->getMessage());
         }
+
     }
 
     /**
@@ -191,6 +202,33 @@ class RiotApi
             throw new RiotApiException('GetChampion Exception: ' . $e->getMessage());
         }
 
+    }
+
+    /**
+     * Getting Perks from external Ressource?
+     * @return mixed
+     * @throws RiotApiException
+     */
+    public function getPerkStyles()
+    {
+        $url = self::API_PERKSTYLES_EXTERNAL;
+
+        try {
+            return $this->getData($url, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetPerkStyles Exception: ' . $e->getMessage());
+        }
+    }
+
+    public function getPerks()
+    {
+        $url = self::API_PERKS_EXTERNAL;
+
+        try {
+            return $this->getData($url, true);
+        } catch (RiotApiException $e) {
+            throw new RiotApiException('GetPerks Exception: ' . $e->getMessage());
+        }
     }
 
     /**

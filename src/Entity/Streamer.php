@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -148,6 +150,16 @@ class Streamer
      * @ORM\Column(type="datetime", nullable=false)
      */
     protected $created;
+
+    public function __construct()
+    {
+        $this->streamerReport = new ArrayCollection();
+        $this->vod = new ArrayCollection();
+        $this->summoner = new ArrayCollection();
+        $this->smurf = new ArrayCollection();
+        $this->report = new ArrayCollection();
+        $this->match = new ArrayCollection();
+    }
 
     /**
      * @ORM\PreUpdate
@@ -571,6 +583,144 @@ class Streamer
     public function getCreated()
     {
         return $this->created;
+    }
+
+    public function addStreamerReport(StreamerReport $streamerReport): self
+    {
+        if (!$this->streamerReport->contains($streamerReport)) {
+            $this->streamerReport[] = $streamerReport;
+            $streamerReport->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStreamerReport(StreamerReport $streamerReport): self
+    {
+        if ($this->streamerReport->contains($streamerReport)) {
+            $this->streamerReport->removeElement($streamerReport);
+            // set the owning side to null (unless already changed)
+            if ($streamerReport->getStreamer() === $this) {
+                $streamerReport->setStreamer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addVod(Vod $vod): self
+    {
+        if (!$this->vod->contains($vod)) {
+            $this->vod[] = $vod;
+            $vod->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVod(Vod $vod): self
+    {
+        if ($this->vod->contains($vod)) {
+            $this->vod->removeElement($vod);
+            // set the owning side to null (unless already changed)
+            if ($vod->getStreamer() === $this) {
+                $vod->setStreamer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addSummoner(Summoner $summoner): self
+    {
+        if (!$this->summoner->contains($summoner)) {
+            $this->summoner[] = $summoner;
+            $summoner->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSummoner(Summoner $summoner): self
+    {
+        if ($this->summoner->contains($summoner)) {
+            $this->summoner->removeElement($summoner);
+            // set the owning side to null (unless already changed)
+            if ($summoner->getStreamer() === $this) {
+                $summoner->setStreamer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addSmurf(Smurf $smurf): self
+    {
+        if (!$this->smurf->contains($smurf)) {
+            $this->smurf[] = $smurf;
+            $smurf->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSmurf(Smurf $smurf): self
+    {
+        if ($this->smurf->contains($smurf)) {
+            $this->smurf->removeElement($smurf);
+            // set the owning side to null (unless already changed)
+            if ($smurf->getStreamer() === $this) {
+                $smurf->setStreamer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addReport(Report $report): self
+    {
+        if (!$this->report->contains($report)) {
+            $this->report[] = $report;
+            $report->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReport(Report $report): self
+    {
+        if ($this->report->contains($report)) {
+            $this->report->removeElement($report);
+            // set the owning side to null (unless already changed)
+            if ($report->getStreamer() === $this) {
+                $report->setStreamer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addMatch(Match $match): self
+    {
+        if (!$this->match->contains($match)) {
+            $this->match[] = $match;
+            $match->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Match $match): self
+    {
+        if ($this->match->contains($match)) {
+            $this->match->removeElement($match);
+            // set the owning side to null (unless already changed)
+            if ($match->getStreamer() === $this) {
+                $match->setStreamer(null);
+            }
+        }
+
+        return $this;
     }
 
 

@@ -15,7 +15,7 @@ use App\Entity\Summoner;
 use App\Entity\Versions;
 use App\Utils\RiotApi\RiotApi;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Asset\Package;

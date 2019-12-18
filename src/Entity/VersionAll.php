@@ -13,6 +13,12 @@ class VersionAll
 {
     /**
      * @ORM\Id
+     * @ORM\GeneratedValue
+     */
+    protected $id;
+
+    /**
+     * @ORM\Id
      * @ORM\Column(type="string", length=15)
      */
     protected $version;
@@ -66,6 +72,11 @@ class VersionAll
     public function setMajor($major): void
     {
         $this->major = $major;
+    }
+
+    public function getModified(): ?\DateTimeInterface
+    {
+        return $this->modified;
     }
 
 

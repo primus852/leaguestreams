@@ -11,7 +11,7 @@ use App\Utils\LS\LSException;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
 use App\Utils\RiotApi\Settings;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use primus852\SimpleStopwatch\Stopwatch;
@@ -93,6 +93,10 @@ class CrawlVersionCommand extends Command
 
         try{
             $lsCrawl->versions();
+            $lsCrawl->maps();
+            $lsCrawl->queues();
+            $lsCrawl->spells();
+            $lsCrawl->perks();
             $debug ? $io->text('Updated Versions: <fg=green>success</>') : null;
         }catch (LSException $e){
             throw new LSException('Could not gather Versions: '.$e->getMessage());
@@ -142,7 +146,7 @@ class CrawlVersionCommand extends Command
                 throw new LSException('Gather Versions Exception: ' . $e->getMessage());
             }
 
-            $champion->setModified(new \DateTime());
+            $champion->setModified();
             $champion->setName($name);
             $champion->setTitle($champion_api['data'][$name]['title']);
             $champion->setImage($champion_api['data'][$name]['image']['full']);

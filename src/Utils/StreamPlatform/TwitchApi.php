@@ -6,7 +6,7 @@ namespace App\Utils\StreamPlatform;
 use App\Entity\Platform;
 use App\Entity\Streamer;
 use App\Entity\Vod;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
 
