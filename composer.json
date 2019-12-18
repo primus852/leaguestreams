@@ -1,5 +1,7 @@
 {
     "type": "project",
+    "name": "LeagueStreams",
+    "description": "Crawl Streamers League Of Legends' Games",
     "license": "proprietary",
     "require": {
         "php": "^7.1.3",
