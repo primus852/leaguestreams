@@ -7,7 +7,6 @@
 
 ###> symfony/webpack-encore-pack ###
 /node_modules/
-/public/build/
 ###< symfony/webpack-encore-pack ###
 
 ###> symfony/phpunit-bridge ###
@@ -15,7 +14,6 @@
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 .idea
-/public/assets/node_modur
 /public/assets/ls/img/champions/Champions.psd
 
 /public/assets/npm-debug.log
