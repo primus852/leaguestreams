@@ -410,7 +410,7 @@ class Crawl
             /**
              * Suuuuuuper ugly
              */
-            $iPath = str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['iconPath']);
+            $iPath = strtolower(str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['iconPath']));
 
             $p->setName($perk['name']);
             $p->setDescription($perk['tooltip']);
@@ -439,7 +439,7 @@ class Crawl
             /**
              * Suuuuuuper ugly
              */
-            $iPath = str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['iconPath']);
+            $iPath = strtolower(str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['iconPath']));
 
             $p->setName($perk['name']);
             $p->setDescription($perk['shortDesc']);

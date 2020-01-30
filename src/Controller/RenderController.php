@@ -78,7 +78,8 @@ class RenderController extends AbstractController
                         'id' => $perk->getId(),
                         'name' => $perk->getName(),
                         'description' => $perk->getDescription(),
-                        'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                        // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                        'link' => $perk->getImage(),
                     );
                 }
             }
@@ -90,7 +91,8 @@ class RenderController extends AbstractController
                     'id' => $perk->getId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
-                    'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                    //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                    'link' => $perk->getImage(),
                 );
             }
 
@@ -100,7 +102,8 @@ class RenderController extends AbstractController
                     'id' => $perk->getId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
-                    'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                    //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                    'link' => $perk->getImage(),
                 );
             }
         }
@@ -198,7 +201,8 @@ class RenderController extends AbstractController
                                     'id' => $perk->getId(),
                                     'name' => $perk->getName(),
                                     'description' => $perk->getDescription(),
-                                    'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                    // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                    'link' => $perk->getImage(),
                                 );
                             }
                         }
@@ -210,7 +214,8 @@ class RenderController extends AbstractController
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                'link' => $perk->getImage(),
                             );
                         }
 
@@ -220,7 +225,8 @@ class RenderController extends AbstractController
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                'link' => $perk->getImage(),
                             );
                         }
                     }
@@ -313,7 +319,8 @@ class RenderController extends AbstractController
                                 'id' => $perk->getId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                                'link' => $perk->getImage(),
                             );
                         }
                     }
@@ -325,7 +332,8 @@ class RenderController extends AbstractController
                             'id' => $perk->getId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
-                            'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                            //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                            'link' => $perk->getImage(),
                         );
                     }
 
@@ -335,7 +343,8 @@ class RenderController extends AbstractController
                             'id' => $perk->getId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
-                            'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                            //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
+                            'link' => $perk->getImage(),
                         );
                     }
                 }
