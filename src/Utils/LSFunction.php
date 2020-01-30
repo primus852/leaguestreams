@@ -920,7 +920,8 @@ class LSFunction
                                 'id' => $perkStyle->getId(),
                                 'name' => $perkStyle->getName(),
                                 'desc' => $perkStyle->getDescription(),
-                                'link' => $version->getCdn() . '/img/' . $perkStyle->getImage(),
+                                //'link' => $version->getCdn() . '/img/' . $perkStyle->getImage(),
+                                'link' => $perkStyle->getImage(),
                             );
                         }
                         if ($perkSubStyle !== null) {
@@ -928,7 +929,8 @@ class LSFunction
                                 'id' => $perkSubStyle->getId(),
                                 'name' => $perkSubStyle->getName(),
                                 'desc' => $perkSubStyle->getDescription(),
-                                'link' => $version->getCdn() . '/img/' . $perkSubStyle->getImage(),
+                                //'link' => $version->getCdn() . '/img/' . $perkSubStyle->getImage(),
+                                'link' => $perkSubStyle->getImage(),
                             );
                         }
                     }
@@ -994,7 +996,7 @@ class LSFunction
             $totalInGamePct = $totalInGame * 100 / $streamer->getTotalOnline() / 60;
         }
 
-        $sArray = array(
+        return array(
             'id' => $streamer->getId(),
             'platform' => $streamer->getPlatform()->getName(),
             'language' => $streamer->getLanguage(),
@@ -1019,9 +1021,6 @@ class LSFunction
             'hasSummoner' => $hasSummoners,
         );
 
-
-        return $sArray;
-
     }
 
     /**
@@ -1033,97 +1032,47 @@ class LSFunction
 
         switch ($cRole) {
             case "BOTTOM_DUO":
-                $role = "Bot";
-                break;
             case "BOTTOM_DUO_CARRY":
-                $role = "Bot";
-                break;
-            case "BOTTOM_DUO_SUPPORT":
-                $role = "Support";
-                break;
             case "BOTTOM_NONE":
-                $role = "Bot";
-                break;
             case "BOTTOM_SOLO":
-                $role = "Bot";
-                break;
-            case "JUNGLE_NONE":
-                $role = "Jungle";
-                break;
-            case "MIDDLE_DUO":
-                $role = "Mid";
-                break;
-            case "MIDDLE_DUO_CARRY":
-                $role = "Mid";
-                break;
-            case "MIDDLE_DUO_SUPPORT":
-                $role = "Mid";
-                break;
-            case "MIDDLE_NONE":
-                $role = "Mid";
-                break;
-            case "MIDDLE_SOLO":
-                $role = "Mid";
-                break;
-            case "NONE_NONE":
-                $role = "Unknown";
-                break;
-            case "TOP_DUO":
-                $role = "Top";
-                break;
-            case "TOP_DUO_CARRY":
-                $role = "Top";
-                break;
-            case "TOP_DUO_SUPPORT":
-                $role = "Top";
-                break;
-            case "TOP_SOLO":
-                $role = "Top";
-                break;
-            case "TOP_NONE":
-                $role = "Top";
-                break;
             case "BOT_CARRY":
-                $role = "Bot";
-                break;
-            case "BOT_SUPPORT":
-                $role = "Support";
-                break;
             case "BOT_SOLO":
-                $role = "Bot";
-                break;
             case "BOT_DUO":
-                $role = "Bot";
-                break;
-            case "TOP_SUPPORT":
-                $role = "Top";
-                break;
-            case "MIDDLE_SUPPORT":
-                $role = "Mid";
-                break;
-            case "MIDDLE_CARRY":
-                $role = "Mid";
-                break;
-            case "N/A_DUO":
-                $role = "Support";
-                break;
-            case "N/A_SUPPORT":
-                $role = "Support";
-                break;
-            case "JUNGLE_N/A":
-                $role = "Jungle";
-                break;
-            case "N/A_N/A":
-                $role = "Unknown";
-                break;
-            case "TOP_CARRY":
-                $role = "Top";
-                break;
             case "NONE_DUO":
                 $role = "Bot";
                 break;
+            case "BOT_SUPPORT":
+            case "BOTTOM_DUO_SUPPORT":
+            case "N/A_DUO":
+            case "N/A_SUPPORT":
             case "NONE_DUO_SUPPORT":
                 $role = "Support";
+                break;
+            case "JUNGLE_NONE":
+            case "JUNGLE_N/A":
+                $role = "Jungle";
+                break;
+            case "MIDDLE_DUO":
+            case "MIDDLE_DUO_CARRY":
+            case "MIDDLE_DUO_SUPPORT":
+            case "MIDDLE_NONE":
+            case "MIDDLE_SOLO":
+            case "MIDDLE_SUPPORT":
+            case "MIDDLE_CARRY":
+                $role = "Mid";
+                break;
+            case "NONE_NONE":
+            case "N/A_N/A":
+                $role = "Unknown";
+                break;
+            case "TOP_DUO":
+            case "TOP_DUO_CARRY":
+            case "TOP_DUO_SUPPORT":
+            case "TOP_SOLO":
+            case "TOP_NONE":
+            case "TOP_SUPPORT":
+            case "TOP_CARRY":
+                $role = "Top";
                 break;
             default:
                 $role = $cRole;

@@ -398,18 +398,23 @@ class Crawl
             throw new LSException('Gather Versions Exception: ' . $e->getMessage());
         }
 
-        foreach($perksStyles['styles'] as $perk){
+        foreach ($perksStyles['styles'] as $perk) {
 
             $p = $this->em->getRepository(Perk::class)->find($perk['id']);
 
-            if($p === null){
+            if ($p === null) {
                 $p = new Perk();
                 $p->setId($perk['id']);
             }
 
+            /**
+             * Suuuuuuper ugly
+             */
+            $iPath = str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['icpnPath']);
+
             $p->setName($perk['name']);
             $p->setDescription($perk['tooltip']);
-            $p->setImage($perk['iconPath']);
+            $p->setImage($iPath);
             $p->setModified();
 
             $this->em->persist($p);
@@ -422,18 +427,23 @@ class Crawl
 
         }
 
-        foreach($perks as $perk){
+        foreach ($perks as $perk) {
 
             $p = $this->em->getRepository(Perk::class)->find($perk['id']);
 
-            if($p === null){
+            if ($p === null) {
                 $p = new Perk();
                 $p->setId($perk['id']);
             }
 
+            /**
+             * Suuuuuuper ugly
+             */
+            $iPath = str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['icpnPath']);
+
             $p->setName($perk['name']);
             $p->setDescription($perk['shortDesc']);
-            $p->setImage($perk['iconPath']);
+            $p->setImage($iPath);
             $p->setModified();
 
             $this->em->persist($p);
@@ -474,7 +484,7 @@ class Crawl
 
             $s = $this->em->getRepository(Spell::class)->find($spell['key']);
 
-            if($s === null){
+            if ($s === null) {
                 $s = new Spell();
                 $s->setId($spell['key']);
             }
