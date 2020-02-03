@@ -72,11 +72,6 @@ class Streamer
     protected $isOnline;
 
     /**
-     * @ORM\Column(type="integer")
-     */
-    protected $totalOnline;
-
-    /**
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $viewers;
@@ -151,6 +146,11 @@ class Streamer
      */
     protected $created;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\OnlineTime", mappedBy="Streamer", orphanRemoval=true)
+     */
+    private $onlineTimes;
+
     public function __construct()
     {
         $this->streamerReport = new ArrayCollection();
@@ -159,6 +159,7 @@ class Streamer
         $this->smurf = new ArrayCollection();
         $this->report = new ArrayCollection();
         $this->match = new ArrayCollection();
+        $this->onlineTimes = new ArrayCollection();
     }
 
     /**
@@ -337,21 +338,6 @@ class Streamer
         $this->isOnline = $isOnline;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTotalOnline()
-    {
-        return $this->totalOnline;
-    }
-
-    /**
-     * @param mixed $totalOnline
-     */
-    public function setTotalOnline($totalOnline): void
-    {
-        $this->totalOnline = $totalOnline;
-    }
 
     /**
      * @return mixed
@@ -717,6 +703,37 @@ class Streamer
             // set the owning side to null (unless already changed)
             if ($match->getStreamer() === $this) {
                 $match->setStreamer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|OnlineTime[]
+     */
+    public function getOnlineTimes(): Collection
+    {
+        return $this->onlineTimes;
+    }
+
+    public function addOnlineTime(OnlineTime $onlineTime): self
+    {
+        if (!$this->onlineTimes->contains($onlineTime)) {
+            $this->onlineTimes[] = $onlineTime;
+            $onlineTime->setStreamer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOnlineTime(OnlineTime $onlineTime): self
+    {
+        if ($this->onlineTimes->contains($onlineTime)) {
+            $this->onlineTimes->removeElement($onlineTime);
+            // set the owning side to null (unless already changed)
+            if ($onlineTime->getStreamer() === $this) {
+                $onlineTime->setStreamer(null);
             }
         }
 

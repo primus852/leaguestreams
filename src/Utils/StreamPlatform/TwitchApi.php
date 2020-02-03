@@ -3,6 +3,7 @@
 namespace App\Utils\StreamPlatform;
 
 
+use App\Entity\OnlineTime;
 use App\Entity\Platform;
 use App\Entity\Streamer;
 use App\Entity\Vod;
@@ -122,7 +123,6 @@ class TwitchApi implements StreamPlatformInterface
                 $streamer = new Streamer();
                 $streamer->setChannelId($channel_id);
                 $streamer->setPlatform($platform);
-                $streamer->setTotalOnline(0);
                 $streamer->setCreated();
                 $streamer->setIsFeatured(false);
             } else {
@@ -154,7 +154,22 @@ class TwitchApi implements StreamPlatformInterface
             } catch (StopwatchException $e) {
                 throw new StreamPlatformException('Error parsing Timer: ' . $e->getMessage());
             }
-            $streamer->setTotalOnline($streamer->getTotalOnline() + $minutes);
+
+            /**
+             * Find a OnlineTime for the respective Streamer
+             */
+            $today = new \DateTime();
+            $onlineTime = $this->em->getRepository(OnlineTime::class)->findOneBy(array(
+                'streamer' => $streamer,
+                'onlineDate' => $today->format('Y-m-d')
+            ));
+
+            if($onlineTime === null){
+                $onlineTime = new OnlineTime();
+                $onlineTime->setTotalOnline(0);
+            }
+
+            $onlineTime->setTotalOnline($onlineTime->getTotalOnline() + $minutes);
 
             /**
              * Now we update the Modified Col

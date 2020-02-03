@@ -7,6 +7,7 @@ use App\Entity\Champion;
 use App\Entity\CurrentMatch;
 use App\Entity\Map;
 use App\Entity\Match;
+use App\Entity\OnlineTime;
 use App\Entity\Perk;
 use App\Entity\Queue;
 use App\Entity\Region;
@@ -48,10 +49,16 @@ class Crawl
 
         /**
          * Check if Streamer already has Summoners attached
-         * If not, set the GameTime to 0, for better stats
          */
         if ($streamer->getSummoner() === null) {
-            $streamer->setTotalOnline(0);
+
+            /**
+             * Remove all OnlineTimes
+             */
+            foreach($streamer->getOnlineTimes() as $onlineTime){
+                $this->em->remove($onlineTime);
+            }
+
             $this->em->persist($streamer);
         }
 

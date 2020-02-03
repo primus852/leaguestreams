@@ -66,7 +66,6 @@ class TwitchApi implements StreamInterface
                 $this->streamer->setChannelUser($data['stream']['channel']['name']);
                 $this->streamer->setChannelId($data['stream']['channel']['_id']);
                 $this->streamer->setPlatform($platform);
-                $this->streamer->setTotalOnline(0);
                 $this->streamer->setCreated();
                 $this->streamer->setIsFeatured(false);
             }

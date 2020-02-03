@@ -270,7 +270,6 @@ class AjaxController extends AbstractController
             $streamer->setIsOnline(false);
             $streamer->setModified();
             $streamer->setPlatform($platform);
-            $streamer->setTotalOnline(0);
             $streamer->setCreated();
             $streamer->setIsPartner(false);
             $streamer->setViewers(0);
@@ -506,7 +505,6 @@ class AjaxController extends AbstractController
         $streamer->setIsOnline(false);
         $streamer->setModified();
         $streamer->setPlatform($platform);
-        $streamer->setTotalOnline(0);
         $streamer->setCreated();
         $streamer->setIsPartner(false);
         $streamer->setViewers(0);

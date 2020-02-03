@@ -6,6 +6,7 @@ use App\Entity\Champion;
 use App\Entity\CurrentMatch;
 use App\Entity\Map;
 use App\Entity\Match;
+use App\Entity\OnlineTime;
 use App\Entity\Perk;
 use App\Entity\Queue;
 use App\Entity\Region;
@@ -239,7 +240,13 @@ class LSFunction
         /* Count Summoners and if first summoner set played to 0 (for better "inGame" Stats) */
         $summoners = count($this->streamer->getSummoner());
         if ($summoners === 0) {
-            $this->streamer->setTotalOnline(0);
+            /**
+             * Remove all OnlineTimes
+             */
+            foreach ($this->streamer->getOnlineTimes() as $onlineTime) {
+                $this->em->remove($onlineTime);
+            }
+
             $this->em->persist($this->streamer);
         }
 
@@ -722,11 +729,31 @@ class LSFunction
         $cArray = null;
         $lastArray = null;
 
-        /* All Games from Streamer */
-        $games = $this->em->getRepository(Match::class)->findBy(array(
-            'streamer' => $streamer,
-            'crawled' => true,
-        ));
+        /**
+         * Get all Games for the last 60 Days
+         */
+        $nowU = new \DateTime();
+        $nowU->modify('-60 days');
+        $criteria = new Criteria();
+        $criteria->where(Criteria::expr()->eq('crawled', true));
+        $criteria->andWhere(Criteria::expr()->eq('streamer', $streamer));
+        $criteria->andWhere(Criteria::expr()->gte('modified', $nowU));
+
+        $games = $this->em->getRepository(Match::class)->matching($criteria);
+
+        /**
+         * Count Minutes online for the last 60 days
+         */
+        $streamerOnline = 0;
+        $criteriaOn = new Criteria();
+        $criteriaOn->where(Criteria::expr()->eq('streamer', $streamer));
+        $criteriaOn->andWhere(Criteria::expr()->gte('onlineDate', $nowU));
+
+        $onlineTimes = $this->em->getRepository(OnlineTime::class)->matching($criteriaOn);
+        /* @var $onlineTime OnlineTime */
+        foreach($onlineTimes as $onlineTime){
+            $streamerOnline += $onlineTime->getTotalOnline();
+        }
 
         $stats = array();
         $totals = 0;
@@ -993,7 +1020,7 @@ class LSFunction
         /* Total InGame Pct */
         $totalInGamePct = 0;
         if ($totalInGame > 0) {
-            $totalInGamePct = $totalInGame * 100 / $streamer->getTotalOnline() / 60;
+            $totalInGamePct = $totalInGame * 100 / $streamerOnline / 60;
         }
 
         return array(
