@@ -1021,8 +1021,10 @@ class LSFunction
         /* Total InGame Pct */
         $totalInGamePct = 0;
         if ($totalInGame > 0) {
-            $totalInGamePct = $totalInGame * 100 / $streamerOnline / 60;
+            $totalInGamePct = $streamerOnline > 0 ? $totalInGame * 100 / $streamerOnline / 60 : 100;
         }
+
+        $totalInGamePct = $totalInGamePct > 100 ? 100 : $totalInGamePct;
 
         return array(
             'id' => $streamer->getId(),
