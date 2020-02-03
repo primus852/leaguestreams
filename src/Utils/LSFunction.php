@@ -746,7 +746,7 @@ class LSFunction
          */
         $streamerOnline = 0;
         $criteriaOn = new Criteria();
-        $criteriaOn->where(Criteria::expr()->eq('streamer', $streamer));
+        $criteriaOn->where(Criteria::expr()->eq('Streamer', $streamer));
         $criteriaOn->andWhere(Criteria::expr()->gte('onlineDate', $nowU));
 
         $onlineTimes = $this->em->getRepository(OnlineTime::class)->matching($criteriaOn);
