@@ -755,6 +755,7 @@ class LSFunction
             $streamerOnline += $onlineTime->getTotalOnline();
         }
 
+
         $stats = array();
         $totals = 0;
         $totalWins = 0;
