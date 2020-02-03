@@ -160,16 +160,19 @@ class TwitchApi implements StreamPlatformInterface
              */
             $today = new \DateTime();
             $onlineTime = $this->em->getRepository(OnlineTime::class)->findOneBy(array(
-                'streamer' => $streamer,
-                'onlineDate' => $today->format('Y-m-d')
+                'Streamer' => $streamer,
+                'onlineDate' => $today
             ));
 
-            if($onlineTime === null){
+            if ($onlineTime === null) {
                 $onlineTime = new OnlineTime();
                 $onlineTime->setTotalOnline(0);
+                $onlineTime->setStreamer($streamer);
+                $onlineTime->setOnlineDate($today);
+            } else {
+                $onlineTime->setTotalOnline($onlineTime->getTotalOnline() + $minutes);
             }
 
-            $onlineTime->setTotalOnline($onlineTime->getTotalOnline() + $minutes);
 
             /**
              * Now we update the Modified Col
@@ -177,6 +180,7 @@ class TwitchApi implements StreamPlatformInterface
             $streamer->setModified();
 
             $this->em->persist($streamer);
+            $this->em->persist($onlineTime);
 
             try {
                 $this->em->flush();
