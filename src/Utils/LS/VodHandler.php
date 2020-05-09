@@ -86,15 +86,29 @@ class VodHandler
                  * Not UTC
                  */
                 $start = \DateTime::createFromFormat('U', round(($match->getGameCreation() / 1000)));
+                $startSoon = clone $start;
+                $startSoon->modify("-36 hours");
                 $end = clone $start;
                 $end->modify("+" . $match->getLength() . " seconds");
 
                 /**
+                 * Create Criteria for VODs
+                 */
+                try {
+                    $criteriaVod = Criteria::create();
+                    $criteriaVod
+                        ->where(Criteria::expr()->andX(
+                            Criteria::expr()->gte('lastCheck', $startSoon),
+                            Criteria::expr()->eq('streamer', $match->getStreamer())
+                        ));
+                } catch (LSException $e) {
+                    throw new LSException($e->getMessage());
+                }
+
+                /**
                  * Find a match that fits start / end
                  */
-                $vods = $this->em->getRepository(Vod::class)->findBy(array(
-                    'streamer' => $match->getStreamer(),
-                ));
+                $vods = $this->em->getRepository(Vod::class)->matching($criteriaVod);
 
                 /**
                  * Skip if streamer has no VODs

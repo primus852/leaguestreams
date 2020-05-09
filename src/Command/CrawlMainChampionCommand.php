@@ -66,7 +66,11 @@ class CrawlMainChampionCommand extends Command
 
             $io->text('Checking: <fg=green>'.$champ->getName().'</>');
 
-            $result = $ls->getMainStreamer($champ);
+            try {
+                $result = $ls->getMainStreamer($champ);
+            } catch (\Exception $e) {
+                throw new \Exception($e->getMessage());
+            }
 
             /**
              * Output
