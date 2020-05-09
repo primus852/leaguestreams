@@ -60,7 +60,7 @@ class VodHandler
                 ->orderBy(array(
                     'id' => 'DESC'
                 ))
-                ->setMaxResults(10000);
+                ->setMaxResults(5000);
         } catch (LSException $e) {
             throw new LSException($e->getMessage());
         }
@@ -175,9 +175,9 @@ class VodHandler
                     }
                 }
 
-                usort($result['videos'], function ($a, $b) {
+                /*usort($result['videos'], function ($a, $b) {
                     return $b['gameStart'] <=> $a['gameStart'];
-                });
+                });*/
 
             }
 
