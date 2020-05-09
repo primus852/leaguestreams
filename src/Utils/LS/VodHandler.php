@@ -36,7 +36,8 @@ class VodHandler
         $this->router = $router;
     }
 
-    public function by_role(string $role_string){
+    public function by_role(string $role_string)
+    {
 
         /**
          * Prepare Info for Role Page
@@ -53,11 +54,13 @@ class VodHandler
             $criteria
                 ->where(Criteria::expr()->andX(
                     Criteria::expr()->gte('gameCreation', self::long()),
+                    Criteria::expr()->neq('gameCreation', null),
                     Criteria::expr()->eq('crawled', true)
                 ))
                 ->orderBy(array(
                     'id' => 'DESC'
-                ));
+                ))
+                ->setMaxResults(10000);
         } catch (LSException $e) {
             throw new LSException($e->getMessage());
         }
@@ -76,7 +79,7 @@ class VodHandler
             $cRole = $match->getLane() . "_" . $match->getRole();
             $role = LSHelper::get_role($cRole);
 
-            if($role !== $role_string){
+            if ($role !== $role_string) {
                 continue;
             }
 
