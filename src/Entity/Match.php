@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="ls_matches")
  * @ORM\Entity(repositoryClass="App\Repository\MatchRepository")
  * @ORM\HasLifecycleCallbacks()
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Match
 {

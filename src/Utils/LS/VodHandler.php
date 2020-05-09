@@ -23,7 +23,7 @@ class VodHandler
 
     private $em;
     private $router;
-    const DAYS = 55;
+    const DAYS = 10; // More melts the RAM
 
     /**
      * VodHandler constructor.
@@ -59,8 +59,7 @@ class VodHandler
                 ))
                 ->orderBy(array(
                     'id' => 'DESC'
-                ))
-                ->setMaxResults(5000);
+                ));
         } catch (LSException $e) {
             throw new LSException($e->getMessage());
         }
