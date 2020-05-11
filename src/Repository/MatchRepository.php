@@ -21,6 +21,20 @@ class MatchRepository extends ServiceEntityRepository
         parent::__construct($registry, Match::class);
     }
 
+    public function recentMatches($time_ago)
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->andWhere('m.gameCreation >= :gc')
+            ->andWhere('m.gameCreation IS NOT NULL')
+            ->andWhere('m.crawled = :isCrawled')
+            ->setParameter('gc', $time_ago)
+            ->setParameter('isCrawled', true)
+            ->leftJoin('m.streamer', 'streamer')
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
+
     /**
      * @param Streamer $streamer
      * @param $maxResults

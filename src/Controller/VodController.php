@@ -3,40 +3,42 @@
 namespace App\Controller;
 
 use App\Entity\Champion;
+use App\Entity\Match;
 use App\Entity\Streamer;
+use App\Entity\Versions;
+use App\Entity\Vod;
 use App\Utils\LS\LSException;
 use App\Utils\LS\VodHandler;
 use App\Utils\LSFunction;
-use App\Utils\LSVods;
 use Doctrine\Common\Collections\Criteria;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Routing\RouterInterface;
 
-class VodController extends Controller
+class VodController extends AbstractController
 {
     /**
      * @Route("/vods/player/{vId}/{offset}/{match}", name="vodsPlayer", defaults={"vId"="0", "offset"="0", "match"="0"})
+     * @param EntityManagerInterface $em
      * @param $vId
      * @param $offset
      * @param $match
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function vodsPlayerAction($vId, $offset, $match)
+    public function vodsPlayerAction(EntityManagerInterface $em, $vId, $offset, $match)
     {
 
-        /* Entity Manager */
-        $em = $this->getDoctrine()->getManager();
-
         /* Get Video */
-        $vod = $em->getRepository('App:Vod')->find($vId);
+        $vod = $em->getRepository(Vod::class)->find($vId);
         if ($vod === null) {
             throw new NotFoundHttpException();
         }
 
         /* Get Match */
-        $match = $em->getRepository('App:Match')->find($match);
+        $match = $em->getRepository(Match::class)->find($match);
         if ($match === null) {
             throw new NotFoundHttpException();
         }
@@ -79,20 +81,18 @@ class VodController extends Controller
 
     /**
      * @Route("/vods/by-champion", name="vodsByChampion")
+     * @param EntityManagerInterface $em
      * @return Response
      */
-    public function vodsByChampionAction()
+    public function vodsByChampionAction(EntityManagerInterface $em)
     {
 
-        /* Entity Manager */
-        $em = $this->getDoctrine()->getManager();
-
         /* Get Champions */
-        $champs = $em->getRepository('App:Champion')->findBy(array(), array('name' => 'ASC'));
+        $champs = $em->getRepository(Champion::class)->findBy(array(), array('name' => 'ASC'));
 
 
         $versions = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
         return $this->render('vod/byChampion.html.twig', array(
@@ -104,10 +104,12 @@ class VodController extends Controller
 
     /**
      * @Route("/vods/by-role/{role}", name="vodsByRole", defaults={"role"="0"})
+     * @param EntityManagerInterface $em
+     * @param RouterInterface $router
      * @param $role string
      * @return Response
      */
-    public function vodsByRoleAction($role)
+    public function vodsByRoleAction(EntityManagerInterface $em, RouterInterface $router, $role)
     {
 
         if ($role === "0") {
@@ -115,7 +117,7 @@ class VodController extends Controller
         }
 
         /* @var $vodHandler VodHandler */
-        $vodHandler = new VodHandler($this->getDoctrine()->getManager(), $this->container->get('router'));
+        $vodHandler = new VodHandler($em, $router);
 
         try {
             if ($role === 'top' || $role === 'toplane') {

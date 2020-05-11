@@ -12,10 +12,8 @@ namespace App\Utils\LS;
 use App\Entity\Champion;
 use App\Entity\Match;
 use App\Entity\Vod;
-use App\Utils\LSFunction;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface as ObjectManager;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Routing\RouterInterface;
 
 class VodHandler
@@ -46,6 +44,8 @@ class VodHandler
             'videos' => array(),
         );
 
+        $vods = array();
+
         /**
          * Create Criteria for Matches
          */
@@ -68,6 +68,7 @@ class VodHandler
          * Gather all matches
          */
         $matches = $this->em->getRepository(Match::class)->matching($criteria);
+
 
         /**
          * Loop through all the matches
@@ -93,37 +94,42 @@ class VodHandler
                 $end = clone $start;
                 $end->modify("+" . $match->getLength() . " seconds");
 
-                /**
-                 * Create Criteria for VODs
-                 */
-                try {
-                    $criteriaVod = Criteria::create();
-                    $criteriaVod
-                        ->where(Criteria::expr()->andX(
-                            Criteria::expr()->gte('lastCheck', $startSoon),
-                            Criteria::expr()->eq('streamer', $match->getStreamer())
-                        ));
-                } catch (LSException $e) {
-                    throw new LSException($e->getMessage());
+                if (!array_key_exists($match->getStreamer()->getId(), $vods)) {
+
+                    /**
+                     * Create Criteria for VODs
+                     */
+                    try {
+                        $criteriaVod = Criteria::create();
+                        $criteriaVod
+                            ->where(Criteria::expr()->andX(
+                                Criteria::expr()->gte('lastCheck', $startSoon),
+                                Criteria::expr()->eq('streamer', $match->getStreamer())
+                            ));
+                    } catch (LSException $e) {
+                        throw new LSException($e->getMessage());
+                    }
+
+                    /**
+                     * Find a match that fits start / end
+                     */
+                    $vods[$match->getStreamer()->getId()] = $this->em->getRepository(Vod::class)->matching($criteriaVod);
+
+                    /**
+                     * Skip if streamer has no VODs
+                     */
+                    if ($vods[$match->getStreamer()->getId()] === null) {
+                        continue;
+                    }
+
                 }
 
-                /**
-                 * Find a match that fits start / end
-                 */
-                $vods = $this->em->getRepository(Vod::class)->matching($criteriaVod);
-
-                /**
-                 * Skip if streamer has no VODs
-                 */
-                if ($vods === null) {
-                    continue;
-                }
 
                 /**
                  * Loop through all the VODs
                  * @var $vod Vod
                  */
-                foreach ($vods as $vod) {
+                foreach ($vods[$match->getStreamer()->getId()] as $vod) {
 
                     /**
                      * Convert Start to UTC
@@ -133,7 +139,7 @@ class VodHandler
                     $endVod->modify("+" . $vod->getLength() . " seconds");
 
                     /**
-                     * Check if the starting and ending time fith the above match
+                     * Check if the starting and ending time fits the above match
                      */
                     if ($start >= $startVod && $end <= $endVod) {
 
@@ -174,9 +180,9 @@ class VodHandler
                     }
                 }
 
-                /*usort($result['videos'], function ($a, $b) {
+                usort($result['videos'], function ($a, $b) {
                     return $b['gameStart'] <=> $a['gameStart'];
-                });*/
+                });
 
             }
 
