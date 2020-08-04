@@ -361,7 +361,11 @@ class TwitchApi implements StreamPlatformInterface
             'Client-ID: ' . getenv('TWITCH_CLIENT_ID')
         );
 
-        dump($headers);
+        dump(getenv('RIOT_API_KEY'));
+        dump(getenv('TWITCH_CLIENT_ID'));
+        dump(getenv('SIMPLECRYPT_KEY'));
+        dump(getenv('SIMPLECRYPT_IV'));
+        dump(getenv('DATABASE_URL'));
 
         /**
          * Use the v5 API for missing fields
