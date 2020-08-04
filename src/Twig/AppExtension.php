@@ -9,13 +9,16 @@
 namespace App\Twig;
 
 
-class AppExtension extends \Twig_Extension
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+
+class AppExtension extends AbstractExtension
 {
 
     public function getFilters()
     {
         return array(
-            new \Twig_SimpleFilter('timeAgo', array(AppRuntime::class, 'timeAgoFilter')),
+            new TwigFilter('timeAgo', array(AppRuntime::class, 'timeAgoFilter')),
         );
     }
 

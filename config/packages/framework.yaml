@@ -1,4 +1,6 @@
 framework:
+    router:
+        utf8: true
     assets:
         json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'
     secret: '%env(APP_SECRET)%'
@@ -30,5 +32,5 @@ framework:
 
         # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
         #app: cache.adapter.apcu
-    templating:
-        engines: ['twig']
+    fragments:
+        enabled: true

@@ -16,7 +16,7 @@
             <div class="nano-content" id="pScrollerMain">
                 <div class="container-fluid">
                     <div class="row justify-content-left" style="margin-right:15px;">
-                        {% for stream in streams if streams is not null %}
+                        {% for stream in streams|filter(stream => stream is not null) %}
                             {{ render(controller('App\\Controller\\RenderController::renderStreamerInfoContainer',{'s':stream.id})) }}
                             <br/>
                         {% endfor %}

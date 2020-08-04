@@ -22,7 +22,7 @@ class TwitchApi implements StreamPlatformInterface
 
     /**
      * TwitchApi constructor.
-     * @param ObjectManager $em
+     * @param ObjectManager|null $em
      * @param Streamer|null $streamer
      */
     public function __construct(ObjectManager $em = null, Streamer $streamer = null)
@@ -103,7 +103,7 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * Get Info for Streamer User
              */
-            $isPartner = $channelData['partner'] === true ? true : false;
+            $isPartner = $channelData['partner'] === true;
 
             /**
              * Check if the Streamer exists in DB

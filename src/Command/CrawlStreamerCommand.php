@@ -53,8 +53,8 @@ class CrawlStreamerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $debug = $input->getArgument('debug') === 'y' ? true : false;
-        $force = $input->getArgument('force') === 'y' ? true : false;
+        $debug = $input->getArgument('debug') === 'y';
+        $force = $input->getArgument('force') === 'y';
 
         /**
          * Start Stopwatch

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Champion;
 use App\Entity\Match;
 use App\Entity\Platform;
 use App\Entity\Region;
@@ -13,7 +12,6 @@ use App\Utils\Constants;
 use App\Utils\Helper;
 use App\Utils\LS\Crawl;
 use App\Utils\LS\LSException;
-use App\Utils\LSFunction;
 use App\Utils\RiotApi\RiotApi;
 use App\Utils\RiotApi\RiotApiException;
 use App\Utils\RiotApi\Settings;
@@ -24,7 +22,6 @@ use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Doctrine\ORM\PersistentCollection;
 use primus852\ShortResponse\ShortResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
