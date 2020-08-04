@@ -7,7 +7,9 @@ use App\Entity\OnlineTime;
 use App\Entity\Platform;
 use App\Entity\Streamer;
 use App\Entity\Vod;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface as ObjectManager;
+use Exception;
 use primus852\SimpleStopwatch\Stopwatch;
 use primus852\SimpleStopwatch\StopwatchException;
 
@@ -18,7 +20,7 @@ class TwitchApi implements StreamPlatformInterface
     private $streamer;
     private $status;
     private $url = 'https://api.twitch.tv';
-    private $gameId = '21779';
+    # private $gameId = '21779';
 
     /**
      * TwitchApi constructor.
@@ -88,6 +90,9 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * Check if it is the correct game name
              */
+            if(!array_key_exists('game', $data['stream'])){
+                return false;
+            }
             if (strtolower($data['stream']['game']) === strtolower('League of Legends')) {
                 $stream = $data['stream'];
                 $result = true;
@@ -148,7 +153,11 @@ class TwitchApi implements StreamPlatformInterface
             $streamer->setThumbnail($stream['preview']['medium']);
             $streamer->setLogo($channelData['logo']);
             $streamer->setBanner($channelData['profile_banner']);
-            $streamer->setStarted(new \DateTime($stream['created_at']));
+            try {
+                $streamer->setStarted(new DateTime($stream['created_at']));
+            } catch (Exception $e) {
+                throw new StreamPlatformException('Could not create DateTime from '.$stream['created_at']);
+            }
 
             /**
              * If the Streamer is online, update the total time Online (now - last modified)
@@ -162,7 +171,7 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * Find a OnlineTime for the respective Streamer
              */
-            $today = new \DateTime();
+            $today = new DateTime();
             $onlineTime = $this->em->getRepository(OnlineTime::class)->findOneBy(array(
                 'Streamer' => $streamer,
                 'onlineDate' => $today
@@ -188,7 +197,7 @@ class TwitchApi implements StreamPlatformInterface
 
             try {
                 $this->em->flush();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw new StreamPlatformException('MySQL Error: ' . $e->getMessage());
             }
 
@@ -305,14 +314,14 @@ class TwitchApi implements StreamPlatformInterface
                         $v->setThumbnail($thumb);
                         $v->setCreated($created);
                         $v->setLength($length);
-                        $v->setLastCheck(new \DateTime());
+                        $v->setLastCheck(new DateTime());
                         $v->setStreamer($streamer);
 
                         $this->em->persist($v);
 
                         try {
                             $this->em->flush();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             throw new StreamPlatformException('MySQL Error: ' . $e->getMessage());
                         }
                     }
@@ -361,12 +370,6 @@ class TwitchApi implements StreamPlatformInterface
             'Client-ID: ' . getenv('TWITCH_CLIENT_ID')
         );
 
-        dump(getenv('RIOT_API_KEY'));
-        dump(getenv('TWITCH_CLIENT_ID'));
-        dump(getenv('SIMPLECRYPT_KEY'));
-        dump(getenv('SIMPLECRYPT_IV'));
-        dump(getenv('DATABASE_URL'));
-
         /**
          * Use the v5 API for missing fields
          */
@@ -386,7 +389,7 @@ class TwitchApi implements StreamPlatformInterface
             $this->status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new StreamPlatformException('cURL Error: ' . $e->getMessage());
         }
 
