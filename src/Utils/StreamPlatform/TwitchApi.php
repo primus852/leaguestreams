@@ -79,6 +79,7 @@ class TwitchApi implements StreamPlatformInterface
          */
         $result = false;
         $stream = null;
+        dump($data);
         if(!array_key_exists('stream', $data)){
             return false;
         }
@@ -359,6 +360,8 @@ class TwitchApi implements StreamPlatformInterface
         $headers = array(
             'Client-ID: ' . getenv('TWITCH_CLIENT_ID')
         );
+
+        dump($headers);
 
         /**
          * Use the v5 API for missing fields
