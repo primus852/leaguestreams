@@ -75,10 +75,13 @@ class TwitchApi implements StreamPlatformInterface
         }
 
         /**
-         * Check if the stream key s not null ( = is online)
+         * Check if the stream key is not null ( = is online)
          */
         $result = false;
         $stream = null;
+        if(!array_key_exists('stream', $data)){
+            return false;
+        }
         if ($data['stream'] !== null) {
 
             /**
