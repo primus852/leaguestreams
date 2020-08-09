@@ -83,9 +83,12 @@ class TwitchApi implements StreamPlatformInterface
          */
         $result = false;
         $stream = null;
+        $randTrace = rand();
         if (!array_key_exists('stream', $data)) {
+            dump('STREAM EMPTY '.$randTrace);
             return false;
         }
+        dump('STILL HERE '.$randTrace);
         if ($data['stream'] !== null) {
 
             /**
