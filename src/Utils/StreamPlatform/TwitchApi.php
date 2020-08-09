@@ -85,10 +85,8 @@ class TwitchApi implements StreamPlatformInterface
         $stream = null;
         $randTrace = rand();
         if (!array_key_exists('stream', $data)) {
-            dump('STREAM EMPTY '.$randTrace);
             return false;
         }
-        dump('STILL HERE '.$randTrace);
         if ($data['stream'] !== null) {
 
             /**
@@ -106,10 +104,7 @@ class TwitchApi implements StreamPlatformInterface
         /**
          * Check if we need to update the DB Data
          */
-        if ($update) {
-
-            dump(getenv('TWITCH_CLIENT_SECRET'));
-            dump($data);
+        if ($update && $data['stream'] !== null) {
 
             /**
              * Check if we found the Streamer streaming LoL
