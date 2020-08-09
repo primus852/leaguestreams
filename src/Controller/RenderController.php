@@ -12,6 +12,7 @@ use App\Entity\Streamer;
 use App\Entity\Summoner;
 use App\Entity\Versions;
 use App\Utils\Helper;
+use App\Utils\LS\LSException;
 use App\Utils\LS\VodHandler;
 use App\Utils\LSFunction;
 use App\Utils\LSVods;
@@ -21,7 +22,7 @@ use App\Utils\SimpleCrypt;
 use App\Utils\StreamPlatform\TwitchApi;
 use Doctrine\ORM\EntityManagerInterface as ObjectManager;
 use Doctrine\ORM\PersistentCollection;
-use primus852\ShortResponse\ShortResponse;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -263,11 +264,9 @@ class RenderController extends AbstractController
             /* @var $streamer Streamer */
             $streamer = $summoner->getStreamer();
 
-            /* @var $riot RiotApi */
             $riot = new RiotApi(new Settings());
             $riot->setRegion($region->getLong());
 
-            /* @var $ls LSFunction */
             $ls = new LSFunction($em, $riot, $streamer);
 
             /* @var $platform Platform */
@@ -281,7 +280,7 @@ class RenderController extends AbstractController
                 $pApi = new $pClass($em, $streamer);
                 try {
                     $isOnline = $pApi->check_online($streamer->getChannelId(), true);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     throw new NotFoundHttpException();
                 }
 
@@ -294,7 +293,7 @@ class RenderController extends AbstractController
             /* Check and Update Live Game */
             try {
                 $liveGame = $ls->updateLiveGame($summoner);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw new NotFoundHttpException();
             }
 
@@ -396,7 +395,7 @@ class RenderController extends AbstractController
      * @Route("/_render/_streamerInfoContainer/{s}", name="renderStreamerInfoContainer", defaults={"s"="0"})
      * @param $s
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function renderStreamerInfoContainer($s)
     {
@@ -610,12 +609,11 @@ class RenderController extends AbstractController
     /**
      * @Route("/_render/_mainStreamerByChampion", name="renderMainStreamerByChampion")
      * @param Request $request
+     * @param ObjectManager $em
      * @return Response
      */
-    public function renderMainStreamerAction(Request $request)
+    public function renderMainStreamerAction(Request $request, ObjectManager $em)
     {
-
-        $em = $this->getDoctrine()->getManager();
 
         $cId = $request->get('c');
 
@@ -630,11 +628,10 @@ class RenderController extends AbstractController
             return new Response('Error: Champion not found. ID: ' . $cId);
         }
 
-        /* @var $ls LSFunction */
         $ls = new LSFunction($em);
         try {
             $result = $ls->getMainStreamer($champion);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new Response('Error: ' . $e->getMessage());
         }
 
@@ -659,11 +656,10 @@ class RenderController extends AbstractController
             return new Response('Error: Role cannot be empty.');
         }
 
-        /* @var $ls LSFunction */
         $ls = new LSFunction($em);
         try {
             $result = $ls->getMainRole($role);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new Response('Error: ' . $e->getMessage());
         }
 
@@ -676,13 +672,12 @@ class RenderController extends AbstractController
     /**
      * @Route("/_render/_vodByChampion/{c}", name="renderVodByChampion", defaults={"c"="0"})
      * @param $c
+     * @param ObjectManager $em
      * @return Response
-     * @throws \Exception
+     * @throws LSException
      */
-    public function renderVodChampionTableAction($c)
+    public function renderVodChampionTableAction($c, ObjectManager $em)
     {
-
-        $em = $this->getDoctrine()->getManager();
 
         /* @var $champion Champion */
         $champion = $em->getRepository(Champion::class)->findOneBy(array(
@@ -708,9 +703,10 @@ class RenderController extends AbstractController
     /**
      * @Route("/_render/_vodByWish", name="renderVodByWish")
      * @param Request $request
+     * @param ObjectManager $em
      * @return Response
      */
-    public function renderVodByWishAction(Request $request)
+    public function renderVodByWishAction(Request $request, ObjectManager $em)
     {
 
         $champions = $request->get('champions');
@@ -742,8 +738,7 @@ class RenderController extends AbstractController
 
         $result = null;
         if ($emptyCount < 5) {
-            /* @var $vods LSVods */
-            $vods = new LSVods($this->getDoctrine()->getManager(), null, null, $this->container->get('router'));
+            $vods = new LSVods($em, null, null, $this->container->get('router'));
             $result = $vods->getByWishes($champions, $roles, $streamers, $enemies);
         }
 
