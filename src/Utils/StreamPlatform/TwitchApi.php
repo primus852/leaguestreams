@@ -6,6 +6,7 @@ namespace App\Utils\StreamPlatform;
 use App\Entity\OnlineTime;
 use App\Entity\Platform;
 use App\Entity\Streamer;
+use App\Entity\TwitchOauth;
 use App\Entity\Vod;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface as ObjectManager;
@@ -20,6 +21,7 @@ class TwitchApi implements StreamPlatformInterface
     private $streamer;
     private $status;
     private $url = 'https://api.twitch.tv';
+    private $urlOAuth = 'https://id.twitch.tv';
     # private $gameId = '21779';
 
     /**
@@ -47,7 +49,7 @@ class TwitchApi implements StreamPlatformInterface
         $url = '/kraken/streams/' . $channel_id;
 
         try {
-            $data = $this->data($url, true);
+            $data = $this->_data($url, true);
         } catch (StreamPlatformException $e) {
             throw new StreamPlatformException($e->getMessage());
         }
@@ -71,7 +73,7 @@ class TwitchApi implements StreamPlatformInterface
         $url = '/kraken/streams/' . $channel_id;
 
         try {
-            $data = $this->data($url, true);
+            $data = $this->_data($url, true);
         } catch (StreamPlatformException $e) {
             throw new StreamPlatformException($e->getMessage());
         }
@@ -82,7 +84,7 @@ class TwitchApi implements StreamPlatformInterface
         $result = false;
         $stream = null;
         dump($data);
-        if(!array_key_exists('stream', $data)){
+        if (!array_key_exists('stream', $data)) {
             return false;
         }
         if ($data['stream'] !== null) {
@@ -90,7 +92,7 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * Check if it is the correct game name
              */
-            if(!array_key_exists('game', $data['stream'])){
+            if (!array_key_exists('game', $data['stream'])) {
                 return false;
             }
             if (strtolower($data['stream']['game']) === strtolower('League of Legends')) {
@@ -156,7 +158,7 @@ class TwitchApi implements StreamPlatformInterface
             try {
                 $streamer->setStarted(new DateTime($stream['created_at']));
             } catch (Exception $e) {
-                throw new StreamPlatformException('Could not create DateTime from '.$stream['created_at']);
+                throw new StreamPlatformException('Could not create DateTime from ' . $stream['created_at']);
             }
 
             /**
@@ -231,7 +233,7 @@ class TwitchApi implements StreamPlatformInterface
         $url = '/helix/users?login=' . $channel;
 
         try {
-            $data = $this->data($url);
+            $data = $this->_data($url);
         } catch (StreamPlatformException $e) {
             throw new StreamPlatformException($e->getMessage());
         }
@@ -284,7 +286,7 @@ class TwitchApi implements StreamPlatformInterface
          * Get the VOD List
          */
         try {
-            $data = $this->data($url, true);
+            $data = $this->_data($url, true);
         } catch (StreamPlatformException $e) {
             throw new StreamPlatformException($e->getMessage());
         }
@@ -358,11 +360,17 @@ class TwitchApi implements StreamPlatformInterface
     /**
      * @param string $endpoint
      * @param bool $useV5
+     * @param bool $isRetry
      * @return mixed
      * @throws StreamPlatformException
      */
-    private function data(string $endpoint, bool $useV5 = false)
+    private function _data(string $endpoint, bool $useV5 = false, bool $isRetry = false)
     {
+
+        /**
+         * Get the latest Token
+         */
+        $token = $this->_getToken();
 
         $url = $this->url . $endpoint;
 
@@ -375,8 +383,10 @@ class TwitchApi implements StreamPlatformInterface
          */
         if ($useV5) {
             $headers[] = 'Accept: application/vnd.twitchtv.v5+json';
+            $headers[] = 'Authorization: OAuth ' . $token->getAccessToken();
+        } else {
+            $headers[] = 'Authorization: Bearer ' . $token->getAccessToken();
         }
-
 
         try {
             $ch = curl_init($url);
@@ -385,7 +395,7 @@ class TwitchApi implements StreamPlatformInterface
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-            $result = curl_exec($ch);
+            $result = json_decode(curl_exec($ch), true);
             $this->status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
@@ -394,6 +404,7 @@ class TwitchApi implements StreamPlatformInterface
         }
 
         if (!$this->status === 200) {
+
             throw new StreamPlatformException(
                 'Error with the Twitch API, please try again in a few moments.' .
                 ' Status Code: ' . $this->status .
@@ -401,7 +412,181 @@ class TwitchApi implements StreamPlatformInterface
             );
         }
 
-        return json_decode($result, true);
+        if (array_key_exists('status', $result)) {
+            if ($result['status'] === 401 && !$isRetry) {
+                /**
+                 * Refresh the Token and try again
+                 */
+                $this->_refreshToken($token);
+                $this->_data($endpoint, $useV5, true);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return TwitchOauth|object|null
+     * @throws StreamPlatformException
+     */
+    private function _getToken()
+    {
+
+        /**
+         * Select the last Token
+         */
+        $token = $this->em->getRepository(TwitchOauth::class)->findOneBy(
+            array(),
+            array(
+                'expiresAt' => 'DESC'
+            )
+        );
+
+        /**
+         * If no Token in DB, create a new one
+         */
+        if ($token === null) {
+            try {
+                return $this->_obtainToken();
+            } catch (StreamPlatformException $e) {
+                throw new StreamPlatformException($e->getMessage());
+            }
+        }
+
+        return $token;
+
+    }
+
+    /**
+     * @param TwitchOauth $token
+     * @return TwitchOauth
+     * @throws StreamPlatformException
+     */
+    private function _refreshToken(TwitchOauth $token)
+    {
+
+        if ($token->getRefreshToken() === null) {
+            try {
+                return $this->_obtainToken();
+            } catch (StreamPlatformException $e) {
+                throw new StreamPlatformException($e->getMessage());
+            }
+        }
+
+        /**
+         * Try to refresh it first
+         */
+        $url = $this->urlOAuth . '/oauth2/token';
+
+        try {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, array(
+                'client_id' => getenv('TWITCH_CLIENT_ID'),
+                'client_secret' => getenv('TWITCH_CLIENT_SECRET'),
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $token->getRefreshToken()
+            ));
+
+            $result = json_decode(curl_exec($ch), true);
+            $this->status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+        } catch (Exception $e) {
+            throw new StreamPlatformException('cURL _refreshToken Error: ' . $e->getMessage());
+        }
+
+        /**
+         * Invalid Token, get a new one
+         */
+        if ($result['status'] === 400 || $result['status'] === 401) {
+            try {
+                return $this->_obtainToken();
+            } catch (StreamPlatformException $e) {
+                throw new StreamPlatformException($e->getMessage());
+            }
+        }
+
+        /**
+         * Refresh success, update the AccessToken
+         */
+        $token->setAccessToken($result['access_token']);
+        $token->setRefreshToken($result['refresh_token']);
+        $token->setScope(json_encode($result['scope']));
+
+        $this->em->persist($token);
+
+        try {
+            $this->em->flush();
+        } catch (Exception $exception) {
+            throw new StreamPlatformException('MySQL Error while flushing OAuth Token Refresh');
+        }
+
+        return $token;
+
+    }
+
+    /**
+     * @return TwitchOauth
+     * @throws StreamPlatformException
+     */
+    private function _obtainToken()
+    {
+
+        $url = $this->urlOAuth . '/oauth2/token';
+
+        try {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, array(
+                'client_id' => getenv('TWITCH_CLIENT_ID'),
+                'client_secret' => getenv('TWITCH_CLIENT_SECRET'),
+                'grant_type' => 'client_credentials'
+            ));
+
+            $result = json_decode(curl_exec($ch), true);
+            $this->status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+        } catch (Exception $e) {
+            throw new StreamPlatformException('cURL _getToken Error: ' . $e->getMessage());
+        }
+
+        /**
+         * Create Expiry DateTime
+         */
+        $expiry = new DateTime();
+        $expiry->modify('+' . $result['expires_in'] . ' seconds');
+
+        /**
+         * Save Token to DB
+         */
+        $token = new TwitchOauth();
+        $token->setAccessToken($result['access_token']);
+        if (array_key_exists('refresh_token', $result)) {
+            $token->setRefreshToken($result['refresh_token']);
+        }
+        if (array_key_exists('scope', $result)) {
+            $token->setScope(json_encode($result['scope']));
+        }
+        $token->setExpiresAt($expiry);
+        $token->setTokenType($result['token_type']);
+
+        $this->em->persist($token);
+
+        try {
+            $this->em->flush();
+        } catch (Exception $e) {
+            throw new StreamPlatformException('MySQL Error while flushing OAuth Token: ' . $e->getMessage());
+        }
+
+        return $token;
+
+
     }
 
 
