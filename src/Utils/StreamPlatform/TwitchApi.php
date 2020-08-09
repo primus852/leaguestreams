@@ -108,6 +108,7 @@ class TwitchApi implements StreamPlatformInterface
             /**
              * Check if we found the Streamer streaming LoL
              */
+
             $channelData = $stream['channel'];
 
             /**
