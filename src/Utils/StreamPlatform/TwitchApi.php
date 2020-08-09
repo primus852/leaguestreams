@@ -105,6 +105,9 @@ class TwitchApi implements StreamPlatformInterface
          */
         if ($update) {
 
+            dump(getenv('TWITCH_CLIENT_SECRET'));
+            dump($data);
+
             /**
              * Check if we found the Streamer streaming LoL
              */
