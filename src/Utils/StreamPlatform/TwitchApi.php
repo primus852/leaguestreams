@@ -83,7 +83,6 @@ class TwitchApi implements StreamPlatformInterface
          */
         $result = false;
         $stream = null;
-        dump($data);
         if (!array_key_exists('stream', $data)) {
             return false;
         }

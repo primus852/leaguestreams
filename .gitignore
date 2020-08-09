@@ -18,7 +18,6 @@
 
 /public/assets/npm-debug.log
 /symfony.lock
-/src/Migrations/
 
 ###> symfony/web-server-bundle ###
 /.web-server-pid
