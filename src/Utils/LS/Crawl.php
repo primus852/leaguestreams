@@ -57,7 +57,7 @@ class Crawl
             /**
              * Remove all OnlineTimes
              */
-            foreach($streamer->getOnlineTimes() as $onlineTime){
+            foreach ($streamer->getOnlineTimes() as $onlineTime) {
                 $this->em->remove($onlineTime);
             }
 
@@ -171,7 +171,7 @@ class Crawl
         /**
          * Check if we have an updated SummonerId already
          */
-        $upgrade = strlen($match->getSummoner()->getSummonerId()) > 12 ? true : false;
+        $upgrade = strlen($match->getSummoner()->getSummonerId()) > 12;
 
         try {
             $history = $api->getMatch($match->getMatchId(), false, $upgrade);
@@ -243,7 +243,7 @@ class Crawl
                 /**
                  * Check if we have an updated SummonerId already
                  */
-                $upgrade = strlen($match->getSummoner()->getSummonerId()) > 12 ? true : false;
+                $upgrade = strlen($match->getSummoner()->getSummonerId()) > 12;
 
                 /**
                  * We have a private Game, see if we find the game in the according match history
@@ -309,7 +309,7 @@ class Crawl
         /**
          * Check if we have an updated SummonerId already
          */
-        $upgrade = strlen($summoner->getSummonerId()) > 12 ? true : false;
+        $upgrade = strlen($summoner->getSummonerId()) > 12;
 
         $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
 
@@ -358,7 +358,7 @@ class Crawl
                 /**
                  * If we already have the upgraded ID/AccID, use them
                  */
-                $upgrade = strlen($summoner->getSummonerId()) > 12 ? true : false;
+                $upgrade = strlen($summoner->getSummonerId()) > 12;
 
                 $s = $api->getSummoner($summoner->getSummonerId(), false, $upgrade);
             } catch (RiotApiException $e) {
@@ -409,7 +409,9 @@ class Crawl
 
         foreach ($perksStyles['styles'] as $perk) {
 
-            $p = $this->em->getRepository(Perk::class)->find($perk['id']);
+            $p = $this->em->getRepository(Perk::class)->findOneBy(array(
+                'officialId' => $perk['id']
+            ));
 
             if ($p === null) {
                 $p = new Perk();
@@ -422,6 +424,7 @@ class Crawl
             $iPath = strtolower(str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['iconPath']));
 
             $p->setName($perk['name']);
+            $p->setOfficialId($perk['id']);
             $p->setDescription($perk['tooltip']);
             $p->setImage($iPath);
             $p->setModified();
@@ -438,7 +441,9 @@ class Crawl
 
         foreach ($perks as $perk) {
 
-            $p = $this->em->getRepository(Perk::class)->find($perk['id']);
+            $p = $this->em->getRepository(Perk::class)->findOneBy(array(
+                'officialId' => $perk['id']
+            ));
 
             if ($p === null) {
                 $p = new Perk();
@@ -451,6 +456,7 @@ class Crawl
             $iPath = strtolower(str_replace('/lol-game-data/assets/', 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/', $perk['iconPath']));
 
             $p->setName($perk['name']);
+            $p->setOfficialId($perk['id']);
             $p->setDescription($perk['shortDesc']);
             $p->setImage($iPath);
             $p->setModified();
@@ -532,15 +538,19 @@ class Crawl
 
         foreach ($queues as $queue) {
 
-            $q = $this->em->getRepository(Queue::class)->find($queue['queueId']);
+            $q = $this->em->getRepository(Queue::class)->findOneBy(array(
+                'officialId' => $queue['queueId']
+            ));
 
             /**
              * Create it if it does not exist
              */
             if ($q === null) {
                 $q = new Queue();
+                $q->setId($queue['queueId']);
             }
             $q->setName($queue['map']);
+            $q->setOfficialId($queue['queueId']);
             $q->setModified();
             $q->setDescription($queue['description']);
             $q->setNote($queue['notes']);
@@ -826,7 +836,7 @@ class Crawl
             if (array_key_exists('gameQueueConfigId', $game)) {
                 $qId = $game['gameQueueConfigId'];
             }
-            $queue = self::loadEntity(Queue::class, $qId);
+            $queue = self::loadEntity(Queue::class, $qId, true);
         } catch (LSException $e) {
             throw new LSException($e->getMessage());
         }
@@ -930,13 +940,20 @@ class Crawl
     /**
      * @param string $entity
      * @param int $id
+     * @param bool $useOfficial
      * @return null|object
      * @throws LSException
      */
-    private function loadEntity(string $entity, int $id)
+    private function loadEntity(string $entity, int $id, bool $useOfficial = false)
     {
 
-        $e = $this->em->getRepository($entity)->find($id);
+        if (!$useOfficial) {
+            $e = $this->em->getRepository($entity)->find($id);
+        } else {
+            $e = $this->em->getRepository($entity)->findOneBy(array(
+                'officialId' => $id
+            ));
+        }
 
         if ($e === null) {
             throw new LSException('Could not find ' . $entity . '. ID: ' . $id);

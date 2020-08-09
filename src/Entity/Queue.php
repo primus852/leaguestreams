@@ -25,6 +25,11 @@ class Queue
     protected $name;
 
     /**
+     * @ORM\Column(type="string", length=100)
+     */
+    protected $officialId;
+
+    /**
      * @ORM\OneToMany(targetEntity="Match", mappedBy="queue")
      */
     protected $match;
@@ -78,6 +83,22 @@ class Queue
     public function setName($name): void
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOfficialId()
+    {
+        return $this->officialId;
+    }
+
+    /**
+     * @param mixed $officialId
+     */
+    public function setOfficialId($officialId): void
+    {
+        $this->officialId = $officialId;
     }
 
     /**

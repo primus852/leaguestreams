@@ -71,38 +71,41 @@ class RenderController extends AbstractController
             /* Perk Ids */
             foreach ($perksDb['perkIds'] as $p) {
 
-                $perk = $em->getRepository(Perk::class)->find($p);
+                $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                    'officialId' => $p
+                ));
 
                 if ($perk !== null) {
                     $perks['ids'][] = array(
-                        'id' => $perk->getId(),
+                        'id' => $perk->getOfficialId(),
                         'name' => $perk->getName(),
                         'description' => $perk->getDescription(),
-                        // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                         'link' => $perk->getImage(),
                     );
                 }
             }
 
             /* Perk Styles */
-            $perk = $em->getRepository(Perk::class)->find($perksDb['perkStyle']);
+            $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                'officialId' => $perksDb['perkStyle']
+            ));
             if ($perk !== null) {
                 $perks['primary'] = array(
-                    'id' => $perk->getId(),
+                    'id' => $perk->getOfficialId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
-                    //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                     'link' => $perk->getImage(),
                 );
             }
 
-            $perk = $em->getRepository(Perk::class)->find($perksDb['perkSubStyle']);
+            $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                'officialId' => $perksDb['perkSubStyle']
+            ));
             if ($perk !== null) {
                 $perks['secondary'] = array(
-                    'id' => $perk->getId(),
+                    'id' => $perk->getOfficialId(),
                     'name' => $perk->getName(),
                     'description' => $perk->getDescription(),
-                    //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                     'link' => $perk->getImage(),
                 );
             }
@@ -110,7 +113,7 @@ class RenderController extends AbstractController
 
 
         $version = $this->getDoctrine()
-            ->getRepository('App:Versions')
+            ->getRepository(Versions::class)
             ->find(1);
 
         return $this->render('render/playerStats.html.twig', array(
@@ -194,35 +197,39 @@ class RenderController extends AbstractController
                         /* Perk Ids */
                         foreach ($perksDb['perkIds'] as $p) {
 
-                            $perk = $em->getRepository(Perk::class)->find($p);
+                            $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                                'officialId' => $p
+                            ));
 
                             if ($perk !== null) {
                                 $perks['ids'][] = array(
-                                    'id' => $perk->getId(),
+                                    'id' => $perk->getOfficialId(),
                                     'name' => $perk->getName(),
                                     'description' => $perk->getDescription(),
-                                    // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                                     'link' => $perk->getImage(),
                                 );
                             }
                         }
 
                         /* Perk Styles */
-                        $perk = $em->getRepository(Perk::class)->find($perksDb['perkStyle']);
+                        $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                            'officialId' => $perksDb['perkStyle']
+                        ));
                         if ($perk !== null) {
                             $perks['primary'] = array(
-                                'id' => $perk->getId(),
+                                'id' => $perk->getOfficialId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                                 'link' => $perk->getImage(),
                             );
                         }
 
-                        $perk = $em->getRepository(Perk::class)->find($perksDb['perkSubStyle']);
+                        $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                            'officialId' => $perksDb['perkSubStyle']
+                        ));
                         if ($perk !== null) {
                             $perks['secondary'] = array(
-                                'id' => $perk->getId(),
+                                'id' => $perk->getOfficialId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
                                 // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
@@ -312,24 +319,27 @@ class RenderController extends AbstractController
                     /* Perk Ids */
                     foreach ($perksDb['perkIds'] as $p) {
 
-                        $perk = $em->getRepository(Perk::class)->find($p);
+                        $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                            'officialId' => $p
+                        ));
 
                         if ($perk !== null) {
                             $perks['ids'][] = array(
-                                'id' => $perk->getId(),
+                                'id' => $perk->getOfficialId(),
                                 'name' => $perk->getName(),
                                 'description' => $perk->getDescription(),
-                                // 'link' => $version->getCdn() . '/img/' . $perk->getImage(),
                                 'link' => $perk->getImage(),
                             );
                         }
                     }
 
                     /* Perk Styles */
-                    $perk = $em->getRepository(Perk::class)->find($perksDb['perkStyle']);
+                    $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                        'officialId' => $perksDb['perkStyle']
+                    ));
                     if ($perk !== null) {
                         $perks['primary'] = array(
-                            'id' => $perk->getId(),
+                            'id' => $perk->getOfficialId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
                             //'link' => $version->getCdn() . '/img/' . $perk->getImage(),
@@ -337,10 +347,12 @@ class RenderController extends AbstractController
                         );
                     }
 
-                    $perk = $em->getRepository(Perk::class)->find($perksDb['perkSubStyle']);
+                    $perk = $em->getRepository(Perk::class)->findOneBy(array(
+                        'officialId' => $perksDb['perkSubStyle']
+                    ));
                     if ($perk !== null) {
                         $perks['secondary'] = array(
-                            'id' => $perk->getId(),
+                            'id' => $perk->getOfficialId(),
                             'name' => $perk->getName(),
                             'description' => $perk->getDescription(),
                             //'link' => $version->getCdn() . '/img/' . $perk->getImage(),

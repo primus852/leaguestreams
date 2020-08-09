@@ -941,23 +941,25 @@ class LSFunction
                     }
 
                     if (!empty($perks)) {
-                        $perkStyle = $this->em->getRepository(Perk::class)->find($perks['perkIds'][0]);
-                        $perkSubStyle = $this->em->getRepository(Perk::class)->find($perks['perkIds'][4]);
+                        $perkStyle = $this->em->getRepository(Perk::class)->findOneBy(array(
+                            'officialId' => $perks['perkIds'][0]
+                        ));
+                        $perkSubStyle = $this->em->getRepository(Perk::class)->findOneBy(array(
+                            'officialId' => $perks['perkIds'][4]
+                        ));
                         if ($perkStyle !== null) {
                             $perkArray['perkStyle'] = array(
-                                'id' => $perkStyle->getId(),
+                                'id' => $perkStyle->getOfficialId(),
                                 'name' => $perkStyle->getName(),
                                 'desc' => $perkStyle->getDescription(),
-                                //'link' => $version->getCdn() . '/img/' . $perkStyle->getImage(),
                                 'link' => $perkStyle->getImage(),
                             );
                         }
                         if ($perkSubStyle !== null) {
                             $perkArray['perkSubStyle'] = array(
-                                'id' => $perkSubStyle->getId(),
+                                'id' => $perkSubStyle->getOfficialId(),
                                 'name' => $perkSubStyle->getName(),
                                 'desc' => $perkSubStyle->getDescription(),
-                                //'link' => $version->getCdn() . '/img/' . $perkSubStyle->getImage(),
                                 'link' => $perkSubStyle->getImage(),
                             );
                         }
