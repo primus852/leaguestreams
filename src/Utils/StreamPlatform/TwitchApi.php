@@ -103,7 +103,7 @@ class TwitchApi implements StreamPlatformInterface
         /**
          * Check if we need to update the DB Data
          */
-        if ($update && $stream !== null) {
+        if ($update) {
 
             /**
              * Check if we found the Streamer streaming LoL
