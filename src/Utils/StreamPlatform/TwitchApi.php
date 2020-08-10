@@ -106,17 +106,6 @@ class TwitchApi implements StreamPlatformInterface
         if ($update) {
 
             /**
-             * Check if we found the Streamer streaming LoL
-             */
-
-            $channelData = $stream['channel'];
-
-            /**
-             * Get Info for Streamer User
-             */
-            $isPartner = $channelData['partner'] === true;
-
-            /**
              * Check if the Streamer exists in DB
              */
             $streamer = $this->em->getRepository(Streamer::class)->findOneBy(array(
@@ -140,26 +129,41 @@ class TwitchApi implements StreamPlatformInterface
                 $was = $streamer->getIsOnline();
             }
 
-            if ($channelData != null) {
+            if ($stream != null) {
+                /**
+                 * Check if we found the Streamer streaming LoL
+                 */
+
+                $channelData = $stream['channel'];
+
+                /**
+                 * Get Info for Streamer User
+                 */
+                $isPartner = $channelData['partner'] === true;
                 $streamer->setChannelName($channelData['display_name']);
                 $streamer->setChannelUser($channelData['name']);
+                $streamer->setIsPartner($isPartner);
+                $streamer->setDescription($channelData['status']);
+                $streamer->setLanguage($channelData['language']);
+                $streamer->setLogo($channelData['logo']);
+                $streamer->setBanner($channelData['profile_banner']);
+                $streamer->setViewers($stream['viewers']);
+                $streamer->setResolution($stream['video_height']);
+                $streamer->setFps($stream['average_fps']);
+                $streamer->setDelay($stream['delay']);
+                $streamer->setThumbnail($stream['preview']['medium']);
+
+                try {
+                    $streamer->setStarted(new DateTime($stream['created_at']));
+                } catch (Exception $e) {
+                    throw new StreamPlatformException('Could not create DateTime from ' . $stream['created_at']);
+                }
+
             }
-            $streamer->setIsPartner($isPartner);
             $streamer->setIsOnline($result);
-            $streamer->setDescription($channelData['status']);
-            $streamer->setViewers($stream['viewers']);
-            $streamer->setResolution($stream['video_height']);
-            $streamer->setFps($stream['average_fps']);
-            $streamer->setDelay($stream['delay']);
-            $streamer->setLanguage($channelData['language']);
-            $streamer->setThumbnail($stream['preview']['medium']);
-            $streamer->setLogo($channelData['logo']);
-            $streamer->setBanner($channelData['profile_banner']);
-            try {
-                $streamer->setStarted(new DateTime($stream['created_at']));
-            } catch (Exception $e) {
-                throw new StreamPlatformException('Could not create DateTime from ' . $stream['created_at']);
-            }
+
+
+
 
             /**
              * If the Streamer is online, update the total time Online (now - last modified)
