@@ -59,7 +59,8 @@ class VodHandler
                 ))
                 ->orderBy(array(
                     'id' => 'DESC'
-                ));
+                ))
+                ->setMaxResults(150);
         } catch (LSException $e) {
             throw new LSException($e->getMessage());
         }
