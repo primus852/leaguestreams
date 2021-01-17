@@ -139,7 +139,8 @@
             width: $videoWidth,
             height: $videoHeight,
             video: "{{ videoId }}",
-            time: "{{ iOffset }}"
+            time: "{{ iOffset }}",
+            parent: ["leaguestreams.net"]
         };
         new Twitch.Player("playerMain", options);
     });

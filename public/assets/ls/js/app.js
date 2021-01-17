@@ -124,7 +124,8 @@ if ($isPlayer.length) {
         width: $videoWidth,
         height: $videoHeight,
         channel: $('#streamer-channel').val(),
-        playsinline: true
+        playsinline: true,
+        parent: ["leaguestreams.net"]
     };
     if ($isPlayer.hasClass('twitch-embed')) {
         player = new Twitch.Embed("playerMain", options);

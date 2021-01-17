@@ -146,7 +146,8 @@
                     width: $videoWidth,
                     height: $videoHeight,
                     channel: $(v).attr('data-channel'),
-                    playsinline: true
+                    playsinline: true,
+                    parent: ["leaguestreams.net"]
                 };
                 var player = new Twitch.Player('player_' + $(v).attr('data-streamer'), options);
                 if (i === 0) {
@@ -156,7 +157,6 @@
                 }
             });
         }
-
     })
 </script>
 </body>
