@@ -202,5 +202,7 @@ class CrawlVersionCommand extends Command
         } catch (StopwatchException $e) {
             throw new StopwatchException('Exception with Stopping Timer. ' . $e->getMessage());
         }
+
+        return Command::SUCCESS;
     }
 }

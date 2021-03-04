@@ -98,5 +98,7 @@ class CrawlMainChampionCommand extends Command
         }
 
         $io->success('Main Streamer crawled');
+
+        return Command::SUCCESS;
     }
 }
