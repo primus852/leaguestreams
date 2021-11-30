@@ -188,8 +188,6 @@ class Crawl
             $notFound = true;
         }
 
-        dump($history);
-
         /**
          * Does the Games exist at Riot?
          */
