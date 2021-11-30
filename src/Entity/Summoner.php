@@ -75,6 +75,11 @@ class Summoner
      */
     protected $accountId;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $puuid;
+
 
     /**
      * @ORM\ManyToMany(targetEntity="Spell", inversedBy="summoner", cascade={"remove"})
@@ -276,6 +281,22 @@ class Summoner
     public function setAccountId($accountId): void
     {
         $this->accountId = $accountId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPuuid()
+    {
+        return $this->puuid;
+    }
+
+    /**
+     * @param mixed $puuid
+     */
+    public function setPuuid($puuid): void
+    {
+        $this->puuid = $puuid;
     }
 
     /**

@@ -51,6 +51,11 @@ class Region
     protected $long;
 
     /**
+     * @ORM\Column(type="string", length=25)
+     */
+    protected $route;
+
+    /**
      * @ORM\Column(type="string", length=150)
      */
     protected $url;
@@ -191,6 +196,22 @@ class Region
     public function setLong($long): void
     {
         $this->long = $long;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRoute()
+    {
+        return $this->route;
+    }
+
+    /**
+     * @param mixed $route
+     */
+    public function setRoute($route): void
+    {
+        $this->route = $route;
     }
 
     /**

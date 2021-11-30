@@ -119,6 +119,14 @@ class Crawl
         return $streamer->getSummoner();
     }
 
+    public function getSummonerDetails(Summoner $summoner)
+    {
+        $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong(), $summoner->getRegion()->getRoute());
+
+         return $api->getSummoner($summoner->getAccountId(), true, true);
+
+    }
+
     /**
      * @param Summoner $summoner
      * @param bool $update
@@ -128,7 +136,7 @@ class Crawl
     public function check_game_summoner(Summoner $summoner, bool $update = false)
     {
 
-        $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
+        $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong(), $summoner->getRegion()->getRoute());
         $isPlaying = true;
         $game = null;
 
@@ -164,7 +172,7 @@ class Crawl
      */
     public function update_match(Match $match)
     {
-        $api = new RiotApi(new Settings(), null, $match->getSummoner()->getRegion()->getLong());
+        $api = new RiotApi(new Settings(), null, $match->getSummoner()->getRegion()->getLong(), $match->getSummoner()->getRegion()->getRoute());
         $notFound = false;
         $history = null;
 
@@ -186,9 +194,9 @@ class Crawl
             /**
              * Gather Vars to update
              */
-            $gameCreation = $history['gameCreation'];
-            $gameDuration = $history['gameDuration'];
-            $gameVersion = $history['gameVersion'];
+            $gameCreation = $history['info']['gameCreation'];
+            $gameDuration = $history['info']['gameDuration'];
+            $gameVersion = $history['info']['gameVersion'];
             $role = 'N/A';
             $lane = 'N/A';
             $win = true;
@@ -199,24 +207,22 @@ class Crawl
              * Get Participant ID
              */
             $participant = null;
-            foreach ($history['participantIdentities'] as $pId) {
-                if (array_key_exists('player', $pId)) {
-                    if ($pId['player']['summonerId'] === $match->getSummoner()->getSummonerId()) {
-                        $participant = $pId['participantId'];
-                        break;
-                    }
+            foreach ($history['metadata']['participants'] as $pId) {
+                if ($pId === $match->getSummoner()->getPuuid()) {
+                    $participant = $pId;
+                    break;
                 }
             }
 
             if ($participant !== null) {
 
-                foreach ($history['participants'] as $p) {
+                foreach ($history['info']['participants'] as $p) {
 
-                    if ($p['participantId'] === $participant) {
+                    if ($p['puuid'] === $participant) {
 
-                        $win = $p['stats']['win'];
-                        $lane = $p['timeline']['lane'];
-                        $role = $p['timeline']['role'];
+                        $win = $p['win'];
+                        $lane = $p['lane'];
+                        $role = $p['role'];
                         $tempChamp = $p['championId'];
                     }
                 }
@@ -225,9 +231,9 @@ class Crawl
                  * We do it again to find the opponent on the lane
                  */
                 if ($tempChamp !== false) {
-                    foreach ($history['participants'] as $p) {
+                    foreach ($history['info']['participants'] as $p) {
 
-                        if ($p['timeline']['role'] === $role && $p['timeline']['lane'] === $lane && $tempChamp !== $p['championId']) {
+                        if ($p['role'] === $role && $p['lane'] === $lane && $tempChamp !== $p['championId']) {
 
                             try {
                                 $enemy = $this->loadEntity(Champion::class, $p['championId']);
@@ -249,7 +255,7 @@ class Crawl
                  * We have a private Game, see if we find the game in the according match history
                  */
                 try {
-                    $matches = $api->getMatchList($match->getSummoner()->getAccountId(), null, $upgrade);
+                    $matches = $api->getMatchList($match->getSummoner()->getPuuid(), array('start' => 0, 'count' => 20), $upgrade);
                 } catch (RiotApiException $e) {
                     throw new LSException('Could not get Matchhistory: ' . $e->getMessage());
                 }
@@ -311,7 +317,7 @@ class Crawl
          */
         $upgrade = strlen($summoner->getSummonerId()) > 12;
 
-        $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
+        $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong(), $summoner->getRegion()->getRoute());
 
         try {
             $stats = $api->getLeaguePosition($summoner->getSummonerId(), 'RANKED_SOLO_5x5', $upgrade);
@@ -351,7 +357,7 @@ class Crawl
          */
         foreach ($summoners as $summoner) {
 
-            $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
+            $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong(), $summoner->getRegion()->getRoute());
 
             try {
 

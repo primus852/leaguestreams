@@ -9,6 +9,7 @@ class RiotApi
 {
 
     private $region;
+    private $regionRoute;
     private $shortQueue;
     private $longQueue;
     private $responseCode;
@@ -23,7 +24,7 @@ class RiotApi
     private const API_URL_SPECTATOR = 'https://{platform}.api.riotgames.com/lol/spectator/v3/';
     private const API_URL_SPECTATOR_V4 = 'https://{platform}.api.riotgames.com/lol/spectator/v4/';
     private const API_URL_MATCH = 'https://{platform}.api.riotgames.com/lol/match/v3/';
-    private const API_URL_MATCH_V4 = 'https://{platform}.api.riotgames.com/lol/match/v4/';
+    private const API_URL_MATCH_V4 = 'https://{platform}.api.riotgames.com/lol/match/v5/';
     private const API_URL_LEAGUE = 'https://{platform}.api.riotgames.com/lol/league/v3/';
     private const API_URL_LEAGUE_V4 = 'https://{platform}.api.riotgames.com/lol/league/v4/';
     private const API_URL_SUMMONER = 'https://{platform}.api.riotgames.com/lol/summoner/v3/';
@@ -65,10 +66,11 @@ class RiotApi
      * @param Cache|null $cache
      * @param string $region
      */
-    public function __construct(Settings $riotApiSetting, Cache $cache = null, $region = 'na1')
+    public function __construct(Settings $riotApiSetting, Cache $cache = null, $region = 'na1', $regionRoute = 'americas')
     {
 
         $this->region = $region;
+        $this->regionRoute = $regionRoute;
         $this->shortQueue = new \SplQueue();
         $this->longQueue = new \SplQueue();
         $this->cache = $cache;
@@ -241,12 +243,12 @@ class RiotApi
     public function getMatch($matchId, $includeTimeline = true, bool $upgrade = false)
     {
 
-        $mod = 'matches/' . $matchId;
+        $mod = 'matches/{region}' . $matchId;
         $url = $upgrade === false ? self::API_URL_MATCH . $mod : self::API_URL_MATCH_V4 . $mod;
 
         if (!$includeTimeline) {
             try {
-                return $this->getData($url);
+                return $this->getData($url, false, $upgrade);
             } catch (RiotApiException $e) {
                 throw new RiotApiException('GetMatch Exception: ' . $e->getMessage());
             }
@@ -294,30 +296,27 @@ class RiotApi
     public function getMatchList($accountId, $params = null, bool $upgrade = false)
     {
 
-        $mod = 'matchlists/by-account/' . $accountId;
-        if ($params !== null) {
-            $mod = 'matchlists/by-account/' . $accountId . '?';
-        } else {
+        $mod = 'matches/by-puuid/' . $accountId . '/ids';
 
-            if (is_array($params)) {
-                foreach ($params as $key => $param) {
 
-                    if (is_array($param)) {
-                        foreach ($param as $p) {
-                            $mod .= $key . '=' . $p . '&';
-                        }
-                    } else {
-                        $mod .= $key . '=' . $param . '&';
+        if (is_array($params)) {
+            $mod .= '?';
+            foreach ($params as $key => $param) {
+
+                if (is_array($param)) {
+                    foreach ($param as $p) {
+                        $mod .= $key . '=' . $p . '&';
                     }
+                } else {
+                    $mod .= $key . '=' . $param . '&';
                 }
-            } else
-                $mod .= $params . '&';
+            }
         }
 
         $url = $upgrade === false ? self::API_URL_MATCH . $mod : self::API_URL_MATCH_V4 . $mod;
 
         try {
-            return $this->getData($url);
+            return $this->getData($url, false, true);
         } catch (RiotApiException $e) {
             throw new RiotApiException('GetMatchList Exception: ' . $e->getMessage());
         }
@@ -632,11 +631,11 @@ class RiotApi
      * @return mixed
      * @throws RiotApiException
      */
-    private function getData($plainUrl, $static = false)
+    private function getData($plainUrl, $static = false, $newRoutes = false)
     {
 
 
-        $url = $this->formatUrl($plainUrl);
+        $url = $this->formatUrl($plainUrl, $newRoutes);
 
         if ($this->cache !== null && $this->cache->has($url)) {
             $result = $this->cache->get($url);
@@ -663,7 +662,7 @@ class RiotApi
                     $this->cache->put($url, $result, self::CACHE_REFRESH);
                 }
             } else {
-                throw new RiotApiException(self::RIOT_ERROR_CODES[$this->responseCode] . ' [' . $this->responseCode . '|'.$url.']');
+                throw new RiotApiException(self::RIOT_ERROR_CODES[$this->responseCode] . ' [' . $this->responseCode . '|' . $url . ']');
             }
         }
 
@@ -762,8 +761,14 @@ class RiotApi
      * @param $url
      * @return mixed
      */
-    private function formatUrl($url)
+    private function formatUrl($url, $newRoutes)
     {
+
+        if ($newRoutes) {
+            $url = str_replace('{region}', strtoupper($this->region) . '_', $url);
+            return str_replace('{platform}', $this->regionRoute, $url);
+        }
+        $url = str_replace('{region}', '', $url);
         return str_replace('{platform}', $this->region, $url);
     }
 

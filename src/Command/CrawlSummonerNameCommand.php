@@ -95,7 +95,7 @@ class CrawlSummonerNameCommand extends Command
          */
         foreach ($summoners as $summoner) {
 
-            $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong());
+            $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong(), $summoner->getRegion()->getRoute());
 
             $debug ? $io->text('Summoner: <fg=green>' . $summoner->getRegion()->getShort() . '-' . $summoner->getName() . '</>') : null;
 
