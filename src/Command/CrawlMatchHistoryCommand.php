@@ -83,6 +83,8 @@ class CrawlMatchHistoryCommand extends Command
 
         $uncrawled = $this->em->getRepository(Match::class)->findBy(array(
             'crawled' => false,
+        ), array(
+            'matchId' => 'DESC'
         ));
 
         $debug ? $io->note('Crawling uncrawled Games') : null;
