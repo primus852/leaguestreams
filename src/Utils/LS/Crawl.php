@@ -70,6 +70,7 @@ class Crawl
         $s = new Summoner();
         $s->setName($summoner['name']);
         $s->setSummonerId($summoner['id']);
+        $s->setPuuid($summoner['puuid']);
         $s->setRegion($region);
         $s->setStreamer($streamer);
         $s->setModified();
@@ -186,6 +187,8 @@ class Crawl
         } catch (RiotApiException $e) {
             $notFound = true;
         }
+
+        dump($history);
 
         /**
          * Does the Games exist at Riot?

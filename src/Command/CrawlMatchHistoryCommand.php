@@ -85,7 +85,7 @@ class CrawlMatchHistoryCommand extends Command
             'crawled' => false,
         ), array(
             'matchId' => 'DESC'
-        ));
+        ), 1500);
 
         $debug ? $io->note('Crawling uncrawled Games') : null;
         foreach($uncrawled as $uc){
