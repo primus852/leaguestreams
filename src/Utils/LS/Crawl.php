@@ -283,6 +283,7 @@ class Crawl
             /**
              * Update the $match
              */
+            if($gameCreation > 0){
             $match->setGameCreation($gameCreation);
             $match->setLength($gameDuration);
             $match->setGameVersion($gameVersion);
@@ -290,6 +291,12 @@ class Crawl
             $match->setLane($lane);
             $match->setWin($win);
             $match->setEnemyChampion($enemy);
+            }else{
+                /**
+                 * Remove the invalid match
+                 */
+                $this->em->remove($match);
+            }
         }
 
         $match->setCrawled(true);
