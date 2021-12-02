@@ -199,6 +199,7 @@ class Crawl
             $gameCreation = $history['info']['gameCreation'];
             $gameDuration = $history['info']['gameDuration'];
             $gameVersion = $history['info']['gameVersion'];
+            $gameVersionShort = (int)substr(str_replace('.', '', $gameVersion), 0, 3);
             $role = 'N/A';
             $lane = 'N/A';
             $win = true;
@@ -240,7 +241,9 @@ class Crawl
                             try {
                                 $enemy = $this->loadEntity(Champion::class, $p['championId']);
                             } catch (LSException $e) {
-                                throw new LSException('Update Match Exception: ' . $e->getMessage());
+                                if ($gameVersionShort > 113) {
+                                    throw new LSException('Update Match Exception: ' . $e->getMessage());
+                                }
                             }
                         }
                     }
@@ -281,10 +284,11 @@ class Crawl
                 }
             }
 
+
             /**
              * Update the $match
              */
-            if ($gameCreation > 0) {
+            if ($gameCreation > 0 || $gameVersionShort > 113) {
                 $match->setGameCreation($gameCreation);
                 $match->setLength($gameDuration);
                 $match->setGameVersion($gameVersion);
@@ -306,7 +310,7 @@ class Crawl
             $this->em->persist($match);
         }
 
-        if($notFound){
+        if ($notFound) {
             $this->em->remove($match);
         }
 
