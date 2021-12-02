@@ -636,7 +636,6 @@ class RiotApi
 
 
         $url = $this->formatUrl($plainUrl, $newRoutes);
-        dump($url);
 
         if ($this->cache !== null && $this->cache->has($url)) {
             $result = $this->cache->get($url);
