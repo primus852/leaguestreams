@@ -124,7 +124,7 @@ class Crawl
     {
         $api = new RiotApi(new Settings(), null, $summoner->getRegion()->getLong(), $summoner->getRegion()->getRoute());
 
-         return $api->getSummoner($summoner->getAccountId(), true, true);
+        return $api->getSummoner($summoner->getAccountId(), true, true);
 
     }
 
@@ -191,6 +191,7 @@ class Crawl
         /**
          * Does the Games exist at Riot?
          */
+        $gameCreation = 0;
         if (!$notFound) {
             /**
              * Gather Vars to update
@@ -283,15 +284,15 @@ class Crawl
             /**
              * Update the $match
              */
-            if($gameCreation > 0){
-            $match->setGameCreation($gameCreation);
-            $match->setLength($gameDuration);
-            $match->setGameVersion($gameVersion);
-            $match->setRole($role);
-            $match->setLane($lane);
-            $match->setWin($win);
-            $match->setEnemyChampion($enemy);
-            }else{
+            if ($gameCreation > 0) {
+                $match->setGameCreation($gameCreation);
+                $match->setLength($gameDuration);
+                $match->setGameVersion($gameVersion);
+                $match->setRole($role);
+                $match->setLane($lane);
+                $match->setWin($win);
+                $match->setEnemyChampion($enemy);
+            } else {
                 /**
                  * Remove the invalid match
                  */
@@ -299,9 +300,15 @@ class Crawl
             }
         }
 
-        $match->setCrawled(true);
+        if ($gameCreation > 0) {
+            $match->setCrawled(true);
 
-        $this->em->persist($match);
+            $this->em->persist($match);
+        }
+
+        if($notFound){
+            $this->em->remove($match);
+        }
 
         try {
             $this->em->flush();
